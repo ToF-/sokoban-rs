@@ -1,3 +1,4 @@
+use crate::gdk::Key;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
@@ -36,14 +37,21 @@ fn main() -> glib::ExitCode {
         key_controller.connect_key_pressed(glib::clone!(
             #[weak]
             app,
+            #[weak]
+            fixed,
+            #[weak]
+            logo,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state| {
                 match keyval {
                     gdk::Key::q => {
-                        println!("{:?}", keyval);
                         app.quit();
                         glib::Propagation::Stop
+                    }
+                    gdk::Key::Right => {
+                        fixed.move_(&logo, 10.0, 0.0);
+                        glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
                 }
