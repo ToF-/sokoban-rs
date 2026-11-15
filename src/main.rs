@@ -1,7 +1,10 @@
+use std::cell::Cell;
 use crate::gdk::Key;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
+
+const MOVE_LENGTH: f64 = 32.0;
 
 fn main() -> glib::ExitCode {
     gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
@@ -20,12 +23,16 @@ fn main() -> glib::ExitCode {
 
     app.connect_activate(|app| {
         let logo = Picture::for_resource("/com/example/MyApp/images/logo.png");
+        let paintable = logo.paintable().expect("can't access to paintable");
+        println!("{:?},{:?}", paintable.intrinsic_width(), paintable.intrinsic_height());
         logo.set_halign(gtk::Align::Center);
         logo.set_valign(gtk::Align::Center);
         logo.set_can_shrink(false);
 
+        let position = Cell::new((100.0, 100.0));
         let fixed = gtk::Fixed::new();
-        fixed.put(&logo, 0.0, 0.0);
+        let coords = position.get();
+        fixed.put(&logo, coords.0, coords.1);
         let window = gtk::ApplicationWindow::builder()
             .application(app)
             .default_width(600)
@@ -41,6 +48,8 @@ fn main() -> glib::ExitCode {
             fixed,
             #[weak]
             logo,
+            #[strong]
+            position,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state| {
@@ -50,7 +59,35 @@ fn main() -> glib::ExitCode {
                         glib::Propagation::Stop
                     }
                     gdk::Key::Right => {
-                        fixed.move_(&logo, 10.0, 0.0);
+                        let mut coords = position.get();
+                        coords.0 += MOVE_LENGTH;
+                        position.set(coords);
+                        let coords = position.get();
+                        fixed.move_(&logo, coords.0, coords.1);
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::Left => {
+                        let mut coords = position.get();
+                        coords.0 -= MOVE_LENGTH;
+                        position.set(coords);
+                        let coords = position.get();
+                        fixed.move_(&logo, coords.0, coords.1);
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::Up => {
+                        let mut coords = position.get();
+                        coords.1 -= MOVE_LENGTH;
+                        position.set(coords);
+                        let coords = position.get();
+                        fixed.move_(&logo, coords.0, coords.1);
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::Down => {
+                        let mut coords = position.get();
+                        coords.1 += MOVE_LENGTH;
+                        position.set(coords);
+                        let coords = position.get();
+                        fixed.move_(&logo, coords.0, coords.1);
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
