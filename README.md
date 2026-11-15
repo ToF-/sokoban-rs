@@ -7,4 +7,5 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 
 - [x] show a hello world gtk app
 - [x] show a logo
-- [ ] on key 'q', exit the app
+- [x] on key 'q', exit the app
+- [ ] display the logo at a fixed point inside a window larger than the logo

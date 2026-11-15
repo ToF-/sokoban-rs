@@ -1,5 +1,6 @@
-use gtk4::prelude::*;
-use gtk4::{gio, glib, Application, Picture};
+use gtk::{gio, glib, Application, Picture};
+use gtk::gdk;
+use gtk::prelude::*;
 
 fn main() -> glib::ExitCode {
     gio::resources_register_include!("myapp.gresource")
@@ -17,37 +18,31 @@ assert!(
     app.connect_activate(|app| {
         let picture = Picture::for_resource("/com/example/MyApp/images/logo.png");
 
-        let window = gtk4::ApplicationWindow::builder()
+        let window = gtk::ApplicationWindow::builder()
             .application(app)
             .child(&picture)
             .build();
+
+        let key_controller = gtk::EventControllerKey::new();
+        key_controller.connect_key_pressed(glib::clone!(
+            #[weak]
+            app,
+            #[upgrade_or]
+            glib::Propagation::Proceed,
+            move
+            |_controller, keyval, _keycode, state| {
+            match keyval {
+                gdk::Key::q => {
+                    println!("{:?}", keyval);
+                    app.quit();
+                    glib::Propagation::Stop
+            }
+            _ => glib::Propagation::Proceed
+            }
+        }));
+        window.add_controller(key_controller);
         window.present();
     });
 
     app.run()
 }
-
-/*
-use gtk4 as gtk;
-use gtk::prelude::*;
-use gtk::{glib, Application, ApplicationWindow};
-
-fn main() -> glib::ExitCode {
-    let app = Application::builder()
-        .application_id("org.example.HelloWorld")
-        .build();
-
-    app.connect_activate(|app| {
-        let window = ApplicationWindow::builder()
-            .application(app)
-            .default_width(320)
-            .default_height(200)
-            .title("Hello, World!")
-            .build();
-
-        window.present();
-    });
-
-    app.run()
-}
-*/
