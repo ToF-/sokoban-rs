@@ -1,8 +1,8 @@
-use std::cell::Cell;
 use crate::gdk::Key;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
+use std::cell::Cell;
 
 const MOVE_LENGTH: f64 = 32.0;
 
@@ -23,15 +23,40 @@ fn main() -> glib::ExitCode {
 
     app.connect_activate(|app| {
         let logo = Picture::for_resource("/com/example/MyApp/images/logo.png");
+        let block_1 = Picture::for_resource("/com/example/MyApp/images/block.png");
+        let block_2 = Picture::for_resource("/com/example/MyApp/images/block.png");
+        let block_3 = Picture::for_resource("/com/example/MyApp/images/block.png");
         let paintable = logo.paintable().expect("can't access to paintable");
-        println!("{:?},{:?}", paintable.intrinsic_width(), paintable.intrinsic_height());
+        println!(
+            "{:?},{:?}",
+            paintable.intrinsic_width(),
+            paintable.intrinsic_height()
+        );
+        let paintable = logo.paintable().expect("can't access to paintable");
+        println!(
+            "{:?},{:?}",
+            paintable.intrinsic_width(),
+            paintable.intrinsic_height()
+        );
         logo.set_halign(gtk::Align::Center);
         logo.set_valign(gtk::Align::Center);
         logo.set_can_shrink(false);
+        block_1.set_halign(gtk::Align::Center);
+        block_1.set_valign(gtk::Align::Center);
+        block_1.set_can_shrink(false);
+        block_2.set_halign(gtk::Align::Center);
+        block_2.set_valign(gtk::Align::Center);
+        block_2.set_can_shrink(false);
+        block_3.set_halign(gtk::Align::Center);
+        block_3.set_valign(gtk::Align::Center);
+        block_3.set_can_shrink(false);
 
         let position = Cell::new((100.0, 100.0));
         let fixed = gtk::Fixed::new();
         let coords = position.get();
+        fixed.put(&block_1, 0.0, 0.0);
+        fixed.put(&block_2, 32.0, 0.0);
+        fixed.put(&block_3, 0.0, 32.0);
         fixed.put(&logo, coords.0, coords.1);
         let window = gtk::ApplicationWindow::builder()
             .application(app)
