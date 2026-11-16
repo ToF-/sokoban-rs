@@ -4,13 +4,24 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-Level	/Users/christophethibaut/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
-MOVE_LENGTH	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^const MOVE_LENGTH: f64 = 32.0;$/;"	c
-State	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^pub enum State {$/;"	g
-a_floor_is_added_a_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    fn a_floor_is_added_a_crate() {$/;"	f
-add_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
-add_sokoban	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
-from	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
-main	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
-remove_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
-remove_sokoban	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f
+Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
+MOVE_LENGTH	/Users/tof/Coding/sokoban-rs/src/main.rs	/^const MOVE_LENGTH: f64 = 32.0;$/;"	c
+State	/Users/tof/Coding/sokoban-rs/src/state.rs	/^pub enum State {$/;"	g
+a_floor_is_added_a_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_floor_is_added_a_crate() {$/;"	f
+a_floor_is_added_a_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_floor_is_added_a_sokoban() {$/;"	f
+a_goal_is_added_a_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_goal_is_added_a_crate() {$/;"	f
+a_goal_is_added_a_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_goal_is_added_a_sokoban() {$/;"	f
+add_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
+add_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
+from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
+from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(state: State) -> Self {$/;"	f
+from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn from_bytes(bytes: &[u8]) -> Level {$/;"	f
+height	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn height(&self) -> usize {$/;"	f
+initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    fn initialize_from_bytes() {$/;"	f
+main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
+other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn other_additions_dont_work() {$/;"	f
+pretty_print	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
+remove_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
+remove_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f
+state_at	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn state_at(&self, row: usize, col: usize) -> State {$/;"	f
+width	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn width(&self) -> usize {$/;"	f

@@ -2,7 +2,13 @@
 <gresources>
   <gresource prefix="/com/example/MyApp">
       <file>images/logo.png</file>
-      <file>images/block.png</file>
+      <file>images/floor.png</file>
+      <file>images/wall.png</file>
+      <file>images/crate.png</file>
+      <file>images/goal.png</file>
+      <file>images/stored.png</file>
+      <file>images/sokoban.png</file>
+      <file>files/level_00.txt</file>
       <file>files/level_01.txt</file>
   </gresource>
 </gresources>

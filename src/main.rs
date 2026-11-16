@@ -1,4 +1,6 @@
 use crate::gdk::Key;
+use crate::level::Level;
+use crate::state::State;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
@@ -15,54 +17,71 @@ fn main() -> glib::ExitCode {
     let app = Application::builder()
         .application_id("com.example.MyApp")
         .build();
-    assert!(
-        gio::resources_lookup_data(
-            "/com/example/MyApp/images/logo.png",
-            gio::ResourceLookupFlags::NONE
-        )
-        .is_ok(),
-        "Resource path not found!"
-    );
 
     app.connect_activate(|app| {
+        let floor = Picture::for_resource("/com/example/MyApp/images/floor.png");
+        let floor_paintable = floor.paintable().expect("can't access to paintable");
+        let wall = Picture::for_resource("/com/example/MyApp/images/wall.png");
+        let wall_paintable = wall.paintable().expect("can't access to paintable");
+        let _crate = Picture::for_resource("/com/example/MyApp/images/crate.png");
+        let crate_paintable = _crate.paintable().expect("can't access to paintable");
+        let goal = Picture::for_resource("/com/example/MyApp/images/goal.png");
+        let goal_paintable = goal.paintable().expect("can't access to paintable");
+        let stored = Picture::for_resource("/com/example/MyApp/images/stored.png");
+        let stored_paintable = stored.paintable().expect("can't access to paintable");
+        let sokoban = Picture::for_resource("/com/example/MyApp/images/sokoban.png");
+        let sokoban_paintable = sokoban.paintable().expect("can't access to paintable");
+
         let bytes = gio::resources_lookup_data(
             "/com/example/MyApp/files/level_01.txt",
             gio::ResourceLookupFlags::NONE,
         )
         .expect("Failed to find resource");
-        println!("{:?}", bytes);
-
-        let logo = Picture::for_resource("/com/example/MyApp/images/logo.png");
-        let block_1 = Picture::for_resource("/com/example/MyApp/images/block.png");
-        let block_2 = Picture::for_resource("/com/example/MyApp/images/block.png");
-        let block_3 = Picture::for_resource("/com/example/MyApp/images/block.png");
-        logo.set_halign(gtk::Align::Center);
-        logo.set_valign(gtk::Align::Center);
-        logo.set_can_shrink(false);
-        block_1.set_halign(gtk::Align::Center);
-        block_1.set_valign(gtk::Align::Center);
-        block_1.set_can_shrink(false);
-        block_2.set_halign(gtk::Align::Center);
-        block_2.set_valign(gtk::Align::Center);
-        block_2.set_can_shrink(false);
-        block_3.set_halign(gtk::Align::Center);
-        block_3.set_valign(gtk::Align::Center);
-        block_3.set_can_shrink(false);
+        let fixed = gtk::Fixed::new();
+        let level = Level::from_bytes(&bytes);
+        println!("{}", level.pretty_print());
+        let mut sokoban_pos = (0.0, 0.0);
+        for row in 0..level.height() {
+            for col in 0..level.width() {
+                let state = level.state_at(row, col);
+                let paintable = match state {
+                    State::Wall => wall_paintable.clone(),
+                    State::Crate => crate_paintable.clone(),
+                    State::Goal => goal_paintable.clone(),
+                    State::Sokoban => floor_paintable.clone(),
+                    State::Floor => floor_paintable.clone(),
+                    _ => floor_paintable.clone(),
+                };
+                let picture = Picture::for_paintable(&paintable);
+                picture.set_halign(gtk::Align::Center);
+                picture.set_valign(gtk::Align::Center);
+                picture.set_can_shrink(false);
+                let x: f64 = col as f64 * 32.0;
+                let y: f64 = row as f64 * 32.0;
+                fixed.put(&picture, x, y);
+                if state == State::Sokoban {
+                    sokoban_pos = (col as f64 * 32.0, row as f64 * 32.0);
+                }
+            }
+        }
+        let paintable = sokoban_paintable.clone();
+        let picture = Picture::for_paintable(&paintable);
+        picture.set_halign(gtk::Align::Center);
+        picture.set_valign(gtk::Align::Center);
+        picture.set_can_shrink(false);
+        let (x,y) = sokoban_pos;
+        fixed.put(&picture, x, y);
 
         let position = Cell::new((100.0, 100.0));
-        let fixed = gtk::Fixed::new();
         let coords = position.get();
-        fixed.put(&block_1, 0.0, 0.0);
-        fixed.put(&block_2, 32.0, 0.0);
-        fixed.put(&block_3, 0.0, 32.0);
-        fixed.put(&logo, coords.0, coords.1);
         let window = gtk::ApplicationWindow::builder()
             .application(app)
-            .default_width(600)
-            .default_height(400)
+            .default_width(level.width() as i32 * 32)
+            .default_height(level.height() as i32 * 32)
             .child(&fixed)
             .build();
 
+        /*
         let key_controller = gtk::EventControllerKey::new();
         key_controller.connect_key_pressed(glib::clone!(
             #[weak]
@@ -118,6 +137,7 @@ fn main() -> glib::ExitCode {
             }
         ));
         window.add_controller(key_controller);
+        */
         window.present();
     });
 

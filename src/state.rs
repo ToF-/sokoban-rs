@@ -1,4 +1,4 @@
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum State {
     Floor,
     Wall,
@@ -20,6 +20,20 @@ impl From<u8> for State {
             64 => State::Sokoban,
             43 => State::OnGoal,
             _ => State::Floor,
+        }
+    }
+}
+
+impl From<State> for char {
+    fn from(state: State) -> Self {
+        match state {
+            State::Floor => '…',
+            State::Wall => '#',
+            State::Crate => '$',
+            State::Goal => '.',
+            State::Stored => '*',
+            State::Sokoban => '@',
+            State::OnGoal => '+',
         }
     }
 }
@@ -67,4 +81,29 @@ mod tests {
         assert_eq!(State::Crate, s.add_crate());
     }
 
+    #[test]
+    fn a_goal_is_added_a_crate() {
+        let s = State::Goal;
+        assert_eq!(State::Stored, s.add_crate());
+    }
+
+    #[test]
+    fn a_floor_is_added_a_sokoban() {
+        let s = State::Floor;
+        assert_eq!(State::Sokoban, s.add_sokoban());
+    }
+
+    #[test]
+    fn a_goal_is_added_a_sokoban() {
+        let s = State::Goal;
+        assert_eq!(State::OnGoal, s.add_sokoban());
+    }
+
+    #[test]
+    fn other_additions_dont_work() {
+        let s = State::Wall;
+        assert_eq!(State::Wall, s.add_sokoban());
+        let s = State::Crate;
+        assert_eq!(State::Crate, s.add_sokoban());
+    }
 }
