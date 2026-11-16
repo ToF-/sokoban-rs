@@ -1,5 +1,6 @@
 #[derive(Clone, PartialEq, Debug)]
 pub enum State {
+    Outside,
     Floor,
     Wall,
     Goal,
@@ -12,6 +13,7 @@ pub enum State {
 impl From<u8> for State {
     fn from(byte: u8) -> Self {
         match byte {
+            39 => State::Outside,
             32 => State::Floor,
             35 => State::Wall,
             46 => State::Goal,
@@ -27,7 +29,8 @@ impl From<u8> for State {
 impl From<State> for char {
     fn from(state: State) -> Self {
         match state {
-            State::Floor => '…',
+            State::Outside => '\'',
+            State::Floor => ' ',
             State::Wall => '#',
             State::Crate => '$',
             State::Goal => '.',

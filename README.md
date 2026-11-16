@@ -12,7 +12,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] keys can move the logo up,down,left,right
 - [x] several graphical elements are drawn, not just the logo
 - [x] given a level map with floors, walls, store locations, crates, and sokoban, draw the map in the window
-- [ ] darken tiles that are outside the walls
+- [x] darken tiles that are outside the walls
 - [ ] have the sokoban character move in the level
 - [ ] have the sokoban character blocked by walls
 - [ ] have the sokoban character push crates, making them move

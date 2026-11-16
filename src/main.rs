@@ -19,6 +19,8 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
+        let outside = Picture::for_resource("/com/example/MyApp/images/outside.png");
+        let outside_paintable = outside.paintable().expect("can't access to paintable");
         let floor = Picture::for_resource("/com/example/MyApp/images/floor.png");
         let floor_paintable = floor.paintable().expect("can't access to paintable");
         let wall = Picture::for_resource("/com/example/MyApp/images/wall.png");
@@ -45,8 +47,10 @@ fn main() -> glib::ExitCode {
             for col in 0..level.width() {
                 let state = level.state_at(row, col);
                 let paintable = match state {
+                    State::Outside => outside_paintable.clone(),
                     State::Wall => wall_paintable.clone(),
                     State::Crate => crate_paintable.clone(),
+                    State::Stored => stored_paintable.clone(),
                     State::Goal => goal_paintable.clone(),
                     State::Sokoban => floor_paintable.clone(),
                     State::Floor => floor_paintable.clone(),

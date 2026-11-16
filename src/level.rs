@@ -90,11 +90,11 @@ mod tests {
         .expect("Failed to find resource");
         println!("{:?}", bytes);
         let level = Level::from_bytes(&bytes);
-        assert_eq!(19, level.width());
-        assert_eq!(11, level.height());
-        assert_eq!(State::Wall, level.state_at(0, 4));
-        assert_eq!(State::Wall, level.state_at(0, 5));
-        assert_eq!(State::Crate, level.state_at(2, 5));
-        assert_eq!(State::Sokoban, level.state_at(8, 11));
+        assert_eq!(21, level.width());
+        assert_eq!(13, level.height());
+        assert_eq!(State::Wall, level.state_at(1, 5));
+        assert_eq!(State::Wall, level.state_at(1, 6));
+        assert_eq!(State::Crate, level.state_at(3, 6));
+        assert_eq!(State::Sokoban, level.state_at(9, 12));
     }
 }
