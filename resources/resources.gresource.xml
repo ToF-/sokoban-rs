@@ -3,6 +3,7 @@
   <gresource prefix="/com/example/MyApp">
       <file>images/logo.png</file>
       <file>images/block.png</file>
+      <file>files/level_01.txt</file>
   </gresource>
 </gresources>
 

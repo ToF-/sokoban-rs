@@ -4,5 +4,13 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-MOVE_LENGTH	/Users/tof/Coding/sokoban-rs/src/main.rs	/^const MOVE_LENGTH: f64 = 32.0;$/;"	c
-main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
+Level	/Users/christophethibaut/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
+MOVE_LENGTH	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^const MOVE_LENGTH: f64 = 32.0;$/;"	c
+State	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^pub enum State {$/;"	g
+a_floor_is_added_a_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    fn a_floor_is_added_a_crate() {$/;"	f
+add_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
+add_sokoban	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
+from	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
+main	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
+remove_crate	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
+remove_sokoban	/Users/christophethibaut/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f

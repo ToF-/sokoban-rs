@@ -4,6 +4,9 @@ use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
 use std::cell::Cell;
 
+pub mod level;
+pub mod state;
+
 const MOVE_LENGTH: f64 = 32.0;
 
 fn main() -> glib::ExitCode {
@@ -22,22 +25,17 @@ fn main() -> glib::ExitCode {
     );
 
     app.connect_activate(|app| {
+        let bytes = gio::resources_lookup_data(
+            "/com/example/MyApp/files/level_01.txt",
+            gio::ResourceLookupFlags::NONE,
+        )
+        .expect("Failed to find resource");
+        println!("{:?}", bytes);
+
         let logo = Picture::for_resource("/com/example/MyApp/images/logo.png");
         let block_1 = Picture::for_resource("/com/example/MyApp/images/block.png");
         let block_2 = Picture::for_resource("/com/example/MyApp/images/block.png");
         let block_3 = Picture::for_resource("/com/example/MyApp/images/block.png");
-        let paintable = logo.paintable().expect("can't access to paintable");
-        println!(
-            "{:?},{:?}",
-            paintable.intrinsic_width(),
-            paintable.intrinsic_height()
-        );
-        let paintable = logo.paintable().expect("can't access to paintable");
-        println!(
-            "{:?},{:?}",
-            paintable.intrinsic_width(),
-            paintable.intrinsic_height()
-        );
         logo.set_halign(gtk::Align::Center);
         logo.set_valign(gtk::Align::Center);
         logo.set_can_shrink(false);
