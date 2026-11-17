@@ -30,14 +30,19 @@ fn main() -> glib::ExitCode {
         .expect("Failed to find resource");
         let fixed = gtk::Fixed::new();
         let level = Level::from_bytes(&bytes);
-        println!("{}", level.pretty_print());
         let mut sokoban_pos = (0.0, 0.0);
         let mut sokoban_paintable = paintable(&State::Sokoban);
 
         for row in 0..level.height() {
             for col in 0..level.width() {
                 let state = level.state_at(row, col);
-                let paintable = paintable(&state);
+                let mut state_to_paint = State::Floor;
+                if state == State::Sokoban {
+                    sokoban_pos = (col as f64 * 32.0, row as f64 * 32.0);
+                } else {
+                    state_to_paint = state;
+                }
+                let paintable = paintable(&state_to_paint);
                 let picture = Picture::for_paintable(&paintable);
                 picture.set_halign(gtk::Align::Center);
                 picture.set_valign(gtk::Align::Center);
@@ -45,19 +50,16 @@ fn main() -> glib::ExitCode {
                 let x: f64 = col as f64 * 32.0;
                 let y: f64 = row as f64 * 32.0;
                 fixed.put(&picture, x, y);
-                if state == State::Sokoban {
-                    sokoban_pos = (col as f64 * 32.0, row as f64 * 32.0);
-                }
             }
         }
-        let picture = Picture::for_paintable(&sokoban_paintable);
-        picture.set_halign(gtk::Align::Center);
-        picture.set_valign(gtk::Align::Center);
-        picture.set_can_shrink(false);
+        let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
+        sokoban_picture.set_halign(gtk::Align::Center);
+        sokoban_picture.set_valign(gtk::Align::Center);
+        sokoban_picture.set_can_shrink(false);
         let (x, y) = sokoban_pos;
-        fixed.put(&picture, x, y);
+        fixed.put(&sokoban_picture, x, y);
 
-        let position = Cell::new((100.0, 100.0));
+        let position = Cell::new(sokoban_pos);
         let coords = position.get();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -66,7 +68,6 @@ fn main() -> glib::ExitCode {
             .child(&fixed)
             .build();
 
-        /*
         let key_controller = gtk::EventControllerKey::new();
         key_controller.connect_key_pressed(glib::clone!(
             #[weak]
@@ -74,7 +75,7 @@ fn main() -> glib::ExitCode {
             #[weak]
             fixed,
             #[weak]
-            logo,
+            sokoban_picture,
             #[strong]
             position,
             #[upgrade_or]
@@ -90,7 +91,7 @@ fn main() -> glib::ExitCode {
                         coords.0 += MOVE_LENGTH;
                         position.set(coords);
                         let coords = position.get();
-                        fixed.move_(&logo, coords.0, coords.1);
+                        fixed.move_(&sokoban_picture, coords.0, coords.1);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Left => {
@@ -98,7 +99,7 @@ fn main() -> glib::ExitCode {
                         coords.0 -= MOVE_LENGTH;
                         position.set(coords);
                         let coords = position.get();
-                        fixed.move_(&logo, coords.0, coords.1);
+                        fixed.move_(&sokoban_picture, coords.0, coords.1);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Up => {
@@ -106,7 +107,7 @@ fn main() -> glib::ExitCode {
                         coords.1 -= MOVE_LENGTH;
                         position.set(coords);
                         let coords = position.get();
-                        fixed.move_(&logo, coords.0, coords.1);
+                        fixed.move_(&sokoban_picture, coords.0, coords.1);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Down => {
@@ -114,7 +115,7 @@ fn main() -> glib::ExitCode {
                         coords.1 += MOVE_LENGTH;
                         position.set(coords);
                         let coords = position.get();
-                        fixed.move_(&logo, coords.0, coords.1);
+                        fixed.move_(&sokoban_picture, coords.0, coords.1);
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
@@ -122,7 +123,6 @@ fn main() -> glib::ExitCode {
             }
         ));
         window.add_controller(key_controller);
-        */
         window.present();
     });
 
