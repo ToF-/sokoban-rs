@@ -51,7 +51,7 @@ impl Puzzle {
         if let Some(piece) = self.pieces.get(&location) {
             if *piece == State::Floor || *piece == State::Goal {
                 true
-            } else if *piece == State::Crate {
+            } else if *piece == State::Crate || *piece == State::Stored {
                 let target = direction.from(location);
                 if let Some(piece) = self.pieces.get(&target) {
                     *piece == State::Floor || *piece == State::Goal
@@ -70,7 +70,7 @@ impl Puzzle {
         let origin = self.sokoban_position();
         let destination = direction.from(origin);
         let target_opt = if let Some(piece) = self.pieces.get(&destination) {
-            if *piece == State::Crate {
+            if *piece == State::Crate || *piece == State::Stored {
                 Some(direction.from(destination))
             } else {
                 None
@@ -82,6 +82,9 @@ impl Puzzle {
             if let Some(target) = target_opt {
                 if let Some(piece) = self.pieces.get_mut(&target) {
                     *piece = piece.add_crate()
+                }
+                if let Some(piece) = self.pieces.get_mut(&destination) {
+                    *piece = piece.remove_crate();
                 }
             }
         };
