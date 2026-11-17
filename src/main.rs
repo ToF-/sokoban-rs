@@ -1,9 +1,7 @@
 use crate::direction::Direction;
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::puzzle::Puzzle;
 use crate::gdk::Key;
 use crate::level::Level;
+use crate::puzzle::Puzzle;
 use crate::state::State;
 use crate::tile::TILES;
 use crate::tile::Tiles;
@@ -12,6 +10,8 @@ use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
 use std::cell::Cell;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub mod direction;
 pub mod level;
@@ -38,35 +38,67 @@ fn main() -> glib::ExitCode {
         let level = Level::from_bytes(&bytes);
         let mut sokoban_pos = (0.0, 0.0);
         let mut sokoban_paintable = paintable(&State::Sokoban);
+        let mut crate_pictures: Vec<Vec<Picture>> =
+            vec![vec![Picture::new(); level.width()]; level.height()];
 
+        println!("{}", level.pretty_print());
         for row in 0..level.height() {
             for col in 0..level.width() {
                 let state = level.state_at(row, col);
-                let mut state_to_paint = State::Floor;
+                let mut background = State::Floor;
                 if state == State::Sokoban {
-                    sokoban_pos = (col as f64 * 32.0, row as f64 * 32.0);
+                    let background = paintable(&State::Floor);
+                    let bg_picture = Picture::for_paintable(&background);
+                    bg_picture.set_halign(gtk::Align::Center);
+                    bg_picture.set_valign(gtk::Align::Center);
+                    bg_picture.set_can_shrink(false);
+                    let x: f64 = col as f64 * 32.0;
+                    let y: f64 = row as f64 * 32.0;
+                    fixed.put(&bg_picture, x, y);
+                } else if state == State::Crate {
+                    let background = paintable(&State::Floor);
+                    let bg_picture = Picture::for_paintable(&background);
+                    bg_picture.set_halign(gtk::Align::Center);
+                    bg_picture.set_valign(gtk::Align::Center);
+                    bg_picture.set_can_shrink(false);
+                    let x: f64 = col as f64 * 32.0;
+                    let y: f64 = row as f64 * 32.0;
+                    fixed.put(&bg_picture, x, y);
+                    let foreground = paintable(&State::Crate);
+                    let fg_picture = Picture::for_paintable(&foreground);
+                    fg_picture.set_halign(gtk::Align::Center);
+                    fg_picture.set_valign(gtk::Align::Center);
+                    fg_picture.set_can_shrink(false);
+                    let x: f64 = col as f64 * 32.0;
+                    let y: f64 = row as f64 * 32.0;
+                    fixed.put(&fg_picture, x, y);
                 } else {
-                    state_to_paint = state;
+                    let paintable = paintable(&state);
+                    let picture = Picture::for_paintable(&paintable);
+                    picture.set_halign(gtk::Align::Center);
+                    picture.set_valign(gtk::Align::Center);
+                    picture.set_can_shrink(false);
+                    let x: f64 = col as f64 * 32.0;
+                    let y: f64 = row as f64 * 32.0;
+                    fixed.put(&picture, x, y);
                 }
-                let paintable = paintable(&state_to_paint);
-                let picture = Picture::for_paintable(&paintable);
-                picture.set_halign(gtk::Align::Center);
-                picture.set_valign(gtk::Align::Center);
-                picture.set_can_shrink(false);
-                let x: f64 = col as f64 * 32.0;
-                let y: f64 = row as f64 * 32.0;
-                fixed.put(&picture, x, y);
             }
         }
+        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
         let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
         sokoban_picture.set_halign(gtk::Align::Center);
         sokoban_picture.set_valign(gtk::Align::Center);
         sokoban_picture.set_can_shrink(false);
-        let (x, y) = sokoban_pos;
+
+        let (row,col) = {
+            let puzzle = puzzle_rc.borrow();
+            puzzle.sokoban_position()
+        };
+        let x: f64 = col as f64 * 32.0;
+        let y: f64 = row as f64 * 32.0;
         fixed.put(&sokoban_picture, x, y);
 
         let position = Cell::new(sokoban_pos);
-        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
         let coords = position.get();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -95,52 +127,29 @@ fn main() -> glib::ExitCode {
                         app.quit();
                         glib::Propagation::Stop
                     }
-                    gdk::Key::Right => {
+                    gdk::Key::Right | gdk::Key::Left | gdk::Key::Down | gdk::Key::Up => {
+                        let direction = match keyval {
+                            gdk::Key::Right => Direction::Right,
+                            gdk::Key::Left => Direction::Left,
+                            gdk::Key::Up => Direction::Up,
+                            gdk::Key::Down => Direction::Down,
+                            _ => Direction::Right,
+                        };
                         let mut puzzle = puzzle_rc.borrow_mut();
-                        if puzzle.can_move(Direction::Right) {
+                        if puzzle.can_move(direction) {
                             let origin = puzzle.sokoban_position();
-                            let destination = Direction::Right.from(origin);
-                            puzzle.r#move(Direction::Right);
+                            let destination = direction.from(origin);
+                            let target_opt = puzzle.r#move(direction);
+                            if let Some(target) = target_opt {
+                                let destination_state = puzzle.state_at(destination);
+                            }
+                            let position = puzzle.sokoban_position();
+                            fixed.move_(
+                                &sokoban_picture,
+                                position.1 as f64 * MOVE_LENGTH,
+                                position.0 as f64 * MOVE_LENGTH,
+                            );
                         }
-                        let position = puzzle.sokoban_position();
-                        dbg!(position);
-                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::Left => {
-                        let mut puzzle = puzzle_rc.borrow_mut();
-                        if puzzle.can_move(Direction::Left) {
-                            let origin = puzzle.sokoban_position();
-                            let destination = Direction::Left.from(origin);
-                            puzzle.r#move(Direction::Left);
-                        }
-                        let position = puzzle.sokoban_position();
-                        dbg!(position);
-                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::Up => {
-                        let mut puzzle = puzzle_rc.borrow_mut();
-                        if puzzle.can_move(Direction::Up) {
-                            let origin = puzzle.sokoban_position();
-                            let destination = Direction::Up.from(origin);
-                            puzzle.r#move(Direction::Up);
-                        }
-                        let position = puzzle.sokoban_position();
-                        dbg!(position);
-                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::Down => {
-                        let mut puzzle = puzzle_rc.borrow_mut();
-                        if puzzle.can_move(Direction::Down) {
-                            let origin = puzzle.sokoban_position();
-                            let destination = Direction::Down.from(origin);
-                            puzzle.r#move(Direction::Down);
-                        }
-                        let position = puzzle.sokoban_position();
-                        dbg!(position);
-                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,

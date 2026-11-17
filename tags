@@ -39,7 +39,7 @@ paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self,
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn paintable(state: &State) -> Paintable {$/;"	f
 pretty_print	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
-r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) {$/;"	f
+r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {$/;"	f
 remove_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
 remove_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f
 sokoban_can_move_on_floor	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_can_move_on_floor() {$/;"	f

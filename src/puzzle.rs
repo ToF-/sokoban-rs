@@ -66,7 +66,7 @@ impl Puzzle {
         }
     }
 
-    pub fn r#move(&mut self, direction: Direction) {
+    pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {
         let origin = self.sokoban_position();
         let destination = direction.from(origin);
         let target_opt = if let Some(piece) = self.pieces.get(&destination) {
@@ -93,7 +93,8 @@ impl Puzzle {
         if let Some(piece) = self.pieces.get_mut(&destination) {
             *piece = piece.add_sokoban()
         };
-        self.sokoban_position = destination
+        self.sokoban_position = destination;
+        target_opt
     }
 }
 
@@ -150,6 +151,6 @@ mod tests {
         assert_eq!((8, 3), puzzle.sokoban_position());
         assert_eq!(State::Sokoban, puzzle.state_at((8, 3)));
         assert_eq!(State::Crate, puzzle.state_at((8, 2)));
-        assert!(! puzzle.can_move(Direction::Left));
+        assert!(!puzzle.can_move(Direction::Left));
     }
 }
