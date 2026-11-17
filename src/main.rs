@@ -1,3 +1,6 @@
+use crate::direction::Direction;
+use std::cell::RefCell;
+use std::rc::Rc;
 use crate::puzzle::Puzzle;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -63,7 +66,7 @@ fn main() -> glib::ExitCode {
         fixed.put(&sokoban_picture, x, y);
 
         let position = Cell::new(sokoban_pos);
-        let puzzle = Puzzle::from_level(&level);
+        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
         let coords = position.get();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -81,7 +84,7 @@ fn main() -> glib::ExitCode {
             #[weak]
             sokoban_picture,
             #[strong]
-            puzzle,
+            puzzle_rc,
             #[strong]
             position,
             #[upgrade_or]
@@ -93,35 +96,51 @@ fn main() -> glib::ExitCode {
                         glib::Propagation::Stop
                     }
                     gdk::Key::Right => {
-                        let mut coords = position.get();
-                        coords.0 += MOVE_LENGTH;
-                        position.set(coords);
-                        let coords = position.get();
-                        fixed.move_(&sokoban_picture, coords.0, coords.1);
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if puzzle.can_move(Direction::Right) {
+                            let origin = puzzle.sokoban_position();
+                            let destination = Direction::Right.from(origin);
+                            puzzle.r#move(Direction::Right);
+                        }
+                        let position = puzzle.sokoban_position();
+                        dbg!(position);
+                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Left => {
-                        let mut coords = position.get();
-                        coords.0 -= MOVE_LENGTH;
-                        position.set(coords);
-                        let coords = position.get();
-                        fixed.move_(&sokoban_picture, coords.0, coords.1);
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if puzzle.can_move(Direction::Left) {
+                            let origin = puzzle.sokoban_position();
+                            let destination = Direction::Left.from(origin);
+                            puzzle.r#move(Direction::Left);
+                        }
+                        let position = puzzle.sokoban_position();
+                        dbg!(position);
+                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Up => {
-                        let mut coords = position.get();
-                        coords.1 -= MOVE_LENGTH;
-                        position.set(coords);
-                        let coords = position.get();
-                        fixed.move_(&sokoban_picture, coords.0, coords.1);
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if puzzle.can_move(Direction::Up) {
+                            let origin = puzzle.sokoban_position();
+                            let destination = Direction::Up.from(origin);
+                            puzzle.r#move(Direction::Up);
+                        }
+                        let position = puzzle.sokoban_position();
+                        dbg!(position);
+                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Down => {
-                        let mut coords = position.get();
-                        coords.1 += MOVE_LENGTH;
-                        position.set(coords);
-                        let coords = position.get();
-                        fixed.move_(&sokoban_picture, coords.0, coords.1);
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if puzzle.can_move(Direction::Down) {
+                            let origin = puzzle.sokoban_position();
+                            let destination = Direction::Down.from(origin);
+                            puzzle.r#move(Direction::Down);
+                        }
+                        let position = puzzle.sokoban_position();
+                        dbg!(position);
+                        fixed.move_(&sokoban_picture, position.1 as f64 * MOVE_LENGTH, position.0 as f64 * MOVE_LENGTH);
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,

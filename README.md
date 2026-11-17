@@ -14,7 +14,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] given a level map with floors, walls, store locations, crates, and sokoban, draw the map in the window
 - [x] darken tiles that are outside the walls
 - [x] have the sokoban character move in the level
-- [ ] have the sokoban character blocked by walls
+- [x] have the sokoban character blocked by walls
 - [ ] have the sokoban character push crates, making them move
 - [ ] have the sokoban character blocked by blocked crates
 - [ ] have the tile change when a crate is pushed on and off a goal
