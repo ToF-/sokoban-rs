@@ -16,7 +16,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] have the sokoban character move in the level
 - [x] have the sokoban character blocked by walls
 - [x] have the sokoban character push crates, making them move
-- [ ] have the sokoban character blocked by blocked crates
+- [x] have the sokoban character blocked by blocked crates
 - [ ] have the tile change when a crate is pushed on and off a goal
 - [ ] detect when puzzle is solved
 - [ ] undo moves and restart level
