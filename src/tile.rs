@@ -1,8 +1,8 @@
-use gtk::gdk_pixbuf;
-use gtk::gdk;
 use crate::State;
 use crate::gdk::Paintable;
 use gtk::Picture;
+use gtk::gdk;
+use gtk::gdk_pixbuf;
 use gtk::prelude::WidgetExt;
 use std::cell::OnceCell;
 use std::sync::OnceLock;

@@ -1,32 +1,39 @@
+use std::collections::HashSet;
 use crate::Level;
 use crate::State;
 use crate::direction::Direction;
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Puzzle {
     pieces: HashMap<(usize, usize), State>,
     sokoban_position: (usize, usize),
+    goals: HashSet<(usize, usize)>,
 }
 
 impl Puzzle {
     pub fn from_level(level: &Level) -> Self {
         let mut pieces = HashMap::new();
         let mut sokoban_position = (0, 0);
+        let mut goals = HashSet::new();
         for col in 0..level.width() {
             for row in 0..level.height() {
                 let state = level.state_at(row, col);
-                if state != State::Outside {
+                if state == State::Goal {
+                    goals.insert((row, col));
+                    pieces.insert((row, col), State::Floor);
+                } else if state == State::Sokoban {
+                    pieces.insert((row, col), State::Sokoban);
+                    sokoban_position = (row, col);
+                } else if state != State::Outside {
                     pieces.insert((row, col), state.clone());
-                }
-                if state == State::Sokoban {
-                    sokoban_position = (row, col)
                 }
             }
         }
         Self {
             pieces,
             sokoban_position,
+            goals,
         }
     }
 
@@ -38,12 +45,14 @@ impl Puzzle {
         self.pieces.get(&coords).expect("illegal coords").clone()
     }
 
-    // in a solved puzzle, all the Goal pieces have become Stored
     pub fn is_solved(&self) -> bool {
-        self.pieces
-            .iter()
-            .find(|(_, piece)| *piece == &State::Goal)
-            .is_none()
+        for (coords, piece) in &self.pieces {
+            if *piece == State::Crate
+                && ! self.goals.contains(&coords) {
+                    return false
+            }
+        }
+        true
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
@@ -66,6 +75,22 @@ impl Puzzle {
         }
     }
 
+    pub fn move_piece_at(&mut self, origin: (usize, usize), direction: Direction) {
+        let origin_state = self.state_at(origin);
+        let destination = direction.from(origin);
+        let destination_state = self.state_at(destination);
+        let target_state = if origin_state == State::Sokoban {
+            destination_state.add_sokoban()
+        } else if origin_state == State::Crate {
+            destination_state.add_crate()
+        } else {
+            destination_state
+        };
+        if let Some(piece) = self.pieces.get_mut(&destination) {
+            *piece = target_state
+        }
+    }
+
     pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {
         let origin = self.sokoban_position();
         let destination = direction.from(origin);
@@ -78,24 +103,10 @@ impl Puzzle {
         } else {
             None
         };
-        {
-            if let Some(target) = target_opt {
-                if let Some(piece) = self.pieces.get_mut(&target) {
-                    *piece = piece.add_crate()
-                }
-                if let Some(piece) = self.pieces.get_mut(&destination) {
-                    *piece = piece.remove_crate();
-                }
-            }
+        if let Some(target) = target_opt {
+            self.move_piece_at(destination, direction)
         };
-        {
-            if let Some(piece) = self.pieces.get_mut(&origin) {
-                *piece = piece.remove_sokoban()
-            };
-        }
-        if let Some(piece) = self.pieces.get_mut(&destination) {
-            *piece = piece.add_sokoban()
-        };
+        self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
         target_opt
     }
@@ -148,6 +159,7 @@ mod tests {
         puzzle.r#move(Direction::Up);
         assert_eq!((8, 12), puzzle.sokoban_position());
         for _ in 0..9 {
+            dbg!(puzzle.sokoban_position());
             assert!(puzzle.can_move(Direction::Left));
             puzzle.r#move(Direction::Left);
         }

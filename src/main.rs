@@ -1,4 +1,3 @@
-use crate::tile::solid_picture;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -8,6 +7,7 @@ use crate::tile::TILES;
 use crate::tile::Tiles;
 use crate::tile::paintable;
 use crate::tile::picture;
+use crate::tile::solid_picture;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
@@ -33,7 +33,7 @@ fn main() -> glib::ExitCode {
 
     app.connect_activate(|app| {
         let bytes = gio::resources_lookup_data(
-            "/com/example/MyApp/files/level_01.txt",
+            "/com/example/MyApp/files/level_00.txt",
             gio::ResourceLookupFlags::NONE,
         )
         .expect("Failed to find resource");
@@ -45,7 +45,8 @@ fn main() -> glib::ExitCode {
         let background = solid_picture(
             level.width() as i32 * UNIT as i32,
             level.height() as i32 * UNIT as i32,
-            0xdfd7cfff);
+            0xdfd7cfff,
+        );
         fixed.put(&background, 0.0, 0.0);
 
         for row in 0..level.height() {
@@ -66,12 +67,8 @@ fn main() -> glib::ExitCode {
         }
         for (coords, picture) in &crates {
             let (row, col) = coords;
-                    fixed.put(
-                        picture,
-                        *col as f64 * UNIT,
-                        *row as f64 * UNIT,
-                    );
-        };
+            fixed.put(picture, *col as f64 * UNIT, *row as f64 * UNIT);
+        }
         let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
         let crates_rc = Rc::new(RefCell::new(crates));
         let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
@@ -83,11 +80,7 @@ fn main() -> glib::ExitCode {
             let puzzle = puzzle_rc.borrow();
             puzzle.sokoban_position()
         };
-        fixed.put(
-            &sokoban_picture,
-            col as f64 * UNIT,
-            row as f64 * UNIT,
-        );
+        fixed.put(&sokoban_picture, col as f64 * UNIT, row as f64 * UNIT);
 
         let position = Cell::new(sokoban_pos);
         let coords = position.get();
@@ -150,7 +143,15 @@ fn main() -> glib::ExitCode {
                                 position.1 as f64 * UNIT,
                                 position.0 as f64 * UNIT,
                             );
-                        }
+                        };
+                        dbg!(&puzzle);
+                        if puzzle.is_solved() {
+                            let crates = crates_rc.borrow();
+                            for (coords, _) in crates.iter() {
+                                let picture = picture(&State::Stored);
+                                fixed.put(&picture, coords.1 as f64 * UNIT, coords.0 as f64 * UNIT);
+                            }
+                        };
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
