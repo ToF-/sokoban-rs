@@ -70,6 +70,7 @@ impl State {
 
     pub fn add_sokoban(self) -> State {
         match self {
+            State::Crate => State::Sokoban,
             State::Floor => State::Sokoban,
             State::Goal => State::OnGoal,
             other => other,
@@ -119,12 +120,17 @@ mod tests {
         let s = State::Goal;
         assert_eq!(State::OnGoal, s.add_sokoban());
     }
+    #[test]
+    fn a_crate_is_added_a_sokoban() {
+        let s = State::Crate;
+        assert_eq!(State::Sokoban, s.add_sokoban());
+    }
 
     #[test]
     fn other_additions_dont_work() {
         let s = State::Wall;
         assert_eq!(State::Wall, s.add_sokoban());
         let s = State::Crate;
-        assert_eq!(State::Crate, s.add_sokoban());
+        assert_eq!(State::Crate, s.add_crate());
     }
 }

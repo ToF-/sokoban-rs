@@ -1,3 +1,4 @@
+use crate::puzzle::Puzzle;
 use crate::gdk::Key;
 use crate::level::Level;
 use crate::state::State;
@@ -9,7 +10,9 @@ use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
 use std::cell::Cell;
 
+pub mod direction;
 pub mod level;
+pub mod puzzle;
 pub mod state;
 pub mod tile;
 
@@ -60,6 +63,7 @@ fn main() -> glib::ExitCode {
         fixed.put(&sokoban_picture, x, y);
 
         let position = Cell::new(sokoban_pos);
+        let puzzle = Puzzle::from_level(&level);
         let coords = position.get();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -76,6 +80,8 @@ fn main() -> glib::ExitCode {
             fixed,
             #[weak]
             sokoban_picture,
+            #[strong]
+            puzzle,
             #[strong]
             position,
             #[upgrade_or]
