@@ -1,3 +1,4 @@
+use crate::tile::fixed_for_level;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -32,58 +33,24 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
-        let bytes = gio::resources_lookup_data(
-            "/com/example/MyApp/files/level_01.txt",
-            gio::ResourceLookupFlags::NONE,
-        )
-        .expect("Failed to find resource");
-        let fixed = gtk::Fixed::new();
+        let level_index = 2;
+        let level_file_name = format!("/com/example/MyApp/files/level_{:02}.txt", level_index);
+        let bytes = gio::resources_lookup_data(&level_file_name, gio::ResourceLookupFlags::NONE)
+            .expect("Failed to find resource");
         let level = Level::from_bytes(&bytes);
-        let mut sokoban_pos = (0.0, 0.0);
-        let mut sokoban_paintable = paintable(&State::Sokoban);
         let mut crates: HashMap<(usize, usize), Picture> = HashMap::new();
-        let background = solid_picture(
-            level.width() as i32 * UNIT as i32,
-            level.height() as i32 * UNIT as i32,
-            0xdfd7cfff,
-        );
-        fixed.put(&background, 0.0, 0.0);
-
-        for row in 0..level.height() {
-            for col in 0..level.width() {
-                let state = level.state_at(row, col);
-                let mut background = State::Floor;
-                if state == State::Sokoban {
-                    // do not draw sokoban yet
-                } else if state == State::Crate {
-                    // do not draw crates yet
-                    let picture = picture(&State::Crate);
-                    crates.insert((row, col), picture);
-                } else if state != State::Floor {
-                    let picture = picture(&state);
-                    fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
-                }
-            }
-        }
-        for (coords, picture) in &crates {
-            let (row, col) = coords;
-            fixed.put(picture, *col as f64 * UNIT, *row as f64 * UNIT);
-        }
-        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
-        let crates_rc = Rc::new(RefCell::new(crates));
+        let mut sokoban_position = (0, 0);
+        let fixed = fixed_for_level(&level, &mut crates, &mut sokoban_position);
+        let sokoban_paintable = paintable(&State::Sokoban); 
         let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
         sokoban_picture.set_halign(gtk::Align::Center);
         sokoban_picture.set_valign(gtk::Align::Center);
         sokoban_picture.set_can_shrink(false);
-
-        let (row, col) = {
-            let puzzle = puzzle_rc.borrow();
-            puzzle.sokoban_position()
-        };
+        let (row, col) = sokoban_position;
         fixed.put(&sokoban_picture, col as f64 * UNIT, row as f64 * UNIT);
+        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
+        let crates_rc = Rc::new(RefCell::new(crates.clone()));
 
-        let position = Cell::new(sokoban_pos);
-        let coords = position.get();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
             .default_width(level.width() as i32 * 32)
@@ -103,8 +70,6 @@ fn main() -> glib::ExitCode {
             puzzle_rc,
             #[strong]
             crates_rc,
-            #[strong]
-            position,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state| {

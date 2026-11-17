@@ -21,6 +21,7 @@ a_goal_is_added_a_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_g
 add_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
 add_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
+fixed_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fixed_for_level(level: &Level, crates: &mut HashMap<(usize, usize), Picture>, sokoban_position: &mut (usize, usize)) -> gtk::Fixed {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn from(&self, coords: (usize, usize)) -> (usize, usize) {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(state: State) -> Self {$/;"	f
