@@ -17,8 +17,8 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] have the sokoban character blocked by walls
 - [x] have the sokoban character push crates, making them move
 - [x] have the sokoban character blocked by blocked crates
-- [ ] detect when puzzle is solved
-- [ ] have a star covering the crates when puzzle is solved
+- [x] detect when puzzle is solved
+- [x] have a star covering the crates when puzzle is solved
 - [ ] undo moves and restart level
 - [ ] count moves and store the minimal moves when puzzle is solved
 - [ ] chain the puzzles

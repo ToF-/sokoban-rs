@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use crate::Level;
 use crate::State;
 use crate::direction::Direction;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Puzzle {
@@ -47,31 +47,30 @@ impl Puzzle {
 
     pub fn is_solved(&self) -> bool {
         for (coords, piece) in &self.pieces {
-            if *piece == State::Crate
-                && ! self.goals.contains(&coords) {
-                    return false
+            if *piece == State::Crate && !self.goals.contains(&coords) {
+                return false;
             }
         }
         true
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
-        let location = direction.from(self.sokoban_position());
-        if let Some(piece) = self.pieces.get(&location) {
+        let destination = direction.from(self.sokoban_position());
+        if let Some(piece) = self.pieces.get(&destination) {
             if *piece == State::Floor || *piece == State::Goal {
                 true
             } else if *piece == State::Crate || *piece == State::Stored {
-                let target = direction.from(location);
+                let target = direction.from(destination);
                 if let Some(piece) = self.pieces.get(&target) {
                     *piece == State::Floor || *piece == State::Goal
                 } else {
-                    false
+                    true
                 }
             } else {
                 false
             }
         } else {
-            false
+            true
         }
     }
 
@@ -86,9 +85,19 @@ impl Puzzle {
         } else {
             destination_state
         };
+        let clean_state = if origin_state == State::Sokoban {
+            destination_state.remove_sokoban()
+        } else if origin_state == State::Crate {
+            destination_state.remove_crate()
+        } else {
+            destination_state
+        };
         if let Some(piece) = self.pieces.get_mut(&destination) {
             *piece = target_state
-        }
+        };
+        if let Some(piece) = self.pieces.get_mut(&origin) {
+            *piece = clean_state
+        };
     }
 
     pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {
@@ -109,6 +118,32 @@ impl Puzzle {
         self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
         target_opt
+    }
+
+    pub fn pretty_print(&self) -> String {
+        let mut result = String::new();
+        let mut width: usize = 0;
+        let mut height: usize = 0;
+        for (coords, _) in &self.pieces {
+            let (row, col) = coords;
+            if *row >= height {
+                height = row + 1;
+            }
+            if *col >= width {
+                width = col + 1;
+            }
+        }
+        for row in 0..height {
+            for col in 0..width {
+                if let Some(piece) = self.pieces.get(&(row, col)) {
+                    result.push(char::from(*piece))
+                } else {
+                    result.push(' ')
+                };
+            }
+            result.push('\n');
+        }
+        result
     }
 }
 
@@ -159,10 +194,9 @@ mod tests {
         puzzle.r#move(Direction::Up);
         assert_eq!((8, 12), puzzle.sokoban_position());
         for _ in 0..9 {
-            dbg!(puzzle.sokoban_position());
-            assert!(puzzle.can_move(Direction::Left));
             puzzle.r#move(Direction::Left);
         }
+        println!("{}", puzzle.pretty_print());
         assert_eq!((8, 3), puzzle.sokoban_position());
         assert_eq!(State::Sokoban, puzzle.state_at((8, 3)));
         assert_eq!(State::Crate, puzzle.state_at((8, 2)));

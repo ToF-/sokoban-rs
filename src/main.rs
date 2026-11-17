@@ -33,7 +33,7 @@ fn main() -> glib::ExitCode {
 
     app.connect_activate(|app| {
         let bytes = gio::resources_lookup_data(
-            "/com/example/MyApp/files/level_00.txt",
+            "/com/example/MyApp/files/level_01.txt",
             gio::ResourceLookupFlags::NONE,
         )
         .expect("Failed to find resource");
@@ -113,46 +113,61 @@ fn main() -> glib::ExitCode {
                         app.quit();
                         glib::Propagation::Stop
                     }
-                    gdk::Key::Right | gdk::Key::Left | gdk::Key::Down | gdk::Key::Up => {
+                    gdk::Key::Right
+                    | gdk::Key::r
+                    | gdk::Key::Left
+                    | gdk::Key::t
+                    | gdk::Key::Down
+                    | gdk::Key::s
+                    | gdk::Key::Up
+                    | gdk::Key::d => {
                         let direction = match keyval {
-                            gdk::Key::Right => Direction::Right,
-                            gdk::Key::Left => Direction::Left,
-                            gdk::Key::Up => Direction::Up,
-                            gdk::Key::Down => Direction::Down,
+                            gdk::Key::Right | gdk::Key::r => Direction::Right,
+                            gdk::Key::Left | gdk::Key::t => Direction::Left,
+                            gdk::Key::Up | gdk::Key::d => Direction::Up,
+                            gdk::Key::Down | gdk::Key::s => Direction::Down,
                             _ => Direction::Right,
                         };
                         let mut puzzle = puzzle_rc.borrow_mut();
-                        if puzzle.can_move(direction) {
-                            let origin = puzzle.sokoban_position();
-                            let destination = direction.from(origin);
-                            let target_opt = puzzle.r#move(direction);
-                            if let Some(target) = target_opt {
-                                let mut crates = crates_rc.borrow_mut();
-                                if let Some(crate_picture) = crates.remove(&destination) {
-                                    crates.insert(target, crate_picture.clone());
-                                    fixed.move_(
-                                        &crate_picture,
-                                        target.1 as f64 * UNIT,
-                                        target.0 as f64 * UNIT,
-                                    );
-                                };
-                            }
-                            let position = puzzle.sokoban_position();
-                            fixed.move_(
-                                &sokoban_picture,
-                                position.1 as f64 * UNIT,
-                                position.0 as f64 * UNIT,
-                            );
-                        };
-                        dbg!(&puzzle);
                         if puzzle.is_solved() {
-                            let crates = crates_rc.borrow();
-                            for (coords, _) in crates.iter() {
-                                let picture = picture(&State::Stored);
-                                fixed.put(&picture, coords.1 as f64 * UNIT, coords.0 as f64 * UNIT);
-                            }
-                        };
-                        glib::Propagation::Proceed
+                            app.quit();
+                            glib::Propagation::Stop
+                        } else {
+                            if puzzle.can_move(direction) {
+                                let origin = puzzle.sokoban_position();
+                                let destination = direction.from(origin);
+                                let target_opt = puzzle.r#move(direction);
+                                if let Some(target) = target_opt {
+                                    let mut crates = crates_rc.borrow_mut();
+                                    if let Some(crate_picture) = crates.remove(&destination) {
+                                        crates.insert(target, crate_picture.clone());
+                                        fixed.move_(
+                                            &crate_picture,
+                                            target.1 as f64 * UNIT,
+                                            target.0 as f64 * UNIT,
+                                        );
+                                    };
+                                }
+                                let position = puzzle.sokoban_position();
+                                fixed.move_(
+                                    &sokoban_picture,
+                                    position.1 as f64 * UNIT,
+                                    position.0 as f64 * UNIT,
+                                );
+                            };
+                            if puzzle.is_solved() {
+                                let crates = crates_rc.borrow();
+                                for (coords, _) in crates.iter() {
+                                    let picture = picture(&State::Stored);
+                                    fixed.put(
+                                        &picture,
+                                        coords.1 as f64 * UNIT,
+                                        coords.0 as f64 * UNIT,
+                                    );
+                                }
+                            };
+                            glib::Propagation::Proceed
+                        }
                     }
                     _ => glib::Propagation::Proceed,
                 }
