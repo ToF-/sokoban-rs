@@ -1,4 +1,4 @@
-use crate::tile::picture;
+use crate::tile::solid_picture;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -7,11 +7,13 @@ use crate::state::State;
 use crate::tile::TILES;
 use crate::tile::Tiles;
 use crate::tile::paintable;
+use crate::tile::picture;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 pub mod direction;
@@ -20,7 +22,7 @@ pub mod puzzle;
 pub mod state;
 pub mod tile;
 
-const MOVE_LENGTH: f64 = 32.0;
+const UNIT: f64 = 32.0;
 
 fn main() -> glib::ExitCode {
     gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
@@ -39,37 +41,39 @@ fn main() -> glib::ExitCode {
         let level = Level::from_bytes(&bytes);
         let mut sokoban_pos = (0.0, 0.0);
         let mut sokoban_paintable = paintable(&State::Sokoban);
-        let mut crate_pictures: Vec<Vec<Picture>> =
-            vec![vec![Picture::new(); level.width()]; level.height()];
+        let mut crates: HashMap<(usize, usize), Picture> = HashMap::new();
+        let background = solid_picture(
+            level.width() as i32 * UNIT as i32,
+            level.height() as i32 * UNIT as i32,
+            0xdfd7cfff);
+        fixed.put(&background, 0.0, 0.0);
 
-        println!("{}", level.pretty_print());
         for row in 0..level.height() {
             for col in 0..level.width() {
                 let state = level.state_at(row, col);
                 let mut background = State::Floor;
                 if state == State::Sokoban {
-                    let picture = picture(&State::Floor);
-                    let x: f64 = col as f64 * 32.0;
-                    let y: f64 = row as f64 * 32.0;
-                    fixed.put(&picture, x, y);
+                    // do not draw sokoban yet
                 } else if state == State::Crate {
-                    let bg_picture = picture(&State::Floor);
-                    let x: f64 = col as f64 * 32.0;
-                    let y: f64 = row as f64 * 32.0;
-                    fixed.put(&bg_picture, x, y);
-                    let fg_picture = picture(&State::Crate);
-                    let x: f64 = col as f64 * 32.0;
-                    let y: f64 = row as f64 * 32.0;
-                    fixed.put(&fg_picture, x, y);
-                } else {
+                    // do not draw crates yet
+                    let picture = picture(&State::Crate);
+                    crates.insert((row, col), picture);
+                } else if state != State::Floor {
                     let picture = picture(&state);
-                    let x: f64 = col as f64 * 32.0;
-                    let y: f64 = row as f64 * 32.0;
-                    fixed.put(&picture, x, y);
+                    fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
                 }
             }
         }
+        for (coords, picture) in &crates {
+            let (row, col) = coords;
+                    fixed.put(
+                        picture,
+                        *col as f64 * UNIT,
+                        *row as f64 * UNIT,
+                    );
+        };
         let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
+        let crates_rc = Rc::new(RefCell::new(crates));
         let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
         sokoban_picture.set_halign(gtk::Align::Center);
         sokoban_picture.set_valign(gtk::Align::Center);
@@ -79,9 +83,11 @@ fn main() -> glib::ExitCode {
             let puzzle = puzzle_rc.borrow();
             puzzle.sokoban_position()
         };
-        let x: f64 = col as f64 * 32.0;
-        let y: f64 = row as f64 * 32.0;
-        fixed.put(&sokoban_picture, x, y);
+        fixed.put(
+            &sokoban_picture,
+            col as f64 * UNIT,
+            row as f64 * UNIT,
+        );
 
         let position = Cell::new(sokoban_pos);
         let coords = position.get();
@@ -102,6 +108,8 @@ fn main() -> glib::ExitCode {
             sokoban_picture,
             #[strong]
             puzzle_rc,
+            #[strong]
+            crates_rc,
             #[strong]
             position,
             #[upgrade_or]
@@ -126,13 +134,21 @@ fn main() -> glib::ExitCode {
                             let destination = direction.from(origin);
                             let target_opt = puzzle.r#move(direction);
                             if let Some(target) = target_opt {
-                                let destination_state = puzzle.state_at(destination);
+                                let mut crates = crates_rc.borrow_mut();
+                                if let Some(crate_picture) = crates.remove(&destination) {
+                                    crates.insert(target, crate_picture.clone());
+                                    fixed.move_(
+                                        &crate_picture,
+                                        target.1 as f64 * UNIT,
+                                        target.0 as f64 * UNIT,
+                                    );
+                                };
                             }
                             let position = puzzle.sokoban_position();
                             fixed.move_(
                                 &sokoban_picture,
-                                position.1 as f64 * MOVE_LENGTH,
-                                position.0 as f64 * MOVE_LENGTH,
+                                position.1 as f64 * UNIT,
+                                position.0 as f64 * UNIT,
                             );
                         }
                         glib::Propagation::Proceed

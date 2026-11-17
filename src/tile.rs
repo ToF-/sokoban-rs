@@ -1,9 +1,11 @@
+use gtk::gdk_pixbuf;
+use gtk::gdk;
 use crate::State;
 use crate::gdk::Paintable;
 use gtk::Picture;
+use gtk::prelude::WidgetExt;
 use std::cell::OnceCell;
 use std::sync::OnceLock;
-use gtk::prelude::WidgetExt;
 
 pub struct Tile {
     paintable: Paintable,
@@ -65,6 +67,26 @@ pub fn picture(state: &State) -> Picture {
     picture.set_can_shrink(false);
     picture
 }
+
+pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {
+    let pixbuf = gdk_pixbuf::Pixbuf::new(
+        gdk_pixbuf::Colorspace::Rgb,
+        true, // has_alpha
+        8,    // bits_per_sample
+        width,
+        height,
+    )
+    .expect("Failed to create Pixbuf");
+
+    pixbuf.fill(rgba);
+
+    let texture = gdk::Texture::for_pixbuf(&pixbuf);
+
+    let picture = gtk::Picture::for_paintable(&texture);
+    picture.set_can_shrink(false);
+    picture
+}
+
 pub fn paintable(state: &State) -> Paintable {
     TILES.with(|cell| {
         let tiles = cell.get_or_init(Tiles::from_picture_files);
