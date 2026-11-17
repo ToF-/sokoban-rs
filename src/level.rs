@@ -68,7 +68,7 @@ impl Level {
         for row in 0..self.height() {
             for col in 0..self.width() {
                 result.push(char::from(self.state_at(row, col)))
-            };
+            }
             result.push('\n');
         }
         result

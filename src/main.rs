@@ -1,6 +1,9 @@
 use crate::gdk::Key;
 use crate::level::Level;
 use crate::state::State;
+use crate::tile::TILES;
+use crate::tile::Tiles;
+use crate::tile::paintable;
 use gtk::gdk;
 use gtk::prelude::*;
 use gtk::{Application, Picture, gio, glib};
@@ -8,6 +11,7 @@ use std::cell::Cell;
 
 pub mod level;
 pub mod state;
+pub mod tile;
 
 const MOVE_LENGTH: f64 = 32.0;
 
@@ -19,21 +23,6 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
-        let outside = Picture::for_resource("/com/example/MyApp/images/outside.png");
-        let outside_paintable = outside.paintable().expect("can't access to paintable");
-        let floor = Picture::for_resource("/com/example/MyApp/images/floor.png");
-        let floor_paintable = floor.paintable().expect("can't access to paintable");
-        let wall = Picture::for_resource("/com/example/MyApp/images/wall.png");
-        let wall_paintable = wall.paintable().expect("can't access to paintable");
-        let _crate = Picture::for_resource("/com/example/MyApp/images/crate.png");
-        let crate_paintable = _crate.paintable().expect("can't access to paintable");
-        let goal = Picture::for_resource("/com/example/MyApp/images/goal.png");
-        let goal_paintable = goal.paintable().expect("can't access to paintable");
-        let stored = Picture::for_resource("/com/example/MyApp/images/stored.png");
-        let stored_paintable = stored.paintable().expect("can't access to paintable");
-        let sokoban = Picture::for_resource("/com/example/MyApp/images/sokoban.png");
-        let sokoban_paintable = sokoban.paintable().expect("can't access to paintable");
-
         let bytes = gio::resources_lookup_data(
             "/com/example/MyApp/files/level_01.txt",
             gio::ResourceLookupFlags::NONE,
@@ -43,19 +32,12 @@ fn main() -> glib::ExitCode {
         let level = Level::from_bytes(&bytes);
         println!("{}", level.pretty_print());
         let mut sokoban_pos = (0.0, 0.0);
+        let mut sokoban_paintable = paintable(&State::Sokoban);
+
         for row in 0..level.height() {
             for col in 0..level.width() {
                 let state = level.state_at(row, col);
-                let paintable = match state {
-                    State::Outside => outside_paintable.clone(),
-                    State::Wall => wall_paintable.clone(),
-                    State::Crate => crate_paintable.clone(),
-                    State::Stored => stored_paintable.clone(),
-                    State::Goal => goal_paintable.clone(),
-                    State::Sokoban => floor_paintable.clone(),
-                    State::Floor => floor_paintable.clone(),
-                    _ => floor_paintable.clone(),
-                };
+                let paintable = paintable(&state);
                 let picture = Picture::for_paintable(&paintable);
                 picture.set_halign(gtk::Align::Center);
                 picture.set_valign(gtk::Align::Center);
@@ -68,12 +50,11 @@ fn main() -> glib::ExitCode {
                 }
             }
         }
-        let paintable = sokoban_paintable.clone();
-        let picture = Picture::for_paintable(&paintable);
+        let picture = Picture::for_paintable(&sokoban_paintable);
         picture.set_halign(gtk::Align::Center);
         picture.set_valign(gtk::Align::Center);
         picture.set_can_shrink(false);
-        let (x,y) = sokoban_pos;
+        let (x, y) = sokoban_pos;
         fixed.put(&picture, x, y);
 
         let position = Cell::new((100.0, 100.0));
