@@ -1,3 +1,4 @@
+use crate::tile::picture;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -47,37 +48,21 @@ fn main() -> glib::ExitCode {
                 let state = level.state_at(row, col);
                 let mut background = State::Floor;
                 if state == State::Sokoban {
-                    let background = paintable(&State::Floor);
-                    let bg_picture = Picture::for_paintable(&background);
-                    bg_picture.set_halign(gtk::Align::Center);
-                    bg_picture.set_valign(gtk::Align::Center);
-                    bg_picture.set_can_shrink(false);
+                    let picture = picture(&State::Floor);
                     let x: f64 = col as f64 * 32.0;
                     let y: f64 = row as f64 * 32.0;
-                    fixed.put(&bg_picture, x, y);
+                    fixed.put(&picture, x, y);
                 } else if state == State::Crate {
-                    let background = paintable(&State::Floor);
-                    let bg_picture = Picture::for_paintable(&background);
-                    bg_picture.set_halign(gtk::Align::Center);
-                    bg_picture.set_valign(gtk::Align::Center);
-                    bg_picture.set_can_shrink(false);
+                    let bg_picture = picture(&State::Floor);
                     let x: f64 = col as f64 * 32.0;
                     let y: f64 = row as f64 * 32.0;
                     fixed.put(&bg_picture, x, y);
-                    let foreground = paintable(&State::Crate);
-                    let fg_picture = Picture::for_paintable(&foreground);
-                    fg_picture.set_halign(gtk::Align::Center);
-                    fg_picture.set_valign(gtk::Align::Center);
-                    fg_picture.set_can_shrink(false);
+                    let fg_picture = picture(&State::Crate);
                     let x: f64 = col as f64 * 32.0;
                     let y: f64 = row as f64 * 32.0;
                     fixed.put(&fg_picture, x, y);
                 } else {
-                    let paintable = paintable(&state);
-                    let picture = Picture::for_paintable(&paintable);
-                    picture.set_halign(gtk::Align::Center);
-                    picture.set_valign(gtk::Align::Center);
-                    picture.set_can_shrink(false);
+                    let picture = picture(&state);
                     let x: f64 = col as f64 * 32.0;
                     let y: f64 = row as f64 * 32.0;
                     fixed.put(&picture, x, y);
@@ -90,7 +75,7 @@ fn main() -> glib::ExitCode {
         sokoban_picture.set_valign(gtk::Align::Center);
         sokoban_picture.set_can_shrink(false);
 
-        let (row,col) = {
+        let (row, col) = {
             let puzzle = puzzle_rc.borrow();
             puzzle.sokoban_position()
         };

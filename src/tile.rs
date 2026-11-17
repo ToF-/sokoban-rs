@@ -3,6 +3,7 @@ use crate::gdk::Paintable;
 use gtk::Picture;
 use std::cell::OnceCell;
 use std::sync::OnceLock;
+use gtk::prelude::WidgetExt;
 
 pub struct Tile {
     paintable: Paintable,
@@ -56,6 +57,14 @@ thread_local! {
 pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };
 }
 
+pub fn picture(state: &State) -> Picture {
+    let paintable = paintable(state);
+    let picture = Picture::for_paintable(&paintable);
+    picture.set_halign(gtk::Align::Center);
+    picture.set_valign(gtk::Align::Center);
+    picture.set_can_shrink(false);
+    picture
+}
 pub fn paintable(state: &State) -> Paintable {
     TILES.with(|cell| {
         let tiles = cell.get_or_init(Tiles::from_picture_files);

@@ -37,6 +37,7 @@ other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn oth
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self, state: &State) -> Paintable {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn paintable(state: &State) -> Paintable {$/;"	f
+picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn picture(state: &State) -> Picture {$/;"	f
 pretty_print	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
 r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {$/;"	f
