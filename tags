@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+Coords	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub type Coords = (usize, usize);$/;"	T
 Direction	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^pub enum Direction {$/;"	g
 Error	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    type Error = ();$/;"	T
 Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
@@ -21,8 +22,9 @@ a_goal_is_added_a_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_g
 add_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
 add_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
+col	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub fn col(coords: Coords) -> usize {$/;"	f
 fixed_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fixed_for_level(level: &Level, crates: &mut HashMap<(usize, usize), Picture>, sokoban_position: &mut (usize, usize)) -> gtk::Fixed {$/;"	f
-from	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn from(&self, coords: (usize, usize)) -> (usize, usize) {$/;"	f
+from	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn from(&self, coords: Coords) -> Coords {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(state: State) -> Self {$/;"	f
 from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn from_bytes(bytes: &[u8]) -> Level {$/;"	f
@@ -34,7 +36,7 @@ initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initia
 is_solved	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_tile	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn make_tile(state: &State) -> Self {$/;"	f
-move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: (usize, usize), direction: Direction) {$/;"	f
+move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
 other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn other_additions_dont_work() {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self, state: &State) -> Paintable {$/;"	f
@@ -43,15 +45,16 @@ picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn picture(state: &State)
 pretty_print	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 pretty_print	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
-r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {$/;"	f
+r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {$/;"	f
 remove_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
 remove_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f
+row	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub fn row(coords: Coords) -> usize {$/;"	f
 sokoban_can_move_on_floor	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_can_move_on_floor() {$/;"	f
 sokoban_can_push_a_crate	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_can_push_a_crate() {$/;"	f
 sokoban_cannot_move_into_wall	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_cannot_move_into_wall() {$/;"	f
-sokoban_position	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn sokoban_position(&self) -> (usize, usize) {$/;"	f
+sokoban_position	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn sokoban_position(&self) -> Coords {$/;"	f
 solid_picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {$/;"	f
-state_at	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn state_at(&self, row: usize, col: usize) -> State {$/;"	f
-state_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn state_at(&self, coords: (usize, usize)) -> State {$/;"	f
+state_at	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn state_at(&self, coords: Coords) -> State {$/;"	f
+state_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn state_at(&self, coords: Coords) -> State {$/;"	f
 try_from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn try_from(value: usize) -> Result<Self, Self::Error> {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn width(&self) -> usize {$/;"	f

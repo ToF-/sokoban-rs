@@ -110,7 +110,7 @@ pub fn fixed_for_level(level: &Level, crates: &mut HashMap<(usize, usize), Pictu
 
     for row in 0..level.height() {
         for col in 0..level.width() {
-            let state = level.state_at(row, col);
+            let state = level.state_at((row, col));
             let mut background = State::Floor;
             if state == State::Sokoban {
                 *sokoban_position = (row, col)

@@ -1,3 +1,4 @@
+use crate::coords::Coords;
 use crate::Level;
 use crate::State;
 use crate::direction::Direction;
@@ -6,9 +7,9 @@ use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Puzzle {
-    pieces: HashMap<(usize, usize), State>,
-    sokoban_position: (usize, usize),
-    goals: HashSet<(usize, usize)>,
+    pieces: HashMap<Coords, State>,
+    sokoban_position: Coords,
+    goals: HashSet<Coords>,
 }
 
 impl Puzzle {
@@ -18,7 +19,7 @@ impl Puzzle {
         let mut goals = HashSet::new();
         for col in 0..level.width() {
             for row in 0..level.height() {
-                let state = level.state_at(row, col);
+                let state = level.state_at((row, col));
                 if state == State::Goal {
                     goals.insert((row, col));
                     pieces.insert((row, col), State::Floor);
@@ -37,11 +38,11 @@ impl Puzzle {
         }
     }
 
-    pub fn sokoban_position(&self) -> (usize, usize) {
+    pub fn sokoban_position(&self) -> Coords {
         self.sokoban_position
     }
 
-    pub fn state_at(&self, coords: (usize, usize)) -> State {
+    pub fn state_at(&self, coords: Coords) -> State {
         self.pieces.get(&coords).expect("illegal coords").clone()
     }
 
@@ -74,7 +75,7 @@ impl Puzzle {
         }
     }
 
-    pub fn move_piece_at(&mut self, origin: (usize, usize), direction: Direction) {
+    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {
         let origin_state = self.state_at(origin);
         let destination = direction.from(origin);
         let destination_state = self.state_at(destination);
@@ -100,7 +101,7 @@ impl Puzzle {
         };
     }
 
-    pub fn r#move(&mut self, direction: Direction) -> Option<(usize, usize)> {
+    pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
         let origin = self.sokoban_position();
         let destination = direction.from(origin);
         let target_opt = if let Some(piece) = self.pieces.get(&destination) {

@@ -1,3 +1,6 @@
+use crate::coords::col;
+use crate::coords::row;
+use crate::coords::Coords;
 use crate::state::State;
 
 pub struct Level {
@@ -58,8 +61,8 @@ impl Level {
         self.height
     }
 
-    pub fn state_at(&self, row: usize, col: usize) -> State {
-        let index = row * self.width + col;
+    pub fn state_at(&self, coords: Coords) -> State {
+        let index = row(coords) * self.width + col(coords);
         self.tiles[index].clone()
     }
 
@@ -67,7 +70,7 @@ impl Level {
         let mut result = String::new();
         for row in 0..self.height() {
             for col in 0..self.width() {
-                result.push(char::from(self.state_at(row, col)))
+                result.push(char::from(self.state_at((row, col))))
             }
             result.push('\n');
         }
@@ -92,9 +95,9 @@ mod tests {
         let level = Level::from_bytes(&bytes);
         assert_eq!(21, level.width());
         assert_eq!(13, level.height());
-        assert_eq!(State::Wall, level.state_at(1, 5));
-        assert_eq!(State::Wall, level.state_at(1, 6));
-        assert_eq!(State::Crate, level.state_at(3, 6));
-        assert_eq!(State::Sokoban, level.state_at(9, 12));
+        assert_eq!(State::Wall, level.state_at((1, 5)));
+        assert_eq!(State::Wall, level.state_at((1, 6)));
+        assert_eq!(State::Crate, level.state_at((3, 6)));
+        assert_eq!(State::Sokoban, level.state_at((9, 12)));
     }
 }

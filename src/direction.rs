@@ -1,3 +1,5 @@
+use crate::coords::Coords;
+
 #[derive(Copy, Clone)]
 pub enum Direction {
     Left,
@@ -7,7 +9,7 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn from(&self, coords: (usize, usize)) -> (usize, usize) {
+    pub fn from(&self, coords: Coords) -> Coords {
         let (row, col) = coords;
         match self {
             Direction::Left => (row, col - 1),

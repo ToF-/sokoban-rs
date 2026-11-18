@@ -17,6 +17,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+pub mod coords;
 pub mod direction;
 pub mod level;
 pub mod puzzle;
