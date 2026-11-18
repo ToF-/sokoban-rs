@@ -1,13 +1,13 @@
-use gtk::prelude::FixedExt;
 use crate::HashMap;
 use crate::Level;
 use crate::State;
 use crate::UNIT;
 use crate::gdk::Paintable;
 use gtk::Picture;
-use gtk::gio;
 use gtk::gdk;
 use gtk::gdk_pixbuf;
+use gtk::gio;
+use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;
 use std::cell::OnceCell;
 use std::sync::OnceLock;
@@ -24,7 +24,7 @@ impl Tile {
             State::Goal => "goal",
             State::Outside => "outside",
             State::Sokoban => "sokoban",
-            State::Stored => "crate",
+            State::Stored => "stored",
             State::Wall => "wall",
             _ => "floor",
         };
@@ -99,7 +99,11 @@ pub fn paintable(state: &State) -> Paintable {
     })
 }
 
-pub fn fixed_for_level(level: &Level, crates: &mut HashMap<(usize, usize), Picture>, sokoban_position: &mut (usize, usize)) -> gtk::Fixed {
+pub fn fixed_for_level(
+    level: &Level,
+    crates: &mut HashMap<(usize, usize), Picture>,
+    sokoban_position: &mut (usize, usize),
+) -> gtk::Fixed {
     let fixed = gtk::Fixed::new();
     let background = solid_picture(
         level.width() as i32 * UNIT as i32,

@@ -1,4 +1,3 @@
-use crate::tile::fixed_for_level;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -6,6 +5,7 @@ use crate::puzzle::Puzzle;
 use crate::state::State;
 use crate::tile::TILES;
 use crate::tile::Tiles;
+use crate::tile::fixed_for_level;
 use crate::tile::paintable;
 use crate::tile::picture;
 use crate::tile::solid_picture;
@@ -34,7 +34,7 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
-        let level_index = 2;
+        let level_index = 0;
         let level_file_name = format!("/com/example/MyApp/files/level_{:02}.txt", level_index);
         let bytes = gio::resources_lookup_data(&level_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
@@ -42,7 +42,7 @@ fn main() -> glib::ExitCode {
         let mut crates: HashMap<(usize, usize), Picture> = HashMap::new();
         let mut sokoban_position = (0, 0);
         let fixed = fixed_for_level(&level, &mut crates, &mut sokoban_position);
-        let sokoban_paintable = paintable(&State::Sokoban); 
+        let sokoban_paintable = paintable(&State::Sokoban);
         let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
         sokoban_picture.set_halign(gtk::Align::Center);
         sokoban_picture.set_valign(gtk::Align::Center);
@@ -122,8 +122,8 @@ fn main() -> glib::ExitCode {
                                 );
                             };
                             if puzzle.is_solved() {
-                                let crates = crates_rc.borrow();
-                                for (coords, _) in crates.iter() {
+                                for crate_index in 0..puzzle.max_crate() {
+                                    let coords = puzzle.crate_coords(crate_index);
                                     let picture = picture(&State::Stored);
                                     fixed.put(
                                         &picture,

@@ -1,6 +1,6 @@
-use crate::coords::Coords;
 use crate::Level;
 use crate::State;
+use crate::coords::Coords;
 use crate::direction::Direction;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -53,12 +53,9 @@ impl Puzzle {
     }
 
     pub fn is_solved(&self) -> bool {
-        for (coords, piece) in &self.pieces {
-            if *piece == State::Crate && !self.goals.contains(&coords) {
-                return false;
-            }
-        }
-        true
+        self.crates
+            .iter()
+            .all(|crate_coords| self.goals.contains(crate_coords))
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
@@ -79,6 +76,21 @@ impl Puzzle {
         } else {
             true
         }
+    }
+
+    pub fn max_crate(&self) -> usize {
+        self.crates.len()
+    }
+
+    pub fn crate_coords(&self, crate_number: usize) -> Coords {
+        self.crates[crate_number]
+    }
+
+    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {
+        println!("{:?}", self.crates);
+        self.crates
+            .iter()
+            .position(|&crate_coords| crate_coords == coords)
     }
 
     pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {
@@ -105,6 +117,12 @@ impl Puzzle {
         if let Some(piece) = self.pieces.get_mut(&origin) {
             *piece = clean_state
         };
+        if origin_state == State::Crate {
+            let crate_index = self
+                .find_crate_index_at(origin)
+                .expect("can't find crate index");
+            self.crates[crate_index] = destination;
+        }
     }
 
     pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
@@ -124,6 +142,7 @@ impl Puzzle {
         };
         self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
+        dbg!(&self.crates);
         target_opt
     }
 
@@ -208,5 +227,26 @@ mod tests {
         assert_eq!(State::Sokoban, puzzle.state_at((8, 3)));
         assert_eq!(State::Crate, puzzle.state_at((8, 2)));
         assert!(!puzzle.can_move(Direction::Left));
+    }
+    #[test]
+    fn max_crates() {
+        let puzzle = puzzle_1();
+        assert_eq!(6, puzzle.max_crate())
+    }
+    #[test]
+    fn find_crate_index() {
+        let puzzle = puzzle_1();
+        assert_eq!(None, puzzle.find_crate_index_at((8, 12)));
+        assert_eq!(Some(0), puzzle.find_crate_index_at((8, 3)));
+        assert_eq!(Some(1), puzzle.find_crate_index_at((3, 6)));
+        assert_eq!(Some(2), puzzle.find_crate_index_at((5, 6)));
+        assert_eq!(Some(3), puzzle.find_crate_index_at((8, 6)));
+        assert_eq!(Some(4), puzzle.find_crate_index_at((4, 8)));
+        assert_eq!(Some(5), puzzle.find_crate_index_at((5, 8)));
+    }
+    #[test]
+    fn crate_coords() {
+        let puzzle = puzzle_1();
+        assert_eq!((8, 3), puzzle.crate_coords(0));
     }
 }

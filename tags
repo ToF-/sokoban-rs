@@ -23,7 +23,11 @@ add_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self)
 add_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
 col	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub fn col(coords: Coords) -> usize {$/;"	f
-fixed_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fixed_for_level(level: &Level, crates: &mut HashMap<(usize, usize), Picture>, sokoban_position: &mut (usize, usize)) -> gtk::Fixed {$/;"	f
+crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn crate_coords() {$/;"	f
+crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn crate_coords(&self, crate_number: usize) -> Coords {$/;"	f
+find_crate_index	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn find_crate_index() {$/;"	f
+find_crate_index_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {$/;"	f
+fixed_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fixed_for_level($/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn from(&self, coords: Coords) -> Coords {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(byte: u8) -> Self {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn from(state: State) -> Self {$/;"	f
@@ -36,6 +40,8 @@ initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initia
 is_solved	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_tile	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn make_tile(state: &State) -> Self {$/;"	f
+max_crate	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn max_crate(&self) -> usize {$/;"	f
+max_crates	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn max_crates() {$/;"	f
 move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
 other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn other_additions_dont_work() {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f

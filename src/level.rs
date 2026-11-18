@@ -1,6 +1,6 @@
+use crate::coords::Coords;
 use crate::coords::col;
 use crate::coords::row;
-use crate::coords::Coords;
 use crate::state::State;
 
 pub struct Level {
