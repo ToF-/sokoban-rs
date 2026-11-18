@@ -1,11 +1,11 @@
-use gtk::prelude::FixedExt;
-use crate::UNIT;
-use gtk::Fixed;
-use crate::picture;
-use crate::paintable;
-use crate::coords::Coords;
 use crate::Picture;
 use crate::State;
+use crate::UNIT;
+use crate::coords::Coords;
+use crate::paintable;
+use crate::picture;
+use gtk::Fixed;
+use gtk::prelude::FixedExt;
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
@@ -53,5 +53,4 @@ impl Sprite {
     pub fn coords(&self) -> Coords {
         self.coords
     }
-
 }

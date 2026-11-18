@@ -99,9 +99,7 @@ pub fn paintable(state: &State) -> Paintable {
     })
 }
 
-pub fn fixed_for_level(
-    level: &Level,
-) -> gtk::Fixed {
+pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
     let fixed = gtk::Fixed::new();
     let background = solid_picture(
         level.width() as i32 * UNIT as i32,

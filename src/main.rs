@@ -1,9 +1,10 @@
-use crate::sprite::Sprite;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
 use crate::puzzle::Puzzle;
+use crate::sprite::Sprite;
 use crate::state::State;
+use crate::step::Step;
 use crate::tile::TILES;
 use crate::tile::Tiles;
 use crate::tile::fixed_for_level;
@@ -24,6 +25,7 @@ pub mod level;
 pub mod puzzle;
 pub mod sprite;
 pub mod state;
+pub mod step;
 pub mod tile;
 
 const UNIT: f64 = 32.0;
@@ -45,7 +47,10 @@ fn main() -> glib::ExitCode {
         let mut crates: Vec<RefCell<Sprite>> = Vec::new();
         for crate_index in 0..puzzle.max_crate() {
             let crate_coords = puzzle.crate_coords(crate_index);
-            crates.push(RefCell::new(Sprite::make_sprite(&State::Crate, crate_coords)));
+            crates.push(RefCell::new(Sprite::make_sprite(
+                &State::Crate,
+                crate_coords,
+            )));
         }
         let mut sokoban_position = puzzle.sokoban_position();
         let fixed = fixed_for_level(&level);
@@ -56,6 +61,8 @@ fn main() -> glib::ExitCode {
             sprite.place(&fixed);
         }
 
+        let steps: Vec<Step> = Vec::new();
+        let steps_rc = Rc::new(RefCell::new(steps));
         let puzzle_rc = Rc::new(RefCell::new(puzzle));
         let crates_rc = Rc::new(RefCell::new(crates));
         let sokoban_rc = Rc::new(RefCell::new(sokoban_sprite));
@@ -79,6 +86,8 @@ fn main() -> glib::ExitCode {
             puzzle_rc,
             #[strong]
             crates_rc,
+            #[strong]
+            steps_rc,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state| {
@@ -86,6 +95,42 @@ fn main() -> glib::ExitCode {
                     gdk::Key::q => {
                         app.quit();
                         glib::Propagation::Stop
+                    }
+                    gdk::Key::u | gdk::Key::BackSpace => {
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if !puzzle.is_solved() {
+                            let mut steps = steps_rc.borrow_mut();
+                            if let Some(step) = steps.pop() {
+                                let reversed = step.reverse();
+                                let direction = Direction::between(reversed.from(), reversed.to());
+                                puzzle.r#move(direction);
+                                let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                let position = puzzle.sokoban_position();
+                                sokoban_sprite.r#move(&fixed, position);
+                                if let Some((crate_index, boxed_crate_step)) = reversed.pushing() {
+                                    let crate_step = *boxed_crate_step;
+                                    let crate_position = crate_step.from();
+                                    let crate_destination = crate_step.to();
+                                    let mut crate_index = 0;
+                                    {
+                                    let mut crates = crates_rc.borrow_mut();
+                                    crate_index = crates
+                                        .iter()
+                                        .position(|sprite_rc| {
+                                            sprite_rc.borrow().coords() == crate_position
+                                        })
+                                        .expect("can't find crate");
+                                    let mut sprite = crates[crate_index].borrow_mut();
+                                    sprite.r#move(&fixed, crate_destination);
+                                    }
+                                    {
+                                        let crates = crates_rc.borrow();
+                                        dbg!(&crates);
+                                    }
+                                }
+                            }
+                        };
+                        glib::Propagation::Proceed
                     }
                     gdk::Key::Right
                     | gdk::Key::r
@@ -111,17 +156,28 @@ fn main() -> glib::ExitCode {
                                 let origin = puzzle.sokoban_position();
                                 let destination = direction.from(origin);
                                 let target_opt = puzzle.r#move(direction);
+                                let mut crate_index = 0;
                                 if let Some(target) = target_opt {
                                     let mut crates = crates_rc.borrow_mut();
-                                    let index = crates.iter().position(|sprite_rc|
-                                       sprite_rc.borrow().coords() == destination 
-                                    ).expect("can't find crate");
-                                    let mut sprite = crates[index].borrow_mut();
+                                    crate_index = crates
+                                        .iter()
+                                        .position(|sprite_rc| {
+                                            sprite_rc.borrow().coords() == destination
+                                        })
+                                        .expect("can't find crate");
+                                    let mut sprite = crates[crate_index].borrow_mut();
                                     sprite.r#move(&fixed, target);
-                                    };
+                                };
                                 let position = puzzle.sokoban_position();
                                 let mut sokoban_sprite = sokoban_rc.borrow_mut();
                                 sokoban_sprite.r#move(&fixed, position);
+                                let mut steps = steps_rc.borrow_mut();
+                                let pushing = if let Some(target) = target_opt {
+                                    Some(crate_index)
+                                } else {
+                                    None
+                                };
+                                steps.push(Step::new(origin, direction, pushing));
                             };
                             if puzzle.is_solved() {
                                 for crate_index in 0..puzzle.max_crate() {
