@@ -38,7 +38,7 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
-        let level_index = 0;
+        let level_index = 2;
         let level_file_name = format!("/com/example/MyApp/files/level_{:02}.txt", level_index);
         let bytes = gio::resources_lookup_data(&level_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
@@ -95,6 +95,39 @@ fn main() -> glib::ExitCode {
                     gdk::Key::q => {
                         app.quit();
                         glib::Propagation::Stop
+                    }
+                    gdk::Key::asterisk => {
+                        let mut puzzle = puzzle_rc.borrow_mut();
+                        if !puzzle.is_solved() {
+                            let mut steps = steps_rc.borrow_mut();
+                            while !steps.is_empty() {
+                                if let Some(step) = steps.pop() {
+                                    let reversed = step.reverse();
+                                    let backwards =
+                                        Direction::between(reversed.from(), reversed.to());
+                                    puzzle.r#move(backwards);
+                                    if let Some((crate_index, boxed_crate_step)) =
+                                        reversed.pushing()
+                                    {
+                                        let crate_step = *boxed_crate_step;
+                                        let crate_origin = crate_step.from();
+                                        let crate_destination = crate_step.to();
+                                        puzzle.move_piece_at(crate_origin, backwards);
+                                        let mut sprite = crates[crate_index].borrow_mut();
+                                        sprite.r#move(&fixed, crate_destination);
+                                        {
+                                            let mut crates = crates_rc.borrow_mut();
+                                            crates[crate_index] = RefCell::new(sprite.clone());
+                                        }
+                                    };
+                                    let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                    let position = puzzle.sokoban_position();
+                                    sokoban_sprite.r#move(&fixed, position);
+                                }
+                            }
+                        };
+
+                        glib::Propagation::Proceed
                     }
                     gdk::Key::u | gdk::Key::BackSpace => {
                         let mut puzzle = puzzle_rc.borrow_mut();
