@@ -64,7 +64,7 @@ fn main() -> glib::ExitCode {
         let steps: Vec<Step> = Vec::new();
         let steps_rc = Rc::new(RefCell::new(steps));
         let puzzle_rc = Rc::new(RefCell::new(puzzle));
-        let crates_rc = Rc::new(RefCell::new(crates));
+        let crates_rc = Rc::new(RefCell::new(crates.clone()));
         let sokoban_rc = Rc::new(RefCell::new(sokoban_sprite));
 
         let window = gtk::ApplicationWindow::builder()
@@ -102,32 +102,23 @@ fn main() -> glib::ExitCode {
                             let mut steps = steps_rc.borrow_mut();
                             if let Some(step) = steps.pop() {
                                 let reversed = step.reverse();
-                                let direction = Direction::between(reversed.from(), reversed.to());
-                                puzzle.r#move(direction);
+                                let backwards = Direction::between(reversed.from(), reversed.to());
+                                puzzle.r#move(backwards);
+                                if let Some((crate_index, boxed_crate_step)) = reversed.pushing() {
+                                    let crate_step = *boxed_crate_step;
+                                    let crate_origin = crate_step.from();
+                                    let crate_destination = crate_step.to();
+                                    puzzle.move_piece_at(crate_origin, backwards);
+                                    let mut sprite = crates[crate_index].borrow_mut();
+                                    sprite.r#move(&fixed, crate_destination);
+                                    {
+                                        let mut crates = crates_rc.borrow_mut();
+                                        crates[crate_index] = RefCell::new(sprite.clone());
+                                    }
+                                };
                                 let mut sokoban_sprite = sokoban_rc.borrow_mut();
                                 let position = puzzle.sokoban_position();
                                 sokoban_sprite.r#move(&fixed, position);
-                                if let Some((crate_index, boxed_crate_step)) = reversed.pushing() {
-                                    let crate_step = *boxed_crate_step;
-                                    let crate_position = crate_step.from();
-                                    let crate_destination = crate_step.to();
-                                    let mut crate_index = 0;
-                                    {
-                                    let mut crates = crates_rc.borrow_mut();
-                                    crate_index = crates
-                                        .iter()
-                                        .position(|sprite_rc| {
-                                            sprite_rc.borrow().coords() == crate_position
-                                        })
-                                        .expect("can't find crate");
-                                    let mut sprite = crates[crate_index].borrow_mut();
-                                    sprite.r#move(&fixed, crate_destination);
-                                    }
-                                    {
-                                        let crates = crates_rc.borrow();
-                                        dbg!(&crates);
-                                    }
-                                }
                             }
                         };
                         glib::Propagation::Proceed
@@ -192,6 +183,15 @@ fn main() -> glib::ExitCode {
                             };
                             glib::Propagation::Proceed
                         }
+                    }
+                    gdk::Key::dollar => {
+                        let puzzle = puzzle_rc.borrow();
+                        println!("{}", puzzle.pretty_print());
+                        let crates = crates_rc.borrow();
+                        for sprite in crates.iter() {
+                            println!("{:?}", sprite);
+                        }
+                        glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
                 }
