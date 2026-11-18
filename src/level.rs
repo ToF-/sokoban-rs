@@ -41,11 +41,7 @@ impl Level {
                 b => {
                     let state = State::from(*b);
                     let index = row * max_col + col;
-                    tiles[index] = if state == State::Stored {
-                        State::Crate
-                    } else {
-                        state
-                    };
+                    tiles[index] = state;
                     col += 1;
                 }
             }

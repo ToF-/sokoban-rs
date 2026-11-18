@@ -25,6 +25,10 @@ impl Puzzle {
                 if state == State::Goal {
                     goals.insert((row, col));
                     pieces.insert((row, col), State::Floor);
+                } else if state == State::Stored {
+                    goals.insert((row, col));
+                    crates.push((row, col));
+                    pieces.insert((row, col), State::Crate);
                 } else if state == State::Sokoban {
                     pieces.insert((row, col), State::Sokoban);
                     sokoban_position = (row, col);

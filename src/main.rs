@@ -54,6 +54,8 @@ fn main() -> glib::ExitCode {
         }
         let mut sokoban_position = puzzle.sokoban_position();
         let fixed = fixed_for_level(&level);
+        let label = gtk::Label::new(Some("0"));
+        fixed.put(&label, 0.0, 0.0);
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, sokoban_position);
         sokoban_sprite.place(&fixed);
         for crate_index in 0..crates.len() {
@@ -80,6 +82,8 @@ fn main() -> glib::ExitCode {
             app,
             #[weak]
             fixed,
+            #[weak]
+            label,
             #[strong]
             sokoban_rc,
             #[strong]
@@ -99,32 +103,39 @@ fn main() -> glib::ExitCode {
                     gdk::Key::asterisk => {
                         let mut puzzle = puzzle_rc.borrow_mut();
                         if !puzzle.is_solved() {
-                            let mut steps = steps_rc.borrow_mut();
-                            while !steps.is_empty() {
-                                if let Some(step) = steps.pop() {
-                                    let reversed = step.reverse();
-                                    let backwards =
-                                        Direction::between(reversed.from(), reversed.to());
-                                    puzzle.r#move(backwards);
-                                    if let Some((crate_index, boxed_crate_step)) =
-                                        reversed.pushing()
-                                    {
-                                        let crate_step = *boxed_crate_step;
-                                        let crate_origin = crate_step.from();
-                                        let crate_destination = crate_step.to();
-                                        puzzle.move_piece_at(crate_origin, backwards);
-                                        let mut sprite = crates[crate_index].borrow_mut();
-                                        sprite.r#move(&fixed, crate_destination);
+                            {
+                                let mut steps = steps_rc.borrow_mut();
+                                while !steps.is_empty() {
+                                    if let Some(step) = steps.pop() {
+                                        let reversed = step.reverse();
+                                        let backwards =
+                                            Direction::between(reversed.from(), reversed.to());
+                                        puzzle.r#move(backwards);
+                                        if let Some((crate_index, boxed_crate_step)) =
+                                            reversed.pushing()
                                         {
-                                            let mut crates = crates_rc.borrow_mut();
-                                            crates[crate_index] = RefCell::new(sprite.clone());
-                                        }
-                                    };
-                                    let mut sokoban_sprite = sokoban_rc.borrow_mut();
-                                    let position = puzzle.sokoban_position();
-                                    sokoban_sprite.r#move(&fixed, position);
+                                            let crate_step = *boxed_crate_step;
+                                            let crate_origin = crate_step.from();
+                                            let crate_destination = crate_step.to();
+                                            puzzle.move_piece_at(crate_origin, backwards);
+                                            let mut sprite = crates[crate_index].borrow_mut();
+                                            sprite.r#move(&fixed, crate_destination);
+                                            {
+                                                let mut crates = crates_rc.borrow_mut();
+                                                crates[crate_index] = RefCell::new(sprite.clone());
+                                            }
+                                        };
+                                        let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                        let position = puzzle.sokoban_position();
+                                        sokoban_sprite.r#move(&fixed, position);
+                                    }
                                 }
                             }
+                            let max_step = {
+                                let steps = steps_rc.borrow();
+                                steps.len()
+                            };
+                            label.set_text(&format!("{}", max_step));
                         };
 
                         glib::Propagation::Proceed
@@ -132,6 +143,7 @@ fn main() -> glib::ExitCode {
                     gdk::Key::u | gdk::Key::BackSpace => {
                         let mut puzzle = puzzle_rc.borrow_mut();
                         if !puzzle.is_solved() {
+                            {
                             let mut steps = steps_rc.borrow_mut();
                             if let Some(step) = steps.pop() {
                                 let reversed = step.reverse();
@@ -153,6 +165,12 @@ fn main() -> glib::ExitCode {
                                 let position = puzzle.sokoban_position();
                                 sokoban_sprite.r#move(&fixed, position);
                             }
+                            }
+                            let max_step = {
+                                let steps = steps_rc.borrow();
+                                steps.len()
+                            };
+                            label.set_text(&format!("{}", max_step));
                         };
                         glib::Propagation::Proceed
                     }
@@ -214,6 +232,11 @@ fn main() -> glib::ExitCode {
                                     );
                                 }
                             };
+                            let max_step = {
+                                let steps = steps_rc.borrow();
+                                steps.len()
+                            };
+                            label.set_text(&format!("{}", max_step));
                             glib::Propagation::Proceed
                         }
                     }

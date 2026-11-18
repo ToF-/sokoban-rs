@@ -112,8 +112,13 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
         for col in 0..level.width() {
             let state = level.state_at((row, col));
             let mut background = State::Floor;
-            if state == State::Wall || state == State::Goal {
-                let picture = picture(&state);
+            let fixed_state = if state == State::Stored {
+                State::Goal
+            } else {
+                state
+            };
+            if fixed_state == State::Wall || fixed_state == State::Goal {
+                let picture = picture(&fixed_state);
                 fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
             }
         }
