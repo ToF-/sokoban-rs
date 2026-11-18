@@ -24,7 +24,7 @@ impl Tile {
             State::Goal => "goal",
             State::Outside => "outside",
             State::Sokoban => "sokoban",
-            State::Stored => "stored",
+            State::Stored => "crate",
             State::Wall => "wall",
             _ => "floor",
         };

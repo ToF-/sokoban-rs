@@ -10,6 +10,7 @@ pub struct Puzzle {
     pieces: HashMap<Coords, State>,
     sokoban_position: Coords,
     goals: HashSet<Coords>,
+    crates: Vec<Coords>,
 }
 
 impl Puzzle {
@@ -17,6 +18,7 @@ impl Puzzle {
         let mut pieces = HashMap::new();
         let mut sokoban_position = (0, 0);
         let mut goals = HashSet::new();
+        let mut crates = Vec::new();
         for col in 0..level.width() {
             for row in 0..level.height() {
                 let state = level.state_at((row, col));
@@ -26,6 +28,9 @@ impl Puzzle {
                 } else if state == State::Sokoban {
                     pieces.insert((row, col), State::Sokoban);
                     sokoban_position = (row, col);
+                } else if state == State::Crate {
+                    crates.push((row, col));
+                    pieces.insert((row, col), State::Crate);
                 } else if state != State::Outside {
                     pieces.insert((row, col), state.clone());
                 }
@@ -35,6 +40,7 @@ impl Puzzle {
             pieces,
             sokoban_position,
             goals,
+            crates,
         }
     }
 
@@ -60,7 +66,7 @@ impl Puzzle {
         if let Some(piece) = self.pieces.get(&destination) {
             if *piece == State::Floor || *piece == State::Goal {
                 true
-            } else if *piece == State::Crate || *piece == State::Stored {
+            } else if *piece == State::Crate {
                 let target = direction.from(destination);
                 if let Some(piece) = self.pieces.get(&target) {
                     *piece == State::Floor || *piece == State::Goal
@@ -105,7 +111,7 @@ impl Puzzle {
         let origin = self.sokoban_position();
         let destination = direction.from(origin);
         let target_opt = if let Some(piece) = self.pieces.get(&destination) {
-            if *piece == State::Crate || *piece == State::Stored {
+            if *piece == State::Crate {
                 Some(direction.from(destination))
             } else {
                 None
