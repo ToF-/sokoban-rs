@@ -101,8 +101,6 @@ pub fn paintable(state: &State) -> Paintable {
 
 pub fn fixed_for_level(
     level: &Level,
-    crates: &mut HashMap<(usize, usize), Picture>,
-    sokoban_position: &mut (usize, usize),
 ) -> gtk::Fixed {
     let fixed = gtk::Fixed::new();
     let background = solid_picture(
@@ -116,21 +114,11 @@ pub fn fixed_for_level(
         for col in 0..level.width() {
             let state = level.state_at((row, col));
             let mut background = State::Floor;
-            if state == State::Sokoban {
-                *sokoban_position = (row, col)
-            } else if state == State::Crate {
-                // do not draw crates yet
-                let picture = picture(&State::Crate);
-                crates.insert((row, col), picture);
-            } else if state != State::Floor {
+            if state == State::Wall || state == State::Goal {
                 let picture = picture(&state);
                 fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
             }
         }
-    }
-    for (coords, picture) in crates {
-        let (row, col) = coords;
-        fixed.put(picture, *col as f64 * UNIT, *row as f64 * UNIT);
     }
     fixed
 }

@@ -1,3 +1,4 @@
+use crate::sprite::Sprite;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -21,6 +22,7 @@ pub mod coords;
 pub mod direction;
 pub mod level;
 pub mod puzzle;
+pub mod sprite;
 pub mod state;
 pub mod tile;
 
@@ -39,18 +41,24 @@ fn main() -> glib::ExitCode {
         let bytes = gio::resources_lookup_data(&level_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
         let level = Level::from_bytes(&bytes);
-        let mut crates: HashMap<(usize, usize), Picture> = HashMap::new();
-        let mut sokoban_position = (0, 0);
-        let fixed = fixed_for_level(&level, &mut crates, &mut sokoban_position);
-        let sokoban_paintable = paintable(&State::Sokoban);
-        let sokoban_picture = Picture::for_paintable(&sokoban_paintable);
-        sokoban_picture.set_halign(gtk::Align::Center);
-        sokoban_picture.set_valign(gtk::Align::Center);
-        sokoban_picture.set_can_shrink(false);
-        let (row, col) = sokoban_position;
-        fixed.put(&sokoban_picture, col as f64 * UNIT, row as f64 * UNIT);
-        let puzzle_rc = Rc::new(RefCell::new(Puzzle::from_level(&level)));
-        let crates_rc = Rc::new(RefCell::new(crates.clone()));
+        let puzzle = Puzzle::from_level(&level);
+        let mut crates: Vec<RefCell<Sprite>> = Vec::new();
+        for crate_index in 0..puzzle.max_crate() {
+            let crate_coords = puzzle.crate_coords(crate_index);
+            crates.push(RefCell::new(Sprite::make_sprite(&State::Crate, crate_coords)));
+        }
+        let mut sokoban_position = puzzle.sokoban_position();
+        let fixed = fixed_for_level(&level);
+        let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, sokoban_position);
+        sokoban_sprite.place(&fixed);
+        for crate_index in 0..crates.len() {
+            let mut sprite = crates[crate_index].borrow_mut();
+            sprite.place(&fixed);
+        }
+
+        let puzzle_rc = Rc::new(RefCell::new(puzzle));
+        let crates_rc = Rc::new(RefCell::new(crates));
+        let sokoban_rc = Rc::new(RefCell::new(sokoban_sprite));
 
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -65,8 +73,8 @@ fn main() -> glib::ExitCode {
             app,
             #[weak]
             fixed,
-            #[weak]
-            sokoban_picture,
+            #[strong]
+            sokoban_rc,
             #[strong]
             puzzle_rc,
             #[strong]
@@ -105,21 +113,15 @@ fn main() -> glib::ExitCode {
                                 let target_opt = puzzle.r#move(direction);
                                 if let Some(target) = target_opt {
                                     let mut crates = crates_rc.borrow_mut();
-                                    if let Some(crate_picture) = crates.remove(&destination) {
-                                        crates.insert(target, crate_picture.clone());
-                                        fixed.move_(
-                                            &crate_picture,
-                                            target.1 as f64 * UNIT,
-                                            target.0 as f64 * UNIT,
-                                        );
+                                    let index = crates.iter().position(|sprite_rc|
+                                       sprite_rc.borrow().coords() == destination 
+                                    ).expect("can't find crate");
+                                    let mut sprite = crates[index].borrow_mut();
+                                    sprite.r#move(&fixed, target);
                                     };
-                                }
                                 let position = puzzle.sokoban_position();
-                                fixed.move_(
-                                    &sokoban_picture,
-                                    position.1 as f64 * UNIT,
-                                    position.0 as f64 * UNIT,
-                                );
+                                let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                sokoban_sprite.r#move(&fixed, position);
                             };
                             if puzzle.is_solved() {
                                 for crate_index in 0..puzzle.max_crate() {

@@ -87,7 +87,6 @@ impl Puzzle {
     }
 
     pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {
-        println!("{:?}", self.crates);
         self.crates
             .iter()
             .position(|&crate_coords| crate_coords == coords)
@@ -142,7 +141,6 @@ impl Puzzle {
         };
         self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
-        dbg!(&self.crates);
         target_opt
     }
 
