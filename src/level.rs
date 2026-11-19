@@ -96,7 +96,7 @@ pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {
     let mut index = 0;
     while index < bytes.len() {
         if bytes[index] == 59 {
-            levels.push(Level::from_bytes(&bytes[start..index+2]));
+            levels.push(Level::from_bytes(&bytes[start..index + 2]));
             index += 2;
             start = index + 2;
         } else {

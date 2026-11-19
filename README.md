@@ -20,7 +20,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] detect when puzzle is solved
 - [x] have a star covering the crates when puzzle is solved
 - [x] undo moves and restart level
-- [ ] chain the levels
+- [x] chain the levels
 - [ ] count moves and store the minimal moves when puzzle is solved
 - [ ] sounds
 

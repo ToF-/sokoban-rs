@@ -7,6 +7,7 @@
 Coords	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub type Coords = (usize, usize);$/;"	T
 Direction	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^pub enum Direction {$/;"	g
 Error	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    type Error = ();$/;"	T
+GAME_MAX	/Users/tof/Coding/sokoban-rs/src/game.rs	/^const GAME_MAX: usize = 90;$/;"	c
 Game	/Users/tof/Coding/sokoban-rs/src/game.rs	/^pub struct Game {$/;"	s
 Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
 Puzzle	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^pub struct Puzzle {$/;"	s
@@ -45,6 +46,7 @@ initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    fn initial
 initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initialize_from_level() {$/;"	f
 is_solved	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 level_index	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
+levels	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn levels(&self) -> Vec<Level> {$/;"	f
 levels_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_sprite	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn make_sprite(state: &State, coords: Coords) -> Self {$/;"	f
@@ -54,6 +56,7 @@ max_crates	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn max_crates() {$/;
 move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {$/;"	f
+next_level	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn next_level(game: &Game) -> Self {$/;"	f
 other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn other_additions_dont_work() {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self, state: &State) -> Paintable {$/;"	f
@@ -69,6 +72,7 @@ r	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn r#move(&mut self, dire
 r	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
 remove_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_crate(self) -> State {$/;"	f
 remove_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn remove_sokoban(self) -> State {$/;"	f
+restart	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn restart(&self) {$/;"	f
 reverse	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn reverse(&self) -> Self {$/;"	f
 reverse	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn reverse(&self) -> Self {$/;"	f
 reversing_a_pushing_step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_pushing_step() {$/;"	f
@@ -81,6 +85,8 @@ sokoban_position	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn sokoban
 solid_picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {$/;"	f
 state_at	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn state_at(&self, coords: Coords) -> State {$/;"	f
 state_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn state_at(&self, coords: Coords) -> State {$/;"	f
+step	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn step(&self, direction: Direction) {$/;"	f
 to	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn to(&self) -> Coords {$/;"	f
 try_from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn try_from(value: usize) -> Result<Self, Self::Error> {$/;"	f
+undo	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn undo(&self) {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn width(&self) -> usize {$/;"	f
