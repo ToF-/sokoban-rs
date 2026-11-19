@@ -3,6 +3,7 @@ use crate::coords::col;
 use crate::coords::row;
 use crate::state::State;
 
+#[derive(Clone)]
 pub struct Level {
     width: usize,
     height: usize,
@@ -14,6 +15,7 @@ impl Level {
         let mut col: usize = 0;
         let mut row: usize = 0;
         let mut max_col: usize = 0;
+        let mut max_row: usize = 0;
         for byte in bytes {
             match byte {
                 10 => {
@@ -28,18 +30,28 @@ impl Level {
                 }
             }
         }
-        let size: usize = row * max_col;
+        max_row = row;
+        let size: usize = max_row * max_col;
         let mut tiles: Vec<State> = vec![State::Floor; size];
         row = 0;
         col = 0;
+        let mut in_comment = false;
         for byte in bytes {
             match byte {
                 10 => {
                     row += 1;
                     col = 0;
+                    in_comment = false;
                 }
                 b => {
-                    let state = State::from(*b);
+                    if *b == 59 {
+                        in_comment = true
+                    };
+                    let state = if !in_comment {
+                        State::from(*b)
+                    } else {
+                        State::Floor
+                    };
                     let index = row * max_col + col;
                     tiles[index] = state;
                     col += 1;
@@ -76,6 +88,25 @@ impl Level {
         }
         result
     }
+}
+
+pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {
+    let mut levels = Vec::new();
+    let mut start = 0;
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == 59 {
+            levels.push(Level::from_bytes(&bytes[start..index+2]));
+            index += 2;
+            start = index + 2;
+        } else {
+            index += 1;
+        }
+    }
+    if start < bytes.len() {
+        levels.push(Level::from_bytes(&bytes[start..]));
+    }
+    levels
 }
 
 #[cfg(test)]

@@ -1,6 +1,7 @@
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
+use crate::level::levels_from_bytes;
 use crate::puzzle::Puzzle;
 use crate::sprite::Sprite;
 use crate::state::State;
@@ -38,11 +39,12 @@ fn main() -> glib::ExitCode {
         .build();
 
     app.connect_activate(|app| {
-        let level_index = 2;
-        let level_file_name = format!("/com/example/MyApp/files/level_{:02}.txt", level_index);
-        let bytes = gio::resources_lookup_data(&level_file_name, gio::ResourceLookupFlags::NONE)
+        let levels_file_name = format!("/com/example/MyApp/files/levels.txt");
+        let bytes = gio::resources_lookup_data(&levels_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
-        let level = Level::from_bytes(&bytes);
+        let levels = levels_from_bytes(&bytes);
+        let level_index = 89;
+        let level = levels[level_index].clone();
         let puzzle = Puzzle::from_level(&level);
         let mut crates: Vec<RefCell<Sprite>> = Vec::new();
         for crate_index in 0..puzzle.max_crate() {
@@ -144,27 +146,30 @@ fn main() -> glib::ExitCode {
                         let mut puzzle = puzzle_rc.borrow_mut();
                         if !puzzle.is_solved() {
                             {
-                            let mut steps = steps_rc.borrow_mut();
-                            if let Some(step) = steps.pop() {
-                                let reversed = step.reverse();
-                                let backwards = Direction::between(reversed.from(), reversed.to());
-                                puzzle.r#move(backwards);
-                                if let Some((crate_index, boxed_crate_step)) = reversed.pushing() {
-                                    let crate_step = *boxed_crate_step;
-                                    let crate_origin = crate_step.from();
-                                    let crate_destination = crate_step.to();
-                                    puzzle.move_piece_at(crate_origin, backwards);
-                                    let mut sprite = crates[crate_index].borrow_mut();
-                                    sprite.r#move(&fixed, crate_destination);
+                                let mut steps = steps_rc.borrow_mut();
+                                if let Some(step) = steps.pop() {
+                                    let reversed = step.reverse();
+                                    let backwards =
+                                        Direction::between(reversed.from(), reversed.to());
+                                    puzzle.r#move(backwards);
+                                    if let Some((crate_index, boxed_crate_step)) =
+                                        reversed.pushing()
                                     {
-                                        let mut crates = crates_rc.borrow_mut();
-                                        crates[crate_index] = RefCell::new(sprite.clone());
-                                    }
-                                };
-                                let mut sokoban_sprite = sokoban_rc.borrow_mut();
-                                let position = puzzle.sokoban_position();
-                                sokoban_sprite.r#move(&fixed, position);
-                            }
+                                        let crate_step = *boxed_crate_step;
+                                        let crate_origin = crate_step.from();
+                                        let crate_destination = crate_step.to();
+                                        puzzle.move_piece_at(crate_origin, backwards);
+                                        let mut sprite = crates[crate_index].borrow_mut();
+                                        sprite.r#move(&fixed, crate_destination);
+                                        {
+                                            let mut crates = crates_rc.borrow_mut();
+                                            crates[crate_index] = RefCell::new(sprite.clone());
+                                        }
+                                    };
+                                    let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                    let position = puzzle.sokoban_position();
+                                    sokoban_sprite.r#move(&fixed, position);
+                                }
                             }
                             let max_step = {
                                 let steps = steps_rc.borrow();
