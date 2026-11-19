@@ -46,7 +46,7 @@ fn main() -> glib::ExitCode {
             .expect("Failed to find resource");
         let levels = levels_from_bytes(&bytes);
         let level_index = 8;
-        let game_rc = Rc::new(RefCell::new(Game::new(&levels, 0)));
+        let game_rc = Rc::new(RefCell::new(Game::new(&levels, 1)));
         let game = game_rc.borrow();
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -82,6 +82,15 @@ fn main() -> glib::ExitCode {
                     gdk::Key::n | gdk::Key::Tab => {
                         let mut game = game_rc.borrow_mut();
                         *game = Game::next_level(&game);
+                        let window = app.active_window()
+                            .expect("can't access application window");
+                        window.set_child(Some(&game.fixed));
+                        window.set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::p => {
+                        let mut game = game_rc.borrow_mut();
+                        *game = Game::previous_level(&game);
                         let window = app.active_window()
                             .expect("can't access application window");
                         window.set_child(Some(&game.fixed));

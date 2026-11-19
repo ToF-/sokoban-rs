@@ -60,7 +60,15 @@ impl Game {
     pub fn next_level(game: &Game) -> Self {
         let mut level_index = game.level_index() + 1;
         if level_index == GAME_MAX {
-            level_index = 0
+            level_index = 1
+        };
+        Self::new(&game.levels(), level_index)
+    }
+
+    pub fn previous_level(game: &Game) -> Self {
+        let mut level_index = game.level_index() - 1;
+        if level_index == 0 {
+            level_index = GAME_MAX - 1
         };
         Self::new(&game.levels(), level_index)
     }
