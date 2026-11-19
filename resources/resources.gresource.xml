@@ -9,6 +9,7 @@
       <file>images/goal.png</file>
       <file>images/stored.png</file>
       <file>images/sokoban.png</file>
+      <file>files/levels.txt</file>
       <file>files/level_00.txt</file>
       <file>files/level_01.txt</file>
       <file>files/level_02.txt</file>
