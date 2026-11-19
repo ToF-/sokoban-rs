@@ -7,6 +7,7 @@
 Coords	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub type Coords = (usize, usize);$/;"	T
 Direction	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^pub enum Direction {$/;"	g
 Error	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    type Error = ();$/;"	T
+Game	/Users/tof/Coding/sokoban-rs/src/game.rs	/^pub struct Game {$/;"	s
 Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
 Puzzle	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^pub struct Puzzle {$/;"	s
 Sprite	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^pub struct Sprite {$/;"	s
@@ -43,6 +44,7 @@ height	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn height(&self) -> u
 initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    fn initialize_from_bytes() {$/;"	f
 initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initialize_from_level() {$/;"	f
 is_solved	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
+level_index	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
 levels_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_sprite	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn make_sprite(state: &State, coords: Coords) -> Self {$/;"	f
@@ -50,6 +52,7 @@ make_tile	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn make_tile(state:
 max_crate	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn max_crate(&self) -> usize {$/;"	f
 max_crates	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn max_crates() {$/;"	f
 move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
+new	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {$/;"	f
 other_additions_dont_work	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn other_additions_dont_work() {$/;"	f
 paintable	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f

@@ -1,3 +1,4 @@
+use crate::game::Game;
 use crate::direction::Direction;
 use crate::gdk::Key;
 use crate::level::Level;
@@ -22,6 +23,7 @@ use std::rc::Rc;
 
 pub mod coords;
 pub mod direction;
+pub mod game;
 pub mod level;
 pub mod puzzle;
 pub mod sprite;
@@ -44,38 +46,15 @@ fn main() -> glib::ExitCode {
             .expect("Failed to find resource");
         let levels = levels_from_bytes(&bytes);
         let level_index = 8;
-        let level = levels[level_index].clone();
-        let puzzle = Puzzle::from_level(&level);
-        let mut crate_sprites: Vec<RefCell<Sprite>> = Vec::new();
-        for crate_index in 0..puzzle.max_crate() {
-            let crate_coords = puzzle.crate_coords(crate_index);
-            crate_sprites.push(RefCell::new(Sprite::make_sprite(
-                &State::Crate,
-                crate_coords,
-            )));
-        }
-        let mut sokoban_position = puzzle.sokoban_position();
-        let fixed = fixed_for_level(&level);
         let label = gtk::Label::new(Some("0"));
-        fixed.put(&label, 0.0, 0.0);
-        let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, sokoban_position);
-        sokoban_sprite.place(&fixed);
-        for crate_index in 0..crate_sprites.len() {
-            let mut sprite = crate_sprites[crate_index].borrow_mut();
-            sprite.place(&fixed);
-        }
-
-        let steps: Vec<Step> = Vec::new();
-        let steps_rc = Rc::new(RefCell::new(steps));
-        let puzzle_rc = Rc::new(RefCell::new(puzzle));
-        let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
-        let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
-
+        let game_rc = Rc::new(RefCell::new(Game::new(&levels, 0)));
+        let game = game_rc.borrow();
+        game.fixed.put(&label, 0.0, 0.0);
         let window = gtk::ApplicationWindow::builder()
             .application(app)
-            .default_width(level.width() as i32 * 32)
-            .default_height(level.height() as i32 * 32)
-            .child(&fixed)
+            .default_width(20 as i32 * UNIT as i32)
+            .default_height(20 as i32 * UNIT as i32)
+            .child(&game.fixed)
             .build();
 
         let key_controller = gtk::EventControllerKey::new();
@@ -83,17 +62,9 @@ fn main() -> glib::ExitCode {
             #[weak]
             app,
             #[weak]
-            fixed,
-            #[weak]
             label,
             #[strong]
-            sokoban_sprite_rc,
-            #[strong]
-            puzzle_rc,
-            #[strong]
-            crate_sprites_rc,
-            #[strong]
-            steps_rc,
+            game_rc,
             #[upgrade_or]
             glib::Propagation::Proceed,
             move |_controller, keyval, _keycode, state| {
@@ -103,10 +74,11 @@ fn main() -> glib::ExitCode {
                         glib::Propagation::Stop
                     }
                     gdk::Key::asterisk => {
-                        let mut puzzle = puzzle_rc.borrow_mut();
+                        let game = game_rc.borrow_mut();
+                        let mut puzzle = game.puzzle_rc.borrow_mut();
                         if !puzzle.is_solved() {
                             {
-                                let mut steps = steps_rc.borrow_mut();
+                                let mut steps = game.steps_rc.borrow_mut();
                                 while !steps.is_empty() {
                                     if let Some(step) = steps.pop() {
                                         let reversed = step.reverse();
@@ -120,21 +92,18 @@ fn main() -> glib::ExitCode {
                                             let crate_origin = crate_step.from();
                                             let crate_destination = crate_step.to();
                                             puzzle.move_piece_at(crate_origin, backwards);
-                                            let mut sprite = crate_sprites[crate_index].borrow_mut();
-                                            sprite.r#move(&fixed, crate_destination);
-                                            {
-                                                let mut crate_sprites = crate_sprites_rc.borrow_mut();
-                                                crate_sprites[crate_index] = RefCell::new(sprite.clone());
-                                            }
+                                            let mut crate_sprites = game.crate_sprites_rc.borrow_mut();
+                                            let mut sprite = &mut crate_sprites[crate_index];
+                                            sprite.r#move(&game.fixed, crate_destination);
                                         };
-                                        let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
+                                        let mut sokoban_sprite = game.sokoban_sprite_rc.borrow_mut();
                                         let position = puzzle.sokoban_position();
-                                        sokoban_sprite.r#move(&fixed, position);
+                                        sokoban_sprite.r#move(&game.fixed, position);
                                     }
                                 }
                             }
                             let max_step = {
-                                let steps = steps_rc.borrow();
+                                let steps = game.steps_rc.borrow();
                                 steps.len()
                             };
                             label.set_text(&format!("{}", max_step));
@@ -143,10 +112,12 @@ fn main() -> glib::ExitCode {
                         glib::Propagation::Proceed
                     }
                     gdk::Key::u | gdk::Key::BackSpace => {
-                        let mut puzzle = puzzle_rc.borrow_mut();
+                        let game = game_rc.borrow();
+                        let mut puzzle = game.puzzle_rc.borrow_mut();
+                        let fixed = &game.fixed;
                         if !puzzle.is_solved() {
                             {
-                                let mut steps = steps_rc.borrow_mut();
+                                let mut steps = game.steps_rc.borrow_mut();
                                 if let Some(step) = steps.pop() {
                                     let reversed = step.reverse();
                                     let backwards =
@@ -159,20 +130,17 @@ fn main() -> glib::ExitCode {
                                         let crate_origin = crate_step.from();
                                         let crate_destination = crate_step.to();
                                         puzzle.move_piece_at(crate_origin, backwards);
-                                        let mut sprite = crate_sprites[crate_index].borrow_mut();
+                                        let mut crate_sprites = game.crate_sprites_rc.borrow_mut();
+                                        let mut sprite = &mut crate_sprites[crate_index];
                                         sprite.r#move(&fixed, crate_destination);
-                                        {
-                                            let mut crate_sprites = crate_sprites_rc.borrow_mut();
-                                            crate_sprites[crate_index] = RefCell::new(sprite.clone());
-                                        }
                                     };
-                                    let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
+                                    let mut sokoban_sprite = game.sokoban_sprite_rc.borrow_mut();
                                     let position = puzzle.sokoban_position();
                                     sokoban_sprite.r#move(&fixed, position);
                                 }
                             }
                             let max_step = {
-                                let steps = steps_rc.borrow();
+                                let steps = game.steps_rc.borrow();
                                 steps.len()
                             };
                             label.set_text(&format!("{}", max_step));
@@ -194,7 +162,9 @@ fn main() -> glib::ExitCode {
                             gdk::Key::Down | gdk::Key::s => Direction::Down,
                             _ => Direction::Right,
                         };
-                        let mut puzzle = puzzle_rc.borrow_mut();
+                        let game = game_rc.borrow();
+                        let mut puzzle = game.puzzle_rc.borrow_mut();
+                        let fixed = &game.fixed;
                         if puzzle.is_solved() {
                             app.quit();
                             glib::Propagation::Stop
@@ -205,20 +175,20 @@ fn main() -> glib::ExitCode {
                                 let target_opt = puzzle.r#move(direction);
                                 let mut crate_index = 0;
                                 if let Some(target) = target_opt {
-                                    let mut crate_sprites = crate_sprites_rc.borrow_mut();
+                                    let mut crate_sprites = game.crate_sprites_rc.borrow_mut();
                                     crate_index = crate_sprites
                                         .iter()
-                                        .position(|sprite_rc| {
-                                            sprite_rc.borrow().coords() == destination
+                                        .position(|mut sprite| {
+                                            sprite.coords() == destination
                                         })
                                         .expect("can't find crate");
-                                    let mut sprite = crate_sprites[crate_index].borrow_mut();
+                                    let mut sprite = &mut crate_sprites[crate_index];
                                     sprite.r#move(&fixed, target);
                                 };
                                 let position = puzzle.sokoban_position();
-                                let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
+                                let mut sokoban_sprite = game.sokoban_sprite_rc.borrow_mut();
                                 sokoban_sprite.r#move(&fixed, position);
-                                let mut steps = steps_rc.borrow_mut();
+                                let mut steps = game.steps_rc.borrow_mut();
                                 let pushing = if let Some(target) = target_opt {
                                     Some(crate_index)
                                 } else {
@@ -238,7 +208,7 @@ fn main() -> glib::ExitCode {
                                 }
                             };
                             let max_step = {
-                                let steps = steps_rc.borrow();
+                                let steps = game.steps_rc.borrow();
                                 steps.len()
                             };
                             label.set_text(&format!("{}", max_step));
@@ -246,9 +216,10 @@ fn main() -> glib::ExitCode {
                         }
                     }
                     gdk::Key::dollar => {
-                        let puzzle = puzzle_rc.borrow();
+                        let game = game_rc.borrow_mut();
+                        let puzzle = game.puzzle_rc.borrow();
                         println!("{}", puzzle.pretty_print());
-                        let crate_sprites = crate_sprites_rc.borrow();
+                        let crate_sprites = game.crate_sprites_rc.borrow();
                         for sprite in crate_sprites.iter() {
                             println!("{:?}", sprite);
                         }
