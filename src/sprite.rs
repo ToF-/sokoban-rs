@@ -50,6 +50,14 @@ impl Sprite {
         )
     }
 
+    pub fn remove(&mut self, fixed: &Fixed) {
+        fixed.remove(&self.picture);
+    }
+
+    pub fn set_picture(&mut self, state: &State) {
+        self.picture = picture(&state);
+    }
+
     pub fn coords(&self) -> Coords {
         self.coords
     }

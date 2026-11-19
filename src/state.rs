@@ -9,6 +9,10 @@ pub enum State {
     Sokoban = 5,
     Stored = 6,
     Wall = 7,
+    Down = 8,
+    Left = 9,
+    Up = 10,
+    Right = 11,
 }
 
 impl From<u8> for State {
@@ -40,6 +44,10 @@ impl TryFrom<usize> for State {
             5 => Ok(State::Sokoban),
             6 => Ok(State::Stored),
             7 => Ok(State::Wall),
+            8 => Ok(State::Down),
+            9 => Ok(State::Left),
+            10 => Ok(State::Up),
+            11 => Ok(State::Right),
             _ => Err(()),
         }
     }
@@ -55,6 +63,7 @@ impl From<State> for char {
             State::Stored => '*',
             State::Sokoban => '@',
             State::OnGoal => '+',
+            _ => ' ',
         }
     }
 }

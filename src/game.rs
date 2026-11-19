@@ -138,7 +138,16 @@ impl Game {
             };
             let position = puzzle.sokoban_position();
             let mut sokoban_sprite = self.sokoban_sprite_rc.borrow_mut();
-            sokoban_sprite.r#move(&fixed, position);
+            let direction_state = match direction {
+                Direction::Right => State::Right,
+                Direction::Down => State::Down,
+                Direction::Up => State::Up,
+                Direction::Left => State::Left,
+            };
+            sokoban_sprite.remove(&fixed);
+            sokoban_sprite.set_picture(&direction_state);
+            sokoban_sprite.place(&fixed);
+            sokoban_sprite.r#move(&fixed, destination);
             let mut steps = self.steps_rc.borrow_mut();
             let pushing = if let Some(target) = target_opt {
                 Some(crate_index)
