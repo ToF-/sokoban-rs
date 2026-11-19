@@ -43,13 +43,13 @@ fn main() -> glib::ExitCode {
         let bytes = gio::resources_lookup_data(&levels_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
         let levels = levels_from_bytes(&bytes);
-        let level_index = 89;
+        let level_index = 8;
         let level = levels[level_index].clone();
         let puzzle = Puzzle::from_level(&level);
-        let mut crates: Vec<RefCell<Sprite>> = Vec::new();
+        let mut crate_sprites: Vec<RefCell<Sprite>> = Vec::new();
         for crate_index in 0..puzzle.max_crate() {
             let crate_coords = puzzle.crate_coords(crate_index);
-            crates.push(RefCell::new(Sprite::make_sprite(
+            crate_sprites.push(RefCell::new(Sprite::make_sprite(
                 &State::Crate,
                 crate_coords,
             )));
@@ -60,16 +60,16 @@ fn main() -> glib::ExitCode {
         fixed.put(&label, 0.0, 0.0);
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, sokoban_position);
         sokoban_sprite.place(&fixed);
-        for crate_index in 0..crates.len() {
-            let mut sprite = crates[crate_index].borrow_mut();
+        for crate_index in 0..crate_sprites.len() {
+            let mut sprite = crate_sprites[crate_index].borrow_mut();
             sprite.place(&fixed);
         }
 
         let steps: Vec<Step> = Vec::new();
         let steps_rc = Rc::new(RefCell::new(steps));
         let puzzle_rc = Rc::new(RefCell::new(puzzle));
-        let crates_rc = Rc::new(RefCell::new(crates.clone()));
-        let sokoban_rc = Rc::new(RefCell::new(sokoban_sprite));
+        let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
+        let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
 
         let window = gtk::ApplicationWindow::builder()
             .application(app)
@@ -87,11 +87,11 @@ fn main() -> glib::ExitCode {
             #[weak]
             label,
             #[strong]
-            sokoban_rc,
+            sokoban_sprite_rc,
             #[strong]
             puzzle_rc,
             #[strong]
-            crates_rc,
+            crate_sprites_rc,
             #[strong]
             steps_rc,
             #[upgrade_or]
@@ -120,14 +120,14 @@ fn main() -> glib::ExitCode {
                                             let crate_origin = crate_step.from();
                                             let crate_destination = crate_step.to();
                                             puzzle.move_piece_at(crate_origin, backwards);
-                                            let mut sprite = crates[crate_index].borrow_mut();
+                                            let mut sprite = crate_sprites[crate_index].borrow_mut();
                                             sprite.r#move(&fixed, crate_destination);
                                             {
-                                                let mut crates = crates_rc.borrow_mut();
-                                                crates[crate_index] = RefCell::new(sprite.clone());
+                                                let mut crate_sprites = crate_sprites_rc.borrow_mut();
+                                                crate_sprites[crate_index] = RefCell::new(sprite.clone());
                                             }
                                         };
-                                        let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                        let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
                                         let position = puzzle.sokoban_position();
                                         sokoban_sprite.r#move(&fixed, position);
                                     }
@@ -159,14 +159,14 @@ fn main() -> glib::ExitCode {
                                         let crate_origin = crate_step.from();
                                         let crate_destination = crate_step.to();
                                         puzzle.move_piece_at(crate_origin, backwards);
-                                        let mut sprite = crates[crate_index].borrow_mut();
+                                        let mut sprite = crate_sprites[crate_index].borrow_mut();
                                         sprite.r#move(&fixed, crate_destination);
                                         {
-                                            let mut crates = crates_rc.borrow_mut();
-                                            crates[crate_index] = RefCell::new(sprite.clone());
+                                            let mut crate_sprites = crate_sprites_rc.borrow_mut();
+                                            crate_sprites[crate_index] = RefCell::new(sprite.clone());
                                         }
                                     };
-                                    let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                    let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
                                     let position = puzzle.sokoban_position();
                                     sokoban_sprite.r#move(&fixed, position);
                                 }
@@ -205,18 +205,18 @@ fn main() -> glib::ExitCode {
                                 let target_opt = puzzle.r#move(direction);
                                 let mut crate_index = 0;
                                 if let Some(target) = target_opt {
-                                    let mut crates = crates_rc.borrow_mut();
-                                    crate_index = crates
+                                    let mut crate_sprites = crate_sprites_rc.borrow_mut();
+                                    crate_index = crate_sprites
                                         .iter()
                                         .position(|sprite_rc| {
                                             sprite_rc.borrow().coords() == destination
                                         })
                                         .expect("can't find crate");
-                                    let mut sprite = crates[crate_index].borrow_mut();
+                                    let mut sprite = crate_sprites[crate_index].borrow_mut();
                                     sprite.r#move(&fixed, target);
                                 };
                                 let position = puzzle.sokoban_position();
-                                let mut sokoban_sprite = sokoban_rc.borrow_mut();
+                                let mut sokoban_sprite = sokoban_sprite_rc.borrow_mut();
                                 sokoban_sprite.r#move(&fixed, position);
                                 let mut steps = steps_rc.borrow_mut();
                                 let pushing = if let Some(target) = target_opt {
@@ -248,8 +248,8 @@ fn main() -> glib::ExitCode {
                     gdk::Key::dollar => {
                         let puzzle = puzzle_rc.borrow();
                         println!("{}", puzzle.pretty_print());
-                        let crates = crates_rc.borrow();
-                        for sprite in crates.iter() {
+                        let crate_sprites = crate_sprites_rc.borrow();
+                        for sprite in crate_sprites.iter() {
                             println!("{:?}", sprite);
                         }
                         glib::Propagation::Proceed
