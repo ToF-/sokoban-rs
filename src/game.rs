@@ -128,7 +128,7 @@ impl Game {
         self.restart();
     }
 
-    pub fn step(&self, direction: Direction) {
+    pub fn move_towards(&self, direction: Direction) {
         let mut puzzle = self.puzzle_rc.borrow_mut();
         if puzzle.is_solved() {
             return;
@@ -226,6 +226,12 @@ impl Game {
             puzzle.remove_mark(letter);
         } else {
             println!("mark not present in puzzle");
+        }
+    }
+
+    pub fn follow_path(&mut self, directions: &Vec<Direction>) {
+        for direction in directions {
+            self.move_towards(*direction)
         }
     }
 }

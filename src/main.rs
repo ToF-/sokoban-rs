@@ -25,6 +25,7 @@ pub mod coords;
 pub mod direction;
 pub mod game;
 pub mod level;
+pub mod path_finder;
 pub mod puzzle;
 pub mod sprite;
 pub mod state;
@@ -131,6 +132,12 @@ fn main() -> glib::ExitCode {
                             .set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
                         glib::Propagation::Proceed
                     }
+                    gdk::Key::x => {
+                        let directions = vec![Direction::Right, Direction::Right, Direction::Right];
+                        let mut game = game_rc.borrow_mut();
+                        game.follow_path(&directions);
+                        glib::Propagation::Proceed
+                    }
                     gdk::Key::Right
                     | gdk::Key::r
                     | gdk::Key::Left
@@ -147,7 +154,7 @@ fn main() -> glib::ExitCode {
                             _ => Direction::Right,
                         };
                         let game = game_rc.borrow();
-                        game.step(direction);
+                        game.move_towards(direction);
                         glib::Propagation::Proceed
                     }
                     gdk::Key::dollar => {

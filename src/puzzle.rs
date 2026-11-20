@@ -51,6 +51,9 @@ impl Puzzle {
         }
     }
 
+    pub fn pieces(&self) -> HashMap<Coords, State> {
+        self.pieces.clone()
+    }
     pub fn sokoban_position(&self) -> Coords {
         self.sokoban_position
     }
@@ -161,9 +164,9 @@ impl Puzzle {
     }
 
     pub fn find_mark_at_coords(&self, target: Coords) -> Option<char> {
-        self.marks.iter()
-            .find_map(|(&letter, &coords)| 
-                if coords == target { Some(letter) } else { None })
+        self.marks
+            .iter()
+            .find_map(|(&letter, &coords)| if coords == target { Some(letter) } else { None })
     }
 
     pub fn remove_mark(&mut self, letter: char) {
