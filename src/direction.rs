@@ -2,7 +2,7 @@ use crate::coords::Coords;
 use crate::coords::col;
 use crate::coords::row;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {
     Left,
     Up,
