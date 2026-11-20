@@ -100,6 +100,21 @@ fn main() -> glib::ExitCode {
                         game.unmark('c');
                         glib::Propagation::Proceed
                     }
+                    gdk::Key::h => {
+                        let mut game = game_rc.borrow_mut();
+                        game.goto('a');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::i => {
+                        let mut game = game_rc.borrow_mut();
+                        game.goto('b');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::j => {
+                        let mut game = game_rc.borrow_mut();
+                        game.goto('c');
+                        glib::Propagation::Proceed
+                    }
                     gdk::Key::asterisk => {
                         let game = game_rc.borrow_mut();
                         game.restart();

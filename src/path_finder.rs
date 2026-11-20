@@ -37,14 +37,16 @@ impl PathFinder {
         result
     }
 
-
-    fn path_from(origin: Coords, moves: &HashMap<Coords, Option<Coords>>) -> Vec<Direction> {
+    fn path_from(target: Coords, moves: &HashMap<Coords, Option<Coords>>) -> Vec<Direction> {
         let mut result = Vec::new();
-        let mut coords = origin;
+        let mut coords = target;
         while let Some(previous_opt) = moves.get(&coords) {
             if let Some(previous) = previous_opt {
                 let direction = Direction::between(*previous, coords);
                 result.insert(0, direction);
+                coords = *previous
+            } else {
+                return result;
             }
         }
         result
@@ -52,15 +54,15 @@ impl PathFinder {
 
     pub fn find_path(&mut self, origin: Coords, target: Coords) -> Option<Vec<Direction>> {
         let mut to_visit: VecDeque<(Coords, Option<Coords>)> = VecDeque::new();
+        let mut visited: HashSet<Coords> = HashSet::new();
         let mut moves: HashMap<Coords, Option<Coords>> = HashMap::new();
         let mut found = false;
-        let mut counter = 0;
         to_visit.push_back((origin, None));
-        while !(found || to_visit.is_empty() || counter > 20) {
-            let (position, previous) = to_visit.pop_front()
-                .expect("can't pop a non-empty deque");
+        while let Some((position, previous)) = to_visit.pop_front() {
+            let _ = moves.insert(position, previous);
             if position == target {
-                found = true
+                found = true;
+                break;
             } else {
                 for direction in [
                     Direction::Up,
@@ -69,17 +71,15 @@ impl PathFinder {
                     Direction::Left,
                 ] {
                     let destination = direction.from(position);
-                    if !self.blocks.contains(&destination) {
+                    if !self.blocks.contains(&destination) && !visited.contains(&destination) {
                         to_visit.push_back((destination, Some(position)));
-                        let _ = self.blocks.insert(position);
                     }
-                };
-                let _ = moves.insert(position, previous);
+                }
+                let _ = visited.insert(position);
             };
-            counter += 1;
         }
         if found {
-            Some(Self::path_from(origin, &moves))
+            Some(Self::path_from(target, &moves))
         } else {
             None
         }
@@ -103,10 +103,26 @@ mod tests {
         Puzzle::from_level(&level)
     }
 
-     #[test]
+    #[test]
     fn path_finder_finds_a_path_in_a_puzzle_if_unencumbered_by_crates() {
         let mut path_finder = PathFinder::new(&puzzle_1());
-         let result = path_finder.find_path((9, 12), (5, 9));
-         assert_eq!(None, result);
+        let result = path_finder.find_path((9, 12), (8, 12));
+        assert_eq!(Some(vec![Direction::Up]), result);
+        let mut path_finder = PathFinder::new(&puzzle_1());
+        let result = path_finder.find_path((9, 12), (8, 9));
+        assert_eq!(
+            Some(vec![
+                Direction::Up,
+                Direction::Left,
+                Direction::Left,
+                Direction::Left
+            ]),
+            result
+        );
+        let mut path_finder = PathFinder::new(&puzzle_1());
+        let result = path_finder
+            .find_path((9, 12), (5, 9))
+            .expect("didn't find a path");
+        assert_eq!(7, result.len());
     }
 }

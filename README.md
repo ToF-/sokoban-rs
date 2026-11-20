@@ -23,7 +23,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [x] chain the levels
 - [x] count moves 
 - [x] mark the floor square (m followed by a b c d or e) where sokoban is located
-- [ ] goto to a marked floor square  (g followed by a b c d or e) if it's on the puzzle and reachable without pushing any crate
+- [x] goto to a marked floor square  (g followed by a b c d or e) if it's on the puzzle and reachable without pushing any crate
 - [ ] store levels done and the score (minimum moves to win)
 - [ ] sounds
 

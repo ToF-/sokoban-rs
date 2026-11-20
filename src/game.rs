@@ -1,3 +1,4 @@
+use crate::path_finder::PathFinder;
 use crate::Direction;
 use crate::HashMap;
 use crate::Level;
@@ -229,6 +230,21 @@ impl Game {
         }
     }
 
+    pub fn goto(&mut self, letter: char) {
+        let directions_opt = {
+            let puzzle = self.puzzle_rc.borrow();
+            let origin = puzzle.sokoban_position();
+            if let Some(target) = puzzle.find_mark_coords(letter) {
+                let mut path_finder = PathFinder::new(&puzzle);
+                path_finder.find_path(origin, target)
+            } else {
+                None
+            }
+        };
+        if let Some(directions) = directions_opt {
+            self.follow_path(&directions);
+        }
+    }
     pub fn follow_path(&mut self, directions: &Vec<Direction>) {
         for direction in directions {
             self.move_towards(*direction)
