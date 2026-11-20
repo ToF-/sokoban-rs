@@ -1,4 +1,5 @@
 use crate::Direction;
+use crate::HashMap;
 use crate::Level;
 use crate::Puzzle;
 use crate::Rc;
@@ -7,6 +8,7 @@ use crate::Sprite;
 use crate::State;
 use crate::Step;
 use crate::UNIT;
+use crate::coords::Coords;
 use crate::fixed_for_level;
 use crate::picture;
 use gtk::prelude::FixedExt;
@@ -22,6 +24,7 @@ pub struct Game {
     pub steps_rc: Rc<RefCell<Vec<Step>>>,
     pub sokoban_sprite_rc: Rc<RefCell<Sprite>>,
     pub crate_sprites_rc: Rc<RefCell<Vec<Sprite>>>,
+    pub mark_sprites_rc: Rc<RefCell<HashMap<char, Sprite>>>,
 }
 
 const GAME_MAX: usize = 90;
@@ -50,6 +53,7 @@ impl Game {
             steps_rc: Rc::new(RefCell::new(Vec::new())),
             sokoban_sprite_rc: Rc::new(RefCell::new(sokoban_sprite)),
             crate_sprites_rc: Rc::new(RefCell::new(crate_sprites.clone())),
+            mark_sprites_rc: Rc::new(RefCell::new(HashMap::new())),
         }
     }
 
@@ -80,7 +84,7 @@ impl Game {
     pub fn undo(&self) {
         let mut puzzle = self.puzzle_rc.borrow_mut();
         if puzzle.is_solved() {
-            return
+            return;
         };
         let fixed = &self.fixed;
         if !puzzle.is_solved() {
@@ -114,11 +118,11 @@ impl Game {
 
     pub fn restart(&self) {
         {
-        let puzzle = self.puzzle_rc.borrow();
-        let steps = self.steps_rc.borrow();
-        if puzzle.is_solved() || steps.is_empty() {
-            return
-        };
+            let puzzle = self.puzzle_rc.borrow();
+            let steps = self.steps_rc.borrow();
+            if puzzle.is_solved() || steps.is_empty() {
+                return;
+            };
         }
         self.undo();
         self.restart();
@@ -127,7 +131,7 @@ impl Game {
     pub fn step(&self, direction: Direction) {
         let mut puzzle = self.puzzle_rc.borrow_mut();
         if puzzle.is_solved() {
-            return
+            return;
         }
         let fixed = &self.fixed;
         if puzzle.can_move(direction) {
@@ -176,5 +180,52 @@ impl Game {
             steps.len()
         };
         self.label.set_text(&format!("{}", max_step));
+    }
+
+    pub fn mark(&self, letter: char) {
+        let already_present = {
+            let puzzle = self.puzzle_rc.borrow();
+            puzzle.find_mark_coords(letter).is_some()
+        };
+        if already_present {
+            self.unmark(letter);
+        };
+        let letter_opt = {
+            let puzzle = self.puzzle_rc.borrow();
+            let coords = puzzle.sokoban_position();
+            puzzle.find_mark_at_coords(coords)
+        };
+        if let Some(letter) = letter_opt {
+            self.unmark(letter);
+        };
+        let mark_state = match letter {
+            'a' => State::Mark_A,
+            'b' => State::Mark_B,
+            'c' => State::Mark_C,
+            _ => return,
+        };
+        let mut puzzle = self.puzzle_rc.borrow_mut();
+        let coords = puzzle.sokoban_position();
+        let mut sprite = Sprite::make_sprite(&mark_state, coords);
+        sprite.place(&self.fixed);
+        let mut mark_sprites = self.mark_sprites_rc.borrow_mut();
+        let _ = mark_sprites.insert(letter, sprite);
+        puzzle.insert_mark(letter);
+    }
+
+    pub fn unmark(&self, letter: char) {
+        let mut puzzle = self.puzzle_rc.borrow_mut();
+        let mut mark_sprites = self.mark_sprites_rc.borrow_mut();
+        if let Some(coords) = puzzle.find_mark_coords(letter) {
+            let mut sprite: Sprite = mark_sprites
+                .get(&letter)
+                .expect("can't access to mark sprite")
+                .clone();
+            sprite.remove(&self.fixed);
+            mark_sprites.remove(&letter);
+            puzzle.remove_mark(letter);
+        } else {
+            println!("mark not present in puzzle");
+        }
     }
 }

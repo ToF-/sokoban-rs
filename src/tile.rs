@@ -30,6 +30,9 @@ impl Tile {
             State::Right => "arrow_right",
             State::Up => "arrow_up",
             State::Left => "arrow_left",
+            State::Mark_A => "mark_a",
+            State::Mark_B => "mark_b",
+            State::Mark_C => "mark_c",
             _ => "floor",
         };
         let file_name = format!("/com/example/MyApp/images/{}.png", tile_name);
@@ -51,7 +54,7 @@ pub struct Tiles {
 
 impl Tiles {
     pub fn from_picture_files() -> Self {
-        let tiles = (0usize..12)
+        let tiles = (0usize..15)
             .map(|index| {
                 let state = State::try_from(index).expect("index out of bound for State");
                 Tile::make_tile(&state)

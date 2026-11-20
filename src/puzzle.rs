@@ -11,6 +11,7 @@ pub struct Puzzle {
     sokoban_position: Coords,
     goals: HashSet<Coords>,
     crates: Vec<Coords>,
+    marks: HashMap<char, Coords>,
 }
 
 impl Puzzle {
@@ -19,6 +20,7 @@ impl Puzzle {
         let mut sokoban_position = (0, 0);
         let mut goals = HashSet::new();
         let mut crates = Vec::new();
+        let mut marks = HashMap::new();
         for col in 0..level.width() {
             for row in 0..level.height() {
                 let state = level.state_at((row, col));
@@ -45,6 +47,7 @@ impl Puzzle {
             sokoban_position,
             goals,
             crates,
+            marks,
         }
     }
 
@@ -146,6 +149,26 @@ impl Puzzle {
         self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
         target_opt
+    }
+
+    pub fn insert_mark(&mut self, letter: char) {
+        let coords = self.sokoban_position();
+        let _ = self.marks.insert(letter, coords);
+    }
+
+    pub fn find_mark_coords(&self, letter: char) -> Option<Coords> {
+        self.marks.get(&letter).copied()
+    }
+
+    pub fn find_mark_at_coords(&self, target: Coords) -> Option<char> {
+        self.marks.iter()
+            .find_map(|(&letter, &coords)| 
+                if coords == target { Some(letter) } else { None })
+    }
+
+    pub fn remove_mark(&mut self, letter: char) {
+        let coords = self.sokoban_position();
+        self.marks.remove(&letter);
     }
 
     pub fn pretty_print(&self) -> String {

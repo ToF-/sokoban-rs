@@ -69,6 +69,36 @@ fn main() -> glib::ExitCode {
                         app.quit();
                         glib::Propagation::Stop
                     }
+                    gdk::Key::a => {
+                        let game = game_rc.borrow_mut();
+                        game.mark('a');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::A => {
+                        let game = game_rc.borrow_mut();
+                        game.unmark('a');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::b => {
+                        let game = game_rc.borrow_mut();
+                        game.mark('b');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::B => {
+                        let game = game_rc.borrow_mut();
+                        game.unmark('b');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::c => {
+                        let game = game_rc.borrow_mut();
+                        game.mark('c');
+                        glib::Propagation::Proceed
+                    }
+                    gdk::Key::C => {
+                        let game = game_rc.borrow_mut();
+                        game.unmark('c');
+                        glib::Propagation::Proceed
+                    }
                     gdk::Key::asterisk => {
                         let game = game_rc.borrow_mut();
                         game.restart();
@@ -82,19 +112,23 @@ fn main() -> glib::ExitCode {
                     gdk::Key::n | gdk::Key::Tab => {
                         let mut game = game_rc.borrow_mut();
                         *game = Game::next_level(&game);
-                        let window = app.active_window()
+                        let window = app
+                            .active_window()
                             .expect("can't access application window");
                         window.set_child(Some(&game.fixed));
-                        window.set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
+                        window
+                            .set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
                         glib::Propagation::Proceed
                     }
                     gdk::Key::p => {
                         let mut game = game_rc.borrow_mut();
                         *game = Game::previous_level(&game);
-                        let window = app.active_window()
+                        let window = app
+                            .active_window()
                             .expect("can't access application window");
                         window.set_child(Some(&game.fixed));
-                        window.set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
+                        window
+                            .set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
                         glib::Propagation::Proceed
                     }
                     gdk::Key::Right

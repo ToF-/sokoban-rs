@@ -13,6 +13,9 @@ pub enum State {
     Left = 9,
     Up = 10,
     Right = 11,
+    Mark_A = 12,
+    Mark_B = 13,
+    Mark_C = 14,
 }
 
 impl From<u8> for State {
@@ -26,6 +29,9 @@ impl From<u8> for State {
             42 => State::Stored,
             64 => State::Sokoban,
             43 => State::OnGoal,
+            65 => State::Mark_A,
+            66 => State::Mark_B,
+            67 => State::Mark_C,
             _ => State::Floor,
         }
     }
@@ -48,6 +54,9 @@ impl TryFrom<usize> for State {
             9 => Ok(State::Left),
             10 => Ok(State::Up),
             11 => Ok(State::Right),
+            12 => Ok(State::Mark_A),
+            13 => Ok(State::Mark_B),
+            14 => Ok(State::Mark_C),
             _ => Err(()),
         }
     }
@@ -63,6 +72,9 @@ impl From<State> for char {
             State::Stored => '*',
             State::Sokoban => '@',
             State::OnGoal => '+',
+            State::Mark_A => 'A',
+            State::Mark_B => 'B',
+            State::Mark_C => 'C',
             _ => ' ',
         }
     }
