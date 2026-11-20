@@ -70,47 +70,32 @@ fn main() -> glib::ExitCode {
                         app.quit();
                         glib::Propagation::Stop
                     }
-                    gdk::Key::a => {
+                    gdk::Key::A => {
                         let game = game_rc.borrow_mut();
                         game.mark('a');
                         glib::Propagation::Proceed
                     }
-                    gdk::Key::A => {
-                        let game = game_rc.borrow_mut();
-                        game.unmark('a');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::b => {
+                    gdk::Key::B => {
                         let game = game_rc.borrow_mut();
                         game.mark('b');
                         glib::Propagation::Proceed
                     }
-                    gdk::Key::B => {
-                        let game = game_rc.borrow_mut();
-                        game.unmark('b');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::c => {
+                    gdk::Key::C => {
                         let game = game_rc.borrow_mut();
                         game.mark('c');
                         glib::Propagation::Proceed
                     }
-                    gdk::Key::C => {
-                        let game = game_rc.borrow_mut();
-                        game.unmark('c');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::h => {
+                    gdk::Key::a => {
                         let mut game = game_rc.borrow_mut();
                         game.goto('a');
                         glib::Propagation::Proceed
                     }
-                    gdk::Key::i => {
+                    gdk::Key::b => {
                         let mut game = game_rc.borrow_mut();
                         game.goto('b');
                         glib::Propagation::Proceed
                     }
-                    gdk::Key::j => {
+                    gdk::Key::c => {
                         let mut game = game_rc.borrow_mut();
                         game.goto('c');
                         glib::Propagation::Proceed
