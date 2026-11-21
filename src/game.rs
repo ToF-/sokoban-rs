@@ -1,8 +1,3 @@
-use gtk::prelude::WidgetExt;
-use std::ops::ControlFlow;
-use gtk::glib::clone;
-use std::time::Duration;
-use crate::path_finder::PathFinder;
 use crate::Direction;
 use crate::HashMap;
 use crate::Level;
@@ -15,9 +10,15 @@ use crate::Step;
 use crate::UNIT;
 use crate::coords::Coords;
 use crate::fixed_for_level;
+use crate::path_finder::PathFinder;
 use crate::picture;
+use crate::tile::fill_tiles_for_level;
+use gtk::glib::clone;
 use gtk::prelude::FixedExt;
+use gtk::prelude::WidgetExt;
 use std::cell::Ref;
+use std::ops::ControlFlow;
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct Game {
@@ -39,6 +40,7 @@ impl Game {
         let puzzle = Puzzle::from_level(&levels[level_index]);
         let mut crate_sprites = Vec::new();
         let fixed = fixed_for_level(&levels[level_index]);
+        fill_tiles_for_level(&levels[level_index], fixed.clone());
         let label = gtk::Label::new(Some(&format!("{}", level_index)));
         fixed.put(&label, 0.0, 0.0);
         for crate_index in 0..puzzle.max_crate() {
@@ -254,24 +256,26 @@ impl Game {
         let step_index_rc = Rc::new(RefCell::new(0));
         let fixed = self.fixed.clone();
 
-        glib::timeout_add_local(Duration::from_millis(50),
-        clone!(
-            #[strong (rename_to=this)]
-            self,
-            #[strong]
-            directions,
-
+        glib::timeout_add_local(
+            Duration::from_millis(50),
+            clone!(
+                #[strong (rename_to=this)]
+                self,
+                #[strong]
+                directions,
                 move || {
-                let mut step_index = step_index_rc.borrow_mut();
-                if *step_index < directions.len() {
-                    let direction = directions[*step_index];
-                    this.move_towards(direction);
-                    fixed.queue_draw();
-                    *step_index += 1;
-                    glib::ControlFlow::Continue
-                } else {
-                   glib::ControlFlow::Break 
+                    let mut step_index = step_index_rc.borrow_mut();
+                    if *step_index < directions.len() {
+                        let direction = directions[*step_index];
+                        this.move_towards(direction);
+                        fixed.queue_draw();
+                        *step_index += 1;
+                        glib::ControlFlow::Continue
+                    } else {
+                        glib::ControlFlow::Break
+                    }
                 }
-        }));
+            ),
+        );
     }
 }

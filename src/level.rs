@@ -10,6 +10,9 @@ pub struct Level {
     tiles: Vec<State>,
 }
 
+const MAX_COL: usize = 22;
+const MAX_ROW: usize = 32;
+
 impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
         let mut col: usize = 0;
@@ -30,9 +33,9 @@ impl Level {
                 }
             }
         }
-        max_row = row;
-        let size: usize = max_row * max_col;
-        let mut tiles: Vec<State> = vec![State::Floor; size];
+        max_row = row+2;
+        let size: usize = MAX_ROW * MAX_COL;
+        let mut tiles: Vec<State> = vec![State::Outside; MAX_COL * MAX_ROW];
         row = 0;
         col = 0;
         let mut in_comment = false;
@@ -43,16 +46,16 @@ impl Level {
                     col = 0;
                     in_comment = false;
                 }
-                b => {
-                    if *b == 59 {
+                b => { 
+                    if *b == 59 || *b == 58 {
                         in_comment = true
                     };
                     let state = if !in_comment {
                         State::from(*b)
                     } else {
-                        State::Floor
+                        State::Outside
                     };
-                    let index = row * max_col + col;
+                    let index = row * MAX_COL + col;
                     tiles[index] = state;
                     col += 1;
                 }

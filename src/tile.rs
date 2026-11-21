@@ -3,14 +3,22 @@ use crate::Level;
 use crate::State;
 use crate::UNIT;
 use crate::gdk::Paintable;
+use glib::ControlFlow;
+use glib::clone;
+use gtk::Fixed;
 use gtk::Picture;
 use gtk::gdk;
 use gtk::gdk_pixbuf;
 use gtk::gio;
 use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;
+use rand::Rng;
+use rand::RngExt;
 use std::cell::OnceCell;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::OnceLock;
+use std::time::Duration;
 
 pub struct Tile {
     paintable: Paintable,
@@ -114,21 +122,58 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
         0xdfd7cfff,
     );
     fixed.put(&background, 0.0, 0.0);
-
-    for row in 0..level.height() {
-        for col in 0..level.width() {
-            let state = level.state_at((row, col));
-            let mut background = State::Floor;
-            let fixed_state = if state == State::Stored {
-                State::Goal
-            } else {
-                state
-            };
-            if fixed_state == State::Wall || fixed_state == State::Goal {
-                let picture = picture(&fixed_state);
-                fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
-            }
-        }
-    }
     fixed
+}
+
+pub fn fill_tiles_for_level(level: &Level, fixed: Fixed) {
+    let level_rc = Rc::new(RefCell::new(level.clone()));
+    let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
+    let done = vec![vec![false; level.width()]; level.height()];
+    let done_rc = Rc::new(RefCell::new(done.clone()));
+    glib::timeout_add_local(
+        Duration::from_millis(2),
+        clone!(
+            #[strong]
+            level_rc,
+            #[strong]
+            fixed_rc,
+            #[strong]
+            done_rc,
+            move || {
+                let level = &level_rc.borrow();
+                let mut done = done_rc.borrow_mut();
+                let fixed = fixed_rc.borrow();
+                let mut all_done = true;
+                for row in 0..level.height() {
+                    for col in 0..level.width() {
+                        all_done = all_done && done[row][col]
+                    }
+                }
+                if all_done {
+                    glib::ControlFlow::Break
+                } else {
+                    let mut rng = rand::rng();
+                    let mut row: usize = rng.random_range(0..level.height());
+                    let mut col: usize = rng.random_range(0..level.width());
+                    while done[row][col] {
+                        row = rng.random_range(0..level.height());
+                        col = rng.random_range(0..level.width());
+                    }
+                    let state = level.state_at((row, col));
+                    let mut background = State::Floor;
+                    let fixed_state = if state == State::Stored {
+                        State::Goal
+                    } else {
+                        state
+                    };
+                    if fixed_state == State::Wall || fixed_state == State::Goal || fixed_state == State::Outside {
+                        let picture = picture(&fixed_state);
+                        fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
+                    };
+                    done[row][col] = true;
+                    glib::ControlFlow::Continue
+                }
+            }
+        ),
+    );
 }

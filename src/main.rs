@@ -119,6 +119,7 @@ fn main() -> glib::ExitCode {
                         window.set_child(Some(&game.fixed));
                         window
                             .set_title(Some(&format!("Sokoban - Level {:02}", game.level_index())));
+                        window.set_default_size(game.fixed.width(), game.fixed.height());
                         glib::Propagation::Proceed
                     }
                     gdk::Key::p => {
