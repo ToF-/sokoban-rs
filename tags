@@ -9,6 +9,7 @@ Direction	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^pub enum Direction {$/
 Error	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    type Error = ();$/;"	T
 GAME_MAX	/Users/tof/Coding/sokoban-rs/src/game.rs	/^const GAME_MAX: usize = 90;$/;"	c
 Game	/Users/tof/Coding/sokoban-rs/src/game.rs	/^pub struct Game {$/;"	s
+Grid	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^pub struct Grid {$/;"	s
 Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
 MAX_COL	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_COL: usize = 22;$/;"	c
 MAX_ROW	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_ROW: usize = 32;$/;"	c
@@ -50,6 +51,7 @@ from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn from_bytes(byt
 from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn from_level(level: &Level) -> Self {$/;"	f
 from_picture_files	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^    pub fn from_picture_files() -> Self {$/;"	f
 goto	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn goto(&mut self, letter: char) {$/;"	f
+height	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn height(&self) -> usize {$/;"	f
 height	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn height(&self) -> usize {$/;"	f
 initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    fn initialize_from_bytes() {$/;"	f
 initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initialize_from_level() {$/;"	f
@@ -67,6 +69,7 @@ max_crates	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn max_crates() {$/;
 move_piece_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
 move_towards	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn move_towards(&self, direction: Direction) {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize) -> Self {$/;"	f
+new	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn new(width: usize, height: usize) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/path_finder.rs	/^    pub fn new(puzzle: &Puzzle) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {$/;"	f
 next_level	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn next_level(game: &Game) -> Self {$/;"	f
@@ -84,6 +87,7 @@ pretty_print	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn pretty_print
 pretty_print	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 previous_level	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn previous_level(game: &Game) -> Self {$/;"	f
 pushing	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn pushing(&self) -> Option<(usize, Box<Step>)> {$/;"	f
+put	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn put(&mut self, sprite: Sprite) {$/;"	f
 put	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn put(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/path_finder.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
@@ -99,6 +103,7 @@ reverse	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn reverse(&self) -> 
 reversing_a_pushing_step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_pushing_step() {$/;"	f
 reversing_a_simple_step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_simple_step() {$/;"	f
 row	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub fn row(coords: Coords) -> usize {$/;"	f
+screen	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn screen(&self) -> gtk::Fixed {$/;"	f
 set_picture	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn set_picture(&mut self, state: &State) {$/;"	f
 sokoban_can_move_on_floor	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_can_move_on_floor() {$/;"	f
 sokoban_can_push_a_crate	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn sokoban_can_push_a_crate() {$/;"	f
@@ -111,4 +116,7 @@ to	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn to(&self) -> Coords {$/
 try_from	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn try_from(value: usize) -> Result<Self, Self::Error> {$/;"	f
 undo	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn undo(&self) {$/;"	f
 unmark	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn unmark(&self, letter: char) {$/;"	f
+width	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn width(&self) -> usize {$/;"	f
+z_order	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn z_order(&self) -> usize {$/;"	f
+z_order	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn z_order(self) -> usize {$/;"	f

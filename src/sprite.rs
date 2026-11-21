@@ -5,13 +5,15 @@ use crate::coords::Coords;
 use crate::paintable;
 use crate::picture;
 use gtk::Fixed;
-use gtk::prelude::FixedExt;
+use gtk::prelude::WidgetExt;
+use gtk::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
     state: State,
     picture: Picture,
     coords: Coords,
+    z_order: usize,
 }
 
 impl Sprite {
@@ -21,7 +23,12 @@ impl Sprite {
             state: state.clone(),
             picture: picture,
             coords: coords,
+            z_order: state.z_order(),
         }
+    }
+
+    pub fn z_order(&self) -> usize {
+        self.z_order
     }
 
     pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {

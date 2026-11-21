@@ -1,6 +1,6 @@
-use crate::Sprite;
 use crate::HashMap;
 use crate::Level;
+use crate::Sprite;
 use crate::State;
 use crate::UNIT;
 use crate::gdk::Paintable;
@@ -133,7 +133,7 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
     let done = vec![vec![false; level.width()]; level.height()];
     let done_rc = Rc::new(RefCell::new(done.clone()));
     glib::timeout_add_local(
-        Duration::from_millis(2),
+        Duration::from_millis(20),
         clone!(
             #[strong]
             level_rc,
@@ -171,14 +171,17 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
                     } else {
                         state
                     };
-                    if fixed_state == State::Wall || fixed_state == State::Goal || fixed_state == State::Outside {
+                    if fixed_state == State::Wall
+                        || fixed_state == State::Goal
+                        || fixed_state == State::Outside
+                    {
                         let picture = picture(&fixed_state);
                         fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
                     };
                     for crate_index in 0..crate_sprites.len() {
                         let mut sprite = &mut crate_sprites[crate_index];
-                        if (row, col) ==  sprite.coords() {
-                            sprite.place(&fixed)
+                        if (row, col) == sprite.coords() {
+                            sprite.place(&fixed);
                         }
                     }
                     done[row][col] = true;
@@ -187,4 +190,12 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
             }
         ),
     );
+    // put crate sprites back above other tiles
+    {
+        let mut crate_sprites = crate_sprites_rc.borrow_mut();
+        for crate_index in 0..crate_sprites.len() {
+            let mut sprite = &mut crate_sprites[crate_index];
+            sprite.place(&fixed);
+        }
+    }
 }

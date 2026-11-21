@@ -24,6 +24,7 @@ use std::rc::Rc;
 pub mod coords;
 pub mod direction;
 pub mod game;
+pub mod grid;
 pub mod level;
 pub mod path_finder;
 pub mod puzzle;

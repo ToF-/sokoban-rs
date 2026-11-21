@@ -113,6 +113,26 @@ impl State {
             other => other,
         }
     }
+
+    pub fn z_order(self) -> usize {
+        match self {
+            State::Outside => 0,
+            State::Floor => 0,
+            State::Wall => 0,
+            State::Crate => 2,
+            State::Goal => 1,
+            State::Stored => 2,
+            State::Sokoban => 2,
+            State::Down => 2,
+            State::Left => 2,
+            State::Up => 2,
+            State::Right => 2,
+            State::OnGoal => 2,
+            State::Mark_A => 1,
+            State::Mark_B => 1,
+            State::Mark_C => 1,
+        }
+    }
 }
 
 #[cfg(test)]

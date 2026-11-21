@@ -33,7 +33,7 @@ impl Level {
                 }
             }
         }
-        max_row = row+2;
+        max_row = row + 2;
         let size: usize = MAX_ROW * MAX_COL;
         let mut tiles: Vec<State> = vec![State::Outside; MAX_COL * MAX_ROW];
         row = 0;
@@ -46,7 +46,7 @@ impl Level {
                     col = 0;
                     in_comment = false;
                 }
-                b => { 
+                b => {
                     if *b == 59 || *b == 58 {
                         in_comment = true
                     };
