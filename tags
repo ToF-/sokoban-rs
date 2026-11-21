@@ -58,6 +58,7 @@ initialize_from_level	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn initia
 insert_mark	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn insert_mark(&mut self, letter: char) {$/;"	f
 is_solved	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 level_index	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
+level_limits	/Users/tof/Coding/sokoban-rs/src/level.rs	/^fn level_limits(bytes: &[u8]) -> (Coords, Coords) {$/;"	f
 levels	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn levels(&self) -> Vec<Level> {$/;"	f
 levels_from_bytes	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f

@@ -21,17 +21,17 @@ pub enum State {
 impl From<u8> for State {
     fn from(byte: u8) -> Self {
         match byte {
-            39 => State::Outside,
-            32 => State::Floor,
-            35 => State::Wall,
-            46 => State::Goal,
-            36 => State::Crate,
-            42 => State::Stored,
-            64 => State::Sokoban,
-            43 => State::OnGoal,
-            65 => State::Mark_A,
-            66 => State::Mark_B,
-            67 => State::Mark_C,
+            b'\'' => State::Outside,
+            b' ' => State::Floor,
+            b'#' => State::Wall,
+            b'.' => State::Goal,
+            b'$' => State::Crate,
+            b'*' => State::Stored,
+            b'@' => State::Sokoban,
+            b'+' => State::OnGoal,
+            b'A' => State::Mark_A,
+            b'B' => State::Mark_B,
+            b'C' => State::Mark_C,
             _ => State::Floor,
         }
     }

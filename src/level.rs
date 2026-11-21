@@ -5,35 +5,75 @@ use crate::state::State;
 
 #[derive(Clone)]
 pub struct Level {
-    width: usize,
-    height: usize,
+    squares: [[State; MAX_COL]; MAX_ROW],
     tiles: Vec<State>,
 }
 
 const MAX_COL: usize = 22;
 const MAX_ROW: usize = 32;
 
+fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
+    let mut start_col: usize = MAX_COL + 1;
+    let mut start_row: usize = MAX_ROW + 1;
+    let mut end_col: usize = 0;
+    let mut end_row: usize = 0;
+    let mut col: usize = 0;
+    let mut row: usize = 0;
+    for byte in bytes {
+        match byte {
+            10 => {
+                row += 1;
+                col = 0;
+            }
+            b'#' => {
+                if col < start_col {
+                    start_col = col
+                };
+                if row < start_row {
+                    start_row = row
+                };
+                if col > end_col {
+                    end_col = col
+                };
+                if row > end_row {
+                    end_row = row
+                };
+                col += 1;
+            }
+            _ => {
+                col += 1;
+            }
+        }
+    }
+    ((start_row, start_col), (end_row, end_col))
+}
 impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
-        let mut col: usize = 0;
-        let mut row: usize = 0;
-        let mut max_col: usize = 0;
-        let mut max_row: usize = 0;
+        let mut squares = vec![vec![State::Outside; MAX_COL]; MAX_ROW];
+        let ((start_row, start_col), (end_row, end_col)) = level_limits(bytes);
+        let height = end_row - start_row + 1;
+        let width = end_col - start_col + 1;
+        let mut row: usize = (MAX_ROW - height) / 2;
+        let mut col: usize = (MAX_COL - width) / 2;
         for byte in bytes {
+            println!(
+                "{} {} {} {} {} {}",
+                start_row, start_col, height, width, row, col
+            );
             match byte {
                 10 => {
                     row += 1;
-                    col = 0;
+                    col = (MAX_COL - width) / 2;
                 }
+
                 _ => {
-                    col += 1;
-                    if col > max_col {
-                        max_col = col
-                    };
+                    if col < MAX_COL {
+                        squares[row][col] = State::from(*byte);
+                        col += 1;
+                    }
                 }
             }
         }
-        max_row = row + 2;
         let size: usize = MAX_ROW * MAX_COL;
         let mut tiles: Vec<State> = vec![State::Outside; MAX_COL * MAX_ROW];
         row = 0;
@@ -61,23 +101,23 @@ impl Level {
                 }
             }
         }
+
         Level {
-            width: max_col,
-            height: row,
+            squares: std::array::from_fn(|row| std::array::from_fn(|col| squares[row][col])),
             tiles: tiles,
         }
     }
 
     pub fn width(&self) -> usize {
-        self.width
+        MAX_COL
     }
 
     pub fn height(&self) -> usize {
-        self.height
+        MAX_ROW
     }
 
     pub fn state_at(&self, coords: Coords) -> State {
-        let index = row(coords) * self.width + col(coords);
+        let index = row(coords) * self.width() + col(coords);
         self.tiles[index].clone()
     }
 
@@ -129,7 +169,7 @@ mod tests {
         let level = Level::from_bytes(&bytes);
         assert_eq!(21, level.width());
         assert_eq!(13, level.height());
-        assert_eq!(State::Wall, level.state_at((1, 5)));
+        assert_eq!(State::Wall, level.state_at((1, 6)));
         assert_eq!(State::Wall, level.state_at((1, 6)));
         assert_eq!(State::Crate, level.state_at((3, 6)));
         assert_eq!(State::Sokoban, level.state_at((9, 12)));
