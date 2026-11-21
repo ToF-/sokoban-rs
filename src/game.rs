@@ -1,3 +1,7 @@
+use gtk::prelude::WidgetExt;
+use std::ops::ControlFlow;
+use gtk::glib::clone;
+use std::time::Duration;
 use crate::path_finder::PathFinder;
 use crate::Direction;
 use crate::HashMap;
@@ -245,9 +249,29 @@ impl Game {
             self.follow_path(&directions);
         }
     }
+
     pub fn follow_path(&mut self, directions: &Vec<Direction>) {
-        for direction in directions {
-            self.move_towards(*direction)
-        }
+        let step_index_rc = Rc::new(RefCell::new(0));
+        let fixed = self.fixed.clone();
+
+        glib::timeout_add_local(Duration::from_millis(50),
+        clone!(
+            #[strong (rename_to=this)]
+            self,
+            #[strong]
+            directions,
+
+                move || {
+                let mut step_index = step_index_rc.borrow_mut();
+                if *step_index < directions.len() {
+                    let direction = directions[*step_index];
+                    this.move_towards(direction);
+                    fixed.queue_draw();
+                    *step_index += 1;
+                    glib::ControlFlow::Continue
+                } else {
+                   glib::ControlFlow::Break 
+                }
+        }));
     }
 }
