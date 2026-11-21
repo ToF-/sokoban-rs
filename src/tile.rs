@@ -130,10 +130,15 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
     let level_rc = Rc::new(RefCell::new(level.clone()));
     let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
     let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
+    let total = level.width() * level.height();
+    println!("{}", level.pretty_print());
+    println!("{} {} {}/{}", level.height(), level.width(), total, level.crate_max());
+    let total_non_crates = total - level.crate_max();
     let done = vec![vec![false; level.width()]; level.height()];
     let done_rc = Rc::new(RefCell::new(done.clone()));
+    let count_rc = Rc::new(RefCell::new(0));
     glib::timeout_add_local(
-        Duration::from_millis(20),
+        Duration::from_millis(1),
         clone!(
             #[strong]
             level_rc,
@@ -143,59 +148,48 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
             fixed_rc,
             #[strong]
             done_rc,
+            #[strong]
+            count_rc,
             move || {
                 let level = &level_rc.borrow();
                 let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut done = done_rc.borrow_mut();
                 let fixed = fixed_rc.borrow();
-                let mut all_done = true;
-                for row in 0..level.height() {
-                    for col in 0..level.width() {
-                        all_done = all_done && done[row][col]
-                    }
-                }
-                if all_done {
+                let mut count = count_rc.borrow_mut();
+                if *count >= total {
                     glib::ControlFlow::Break
                 } else {
                     let mut rng = rand::rng();
                     let mut row: usize = rng.random_range(0..level.height());
                     let mut col: usize = rng.random_range(0..level.width());
-                    while done[row][col] {
+                    let mut state = level.state_at((row, col));
+                    while done[row][col]
+                        || ((state == State::Crate || state == State::Stored)
+                            && *count < total_non_crates)
+                    {
                         row = rng.random_range(0..level.height());
                         col = rng.random_range(0..level.width());
+                        state = level.state_at((row, col));
                     }
                     let state = level.state_at((row, col));
-                    let mut background = State::Floor;
                     let fixed_state = if state == State::Stored {
                         State::Goal
                     } else {
                         state
                     };
-                    if fixed_state == State::Wall
+                    if (fixed_state == State::Crate && *count >= total_non_crates)
+                        || fixed_state == State::Wall
                         || fixed_state == State::Goal
                         || fixed_state == State::Outside
                     {
                         let picture = picture(&fixed_state);
                         fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
+                        done[row][col] = true;
+                        *count += 1;
                     };
-                    for crate_index in 0..crate_sprites.len() {
-                        let mut sprite = &mut crate_sprites[crate_index];
-                        if (row, col) == sprite.coords() {
-                            sprite.place(&fixed);
-                        }
-                    }
-                    done[row][col] = true;
                     glib::ControlFlow::Continue
                 }
             }
         ),
     );
-    // put crate sprites back above other tiles
-    {
-        let mut crate_sprites = crate_sprites_rc.borrow_mut();
-        for crate_index in 0..crate_sprites.len() {
-            let mut sprite = &mut crate_sprites[crate_index];
-            sprite.place(&fixed);
-        }
-    }
 }

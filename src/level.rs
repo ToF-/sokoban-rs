@@ -81,6 +81,10 @@ impl Level {
         self.tiles[index].clone()
     }
 
+    pub fn crate_max(&self) -> usize {
+        self.tiles.iter().filter(|state| **state == State::Crate || **state == State::Stored).count()
+    }
+
     pub fn pretty_print(&self) -> String {
         let mut result = String::new();
         for row in 0..self.height() {
@@ -133,5 +137,6 @@ mod tests {
         assert_eq!(State::Wall, level.state_at((1, 6)));
         assert_eq!(State::Crate, level.state_at((3, 6)));
         assert_eq!(State::Sokoban, level.state_at((9, 12)));
+        assert_eq!(6, level.crate_max());
     }
 }
