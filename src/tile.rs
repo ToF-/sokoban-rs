@@ -1,3 +1,4 @@
+use crate::Sprite;
 use crate::HashMap;
 use crate::Level;
 use crate::State;
@@ -125,9 +126,10 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
     fixed
 }
 
-pub fn fill_tiles_for_level(level: &Level, fixed: Fixed) {
+pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: Fixed) {
     let level_rc = Rc::new(RefCell::new(level.clone()));
     let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
+    let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
     let done = vec![vec![false; level.width()]; level.height()];
     let done_rc = Rc::new(RefCell::new(done.clone()));
     glib::timeout_add_local(
@@ -136,11 +138,14 @@ pub fn fill_tiles_for_level(level: &Level, fixed: Fixed) {
             #[strong]
             level_rc,
             #[strong]
+            crate_sprites_rc,
+            #[strong]
             fixed_rc,
             #[strong]
             done_rc,
             move || {
                 let level = &level_rc.borrow();
+                let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut done = done_rc.borrow_mut();
                 let fixed = fixed_rc.borrow();
                 let mut all_done = true;
@@ -170,6 +175,12 @@ pub fn fill_tiles_for_level(level: &Level, fixed: Fixed) {
                         let picture = picture(&fixed_state);
                         fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
                     };
+                    for crate_index in 0..crate_sprites.len() {
+                        let mut sprite = &mut crate_sprites[crate_index];
+                        if (row, col) ==  sprite.coords() {
+                            sprite.place(&fixed)
+                        }
+                    }
                     done[row][col] = true;
                     glib::ControlFlow::Continue
                 }

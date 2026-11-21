@@ -40,15 +40,14 @@ impl Game {
         let puzzle = Puzzle::from_level(&levels[level_index]);
         let mut crate_sprites = Vec::new();
         let fixed = fixed_for_level(&levels[level_index]);
-        fill_tiles_for_level(&levels[level_index], fixed.clone());
         let label = gtk::Label::new(Some(&format!("{}", level_index)));
         fixed.put(&label, 0.0, 0.0);
         for crate_index in 0..puzzle.max_crate() {
             let crate_coords = puzzle.crate_coords(crate_index);
             let mut sprite = Sprite::make_sprite(&State::Crate, puzzle.crate_coords(crate_index));
-            sprite.place(&fixed);
             crate_sprites.push(sprite);
         }
+        fill_tiles_for_level(&levels[level_index], &crate_sprites, fixed.clone());
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
         sokoban_sprite.place(&fixed);
         Self {
