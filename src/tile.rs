@@ -1,8 +1,10 @@
+use gtk::prelude::Cast;
 use crate::HashMap;
 use crate::Level;
 use crate::Sprite;
 use crate::State;
 use crate::UNIT;
+use crate::coords::Coords;
 use crate::gdk::Paintable;
 use crate::state::STATE_MAX;
 use glib::ControlFlow;
@@ -13,9 +15,12 @@ use gtk::gdk;
 use gtk::gdk_pixbuf;
 use gtk::gio;
 use gtk::prelude::FixedExt;
+use gtk::prelude::ObjectExt;
 use gtk::prelude::WidgetExt;
 use rand::Rng;
 use rand::RngExt;
+use rand::prelude::SliceRandom;
+use rand::rng;
 use std::cell::Cell;
 use std::cell::OnceCell;
 use std::cell::RefCell;
@@ -133,80 +138,94 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
 pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: Fixed) {
     let level = level.clone();
     let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
-    let done = vec![vec![false; level.width()]; level.height()];
-    let done_rc = Rc::new(RefCell::new(done.clone()));
-    let count_rc = Rc::new(Cell::new(0));
-    let crate_count_rc = Rc::new(Cell::new(0));
-    let fixed_squares_count = level.size() - level.crate_max() - 1;
+    let mut all_coords: Vec<Coords> = Vec::new();
+    for row in 0..level.height() {
+        for col in 0..level.width() {
+            all_coords.push((row, col))
+        }
+    }
+    let mut child = fixed.first_child();
+    while let Some(widget) = child {
+        let next = widget.next_sibling();
+        fixed.remove(&widget);
+        child = next;
+    };
+    all_coords.shuffle(&mut rng());
+    let index_rc = Rc::new(Cell::new(0));
+    let total = level.size();
     glib::timeout_add_local(
-        Duration::from_millis(1),
+        Duration::from_millis(10),
         clone!(
             #[strong]
             crate_sprites_rc,
             #[strong]
-            done_rc,
-            #[strong]
-            count_rc,
-            #[strong]
-            crate_count_rc,
+            index_rc,
             move || {
                 let mut crate_sprites = crate_sprites_rc.borrow_mut();
-                let mut done = done_rc.borrow_mut();
-                let mut count = count_rc.get();
-                let mut crate_count = crate_count_rc.get();
+                let mut index = index_rc.get();
                 // stop when all tiles are put
-                if count >= level.size() {
+                if index >= total {
                     glib::ControlFlow::Break
                 } else {
-                    // put the non-crate tiles first, because their z_order must be lower
-                    if count < fixed_squares_count {
-                        let mut rng = rand::rng();
-                        let mut row: usize = rng.random_range(0..level.height());
-                        let mut col: usize = rng.random_range(0..level.width());
-                        let mut state = level.state_at((row, col));
-                        if state == State::Stored {
-                            state = State::Goal
-                        };
-                        while done[row][col] {
-                            row = rng.random_range(0..level.height());
-                            col = rng.random_range(0..level.width());
-                            state = level.state_at((row, col));
+                    let (row, col) = all_coords[index];
+                    let state = level.state_at((row, col));
+                    let mut crate_index_opt: Option<usize> = None;
+                    let picture_state = match state {
+                        // if state is crate, put the floor first, then the crate
+                        State::Crate => {
+                            crate_index_opt = crate_sprites
+                                .iter()
+                                .position(|sprite| sprite.coords() == ((row, col)));
+                            State::Floor
                         }
-                        let state = level.state_at((row, col));
-                        let fixed_state = if state == State::Stored {
+                        // if the state is stored crate, put the goal first, then the crate
+                        State::Stored => {
+                            crate_index_opt = crate_sprites
+                                .iter()
+                                .position(|sprite| sprite.coords() == ((row, col)));
                             State::Goal
-                        } else {
-                            state
-                        };
-                        if fixed_state == State::Wall
-                            || fixed_state == State::Goal
-                            || fixed_state == State::Outside
-                            || fixed_state == State::Grass_1
-                            || fixed_state == State::Grass_2
-                            || fixed_state == State::Floor
-                        {
-                            let picture = picture(&fixed_state);
-                            fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
-                            done[row][col] = true;
-                            count += 1;
-                            count_rc.set(count);
-                        };
-                        glib::ControlFlow::Continue
-                    } else {
-                        if crate_count < level.crate_max() {
-                            let mut sprite = &mut crate_sprites[crate_count];
-                            sprite.place(&fixed);
-                            crate_count += 1;
-                            count += 1;
-                            crate_count_rc.set(crate_count);
-                            count_rc.set(count);
-                            glib::ControlFlow::Continue
-                        } else {
-                            glib::ControlFlow::Break
                         }
-                    }
+                        // if the state is sokoban don't put it, as it comes later
+                        State::Sokoban => State::Floor,
+                        State::OnGoal => State::Goal,
+                        _ => state,
+                    };
+                    let picture = picture(&picture_state);
+                    let x = col as f64 * UNIT;
+                    let y = row as f64 * UNIT;
+                    while let Some(previous_picture) = picture_at(&fixed, x, y) { 
+                        dbg!("remove");
+                        fixed.remove(&previous_picture)
+                    };
+                    fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
+                    if let Some(crate_index) = crate_index_opt {
+                        let mut sprite = &mut crate_sprites[crate_index];
+                        sprite.place(&fixed)
+                    };
+                    index_rc.set(index + 1);
+                    glib::ControlFlow::Continue
                 }
             }
         ),
     );
+}
+fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
+    let mut child = fixed.first_child();
+
+    while let Some(widget) = child {
+        let next = widget.next_sibling();
+
+        if widget.is::<gtk::Picture>() {
+            let (child_x, child_y) = fixed.child_position(&widget);
+
+            if child_x == x && child_y == y {
+                let picture = widget.downcast::<Picture>()
+                    .expect("can't downcast widget to picture");
+                return Some(picture.clone());
+            }
+        }
+
+        child = next;
+    }
+    None
 }
