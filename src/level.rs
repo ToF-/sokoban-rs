@@ -1,7 +1,10 @@
+use crate::Direction;
 use crate::coords::Coords;
 use crate::coords::col;
 use crate::coords::row;
 use crate::state::State;
+use std::collections::HashSet;
+use std::collections::VecDeque;
 
 #[derive(Clone)]
 pub struct Level {
@@ -48,14 +51,12 @@ fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
 }
 impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
-        let mut squares = vec![vec![State::Outside; MAX_COL]; MAX_ROW];
+        let mut squares = vec![vec![State::Floor; MAX_COL]; MAX_ROW];
         let ((start_row, start_col), (end_row, end_col)) = level_limits(bytes);
-        println!("{:?}", level_limits(bytes));
         let height = end_row - start_row + 1;
         let width = end_col - start_col + 1;
         let mut row: usize = (MAX_ROW - height) / 2;
         let mut col: usize = (MAX_COL - width) / 2;
-        println!("{},{}", row, col);
 
         for byte in bytes {
             match byte {
@@ -68,6 +69,33 @@ impl Level {
                     if col < MAX_COL {
                         squares[row][col] = State::from(*byte);
                         col += 1;
+                    }
+                }
+            }
+        }
+        let mut to_paint: VecDeque<(Coords, State)> = VecDeque::new();
+        let mut visited: HashSet<Coords> = HashSet::new();
+        to_paint.push_back(((0, 0), State::Grass_1));
+        while let Some((position, state)) = to_paint.pop_front() {
+            let (row, col) = position;
+            squares[row][col] = state;
+            for direction in [
+                Direction::Up,
+                Direction::Right,
+                Direction::Down,
+                Direction::Left,
+            ] {
+                let destination = direction.from(position);
+                let next_state = if state == State::Grass_1 {
+                    State::Grass_2
+                } else {
+                    State::Grass_1
+                };
+                let (row, col) = destination;
+                if row < MAX_ROW && col < MAX_COL && !visited.contains(&destination) {
+                    if squares[row][col] == State::Floor {
+                        to_paint.push_back((destination, next_state));
+                        let _ = visited.insert(destination);
                     }
                 }
             }
@@ -85,6 +113,10 @@ impl Level {
         MAX_ROW
     }
 
+    pub fn size(&self) -> usize {
+        MAX_COL * MAX_ROW
+    }
+
     pub fn state_at(&self, coords: Coords) -> State {
         let (row, col) = coords;
         self.squares[row][col]
@@ -98,6 +130,18 @@ impl Level {
             .count()
     }
 
+    pub fn crate_coords(&self) -> Vec<Coords> {
+        let mut result = Vec::new();
+        for row in 0..self.height() {
+            for col in 0..self.width() {
+                let state = self.squares[row][col];
+                if state == State::Crate || state == State::Stored {
+                    result.push((row, col))
+                }
+            }
+        }
+        result
+    }
     pub fn pretty_print(&self) -> String {
         let mut result = String::new();
         for row in 0..self.height() {
@@ -116,6 +160,7 @@ pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {
     let mut start_index = 0;
     let mut start = false;
     let mut level_last_line = false;
+    let mut count = 0;
     while index < bytes.len() {
         if bytes[index] == b'\n' {
             if level_last_line {
@@ -130,7 +175,9 @@ pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {
         index += 1
     }
     if level_last_line {
+        println!("Level#{}", count);
         levels.push(Level::from_bytes(&bytes[start_index..]));
+        count += 1;
     }
     levels
 }

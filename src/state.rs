@@ -16,7 +16,11 @@ pub enum State {
     Mark_A = 12,
     Mark_B = 13,
     Mark_C = 14,
+    Grass_1 = 15,
+    Grass_2 = 16,
 }
+
+pub const STATE_MAX: usize = 17;
 
 impl From<u8> for State {
     fn from(byte: u8) -> Self {
@@ -32,6 +36,8 @@ impl From<u8> for State {
             b'A' => State::Mark_A,
             b'B' => State::Mark_B,
             b'C' => State::Mark_C,
+            b'-' => State::Grass_1,
+            b'|' => State::Grass_2,
             _ => State::Floor,
         }
     }
@@ -57,6 +63,8 @@ impl TryFrom<usize> for State {
             12 => Ok(State::Mark_A),
             13 => Ok(State::Mark_B),
             14 => Ok(State::Mark_C),
+            15 => Ok(State::Grass_1),
+            16 => Ok(State::Grass_2),
             _ => Err(()),
         }
     }
@@ -75,6 +83,8 @@ impl From<State> for char {
             State::Mark_A => 'A',
             State::Mark_B => 'B',
             State::Mark_C => 'C',
+            State::Grass_1 => '-',
+            State::Grass_2 => '|',
             _ => ' ',
         }
     }
@@ -131,6 +141,8 @@ impl State {
             State::Mark_A => 1,
             State::Mark_B => 1,
             State::Mark_C => 1,
+            State::Grass_1 => 0,
+            State::Grass_2 => 0,
         }
     }
 }

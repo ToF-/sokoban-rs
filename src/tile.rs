@@ -4,6 +4,7 @@ use crate::Sprite;
 use crate::State;
 use crate::UNIT;
 use crate::gdk::Paintable;
+use crate::state::STATE_MAX;
 use glib::ControlFlow;
 use glib::clone;
 use gtk::Fixed;
@@ -15,6 +16,7 @@ use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;
 use rand::Rng;
 use rand::RngExt;
+use std::cell::Cell;
 use std::cell::OnceCell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -31,7 +33,7 @@ impl Tile {
             State::Crate => "crate",
             State::Floor => "floor",
             State::Goal => "goal",
-            State::Outside => "outside",
+            State::Outside => "grass_2",
             State::Sokoban => "sokoban",
             State::Stored => "stored",
             State::Wall => "wall",
@@ -42,6 +44,8 @@ impl Tile {
             State::Mark_A => "mark_a",
             State::Mark_B => "mark_b",
             State::Mark_C => "mark_c",
+            State::Grass_1 => "grass_1",
+            State::Grass_2 => "grass_2",
             _ => "floor",
         };
         let file_name = format!("/com/example/MyApp/images/{}.png", tile_name);
@@ -63,7 +67,7 @@ pub struct Tiles {
 
 impl Tiles {
     pub fn from_picture_files() -> Self {
-        let tiles = (0usize..15)
+        let tiles = (0usize..STATE_MAX)
             .map(|index| {
                 let state = State::try_from(index).expect("index out of bound for State");
                 Tile::make_tile(&state)
@@ -127,73 +131,80 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
 }
 
 pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: Fixed) {
-    let level_rc = Rc::new(RefCell::new(level.clone()));
-    let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
+    let level = level.clone();
     let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
-    let total = level.width() * level.height();
-    println!("{}", level.pretty_print());
-    println!(
-        "{} {} {}/{}",
-        level.height(),
-        level.width(),
-        total,
-        level.crate_max()
-    );
-    let total_non_crates = total - level.crate_max();
     let done = vec![vec![false; level.width()]; level.height()];
     let done_rc = Rc::new(RefCell::new(done.clone()));
-    let count_rc = Rc::new(RefCell::new(0));
+    let count_rc = Rc::new(Cell::new(0));
+    let crate_count_rc = Rc::new(Cell::new(0));
+    let fixed_squares_count = level.size() - level.crate_max() - 1;
     glib::timeout_add_local(
         Duration::from_millis(1),
         clone!(
             #[strong]
-            level_rc,
-            #[strong]
             crate_sprites_rc,
-            #[strong]
-            fixed_rc,
             #[strong]
             done_rc,
             #[strong]
             count_rc,
+            #[strong]
+            crate_count_rc,
             move || {
-                let level = &level_rc.borrow();
                 let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut done = done_rc.borrow_mut();
-                let fixed = fixed_rc.borrow();
-                let mut count = count_rc.borrow_mut();
-                if *count >= total {
+                let mut count = count_rc.get();
+                let mut crate_count = crate_count_rc.get();
+                // stop when all tiles are put
+                if count >= level.size() {
                     glib::ControlFlow::Break
                 } else {
-                    let mut rng = rand::rng();
-                    let mut row: usize = rng.random_range(0..level.height());
-                    let mut col: usize = rng.random_range(0..level.width());
-                    let mut state = level.state_at((row, col));
-                    while done[row][col]
-                        || ((state == State::Crate || state == State::Stored)
-                            && *count < total_non_crates)
-                    {
-                        row = rng.random_range(0..level.height());
-                        col = rng.random_range(0..level.width());
-                        state = level.state_at((row, col));
-                    }
-                    let state = level.state_at((row, col));
-                    let fixed_state = if state == State::Stored {
-                        State::Goal
+                    // put the non-crate tiles first, because their z_order must be lower
+                    if count < fixed_squares_count {
+                        let mut rng = rand::rng();
+                        let mut row: usize = rng.random_range(0..level.height());
+                        let mut col: usize = rng.random_range(0..level.width());
+                        let mut state = level.state_at((row, col));
+                        if state == State::Stored {
+                            state = State::Goal
+                        };
+                        while done[row][col] {
+                            row = rng.random_range(0..level.height());
+                            col = rng.random_range(0..level.width());
+                            state = level.state_at((row, col));
+                        }
+                        let state = level.state_at((row, col));
+                        let fixed_state = if state == State::Stored {
+                            State::Goal
+                        } else {
+                            state
+                        };
+                        if fixed_state == State::Wall
+                            || fixed_state == State::Goal
+                            || fixed_state == State::Outside
+                            || fixed_state == State::Grass_1
+                            || fixed_state == State::Grass_2
+                            || fixed_state == State::Floor
+                        {
+                            let picture = picture(&fixed_state);
+                            fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
+                            done[row][col] = true;
+                            count += 1;
+                            count_rc.set(count);
+                        };
+                        glib::ControlFlow::Continue
                     } else {
-                        state
-                    };
-                    if (fixed_state == State::Crate && *count >= total_non_crates)
-                        || fixed_state == State::Wall
-                        || fixed_state == State::Goal
-                        || fixed_state == State::Outside
-                    {
-                        let picture = picture(&fixed_state);
-                        fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
-                        done[row][col] = true;
-                        *count += 1;
-                    };
-                    glib::ControlFlow::Continue
+                        if crate_count < level.crate_max() {
+                            let mut sprite = &mut crate_sprites[crate_count];
+                            sprite.place(&fixed);
+                            crate_count += 1;
+                            count += 1;
+                            crate_count_rc.set(crate_count);
+                            count_rc.set(count);
+                            glib::ControlFlow::Continue
+                        } else {
+                            glib::ControlFlow::Break
+                        }
+                    }
                 }
             }
         ),
