@@ -6,11 +6,10 @@ use crate::state::State;
 #[derive(Clone)]
 pub struct Level {
     squares: [[State; MAX_COL]; MAX_ROW],
-    tiles: Vec<State>,
 }
 
-const MAX_COL: usize = 22;
-const MAX_ROW: usize = 32;
+const MAX_COL: usize = 24;
+const MAX_ROW: usize = 20;
 
 fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
     let mut start_col: usize = MAX_COL + 1;
@@ -51,17 +50,16 @@ impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
         let mut squares = vec![vec![State::Outside; MAX_COL]; MAX_ROW];
         let ((start_row, start_col), (end_row, end_col)) = level_limits(bytes);
+        println!("{:?}", level_limits(bytes));
         let height = end_row - start_row + 1;
         let width = end_col - start_col + 1;
         let mut row: usize = (MAX_ROW - height) / 2;
         let mut col: usize = (MAX_COL - width) / 2;
+        println!("{},{}", row, col);
+
         for byte in bytes {
-            println!(
-                "{} {} {} {} {} {}",
-                start_row, start_col, height, width, row, col
-            );
             match byte {
-                10 => {
+                b'\n' => {
                     row += 1;
                     col = (MAX_COL - width) / 2;
                 }
@@ -74,37 +72,8 @@ impl Level {
                 }
             }
         }
-        let size: usize = MAX_ROW * MAX_COL;
-        let mut tiles: Vec<State> = vec![State::Outside; MAX_COL * MAX_ROW];
-        row = 0;
-        col = 0;
-        let mut in_comment = false;
-        for byte in bytes {
-            match byte {
-                10 => {
-                    row += 1;
-                    col = 0;
-                    in_comment = false;
-                }
-                b => {
-                    if *b == 59 || *b == 58 {
-                        in_comment = true
-                    };
-                    let state = if !in_comment {
-                        State::from(*b)
-                    } else {
-                        State::Outside
-                    };
-                    let index = row * MAX_COL + col;
-                    tiles[index] = state;
-                    col += 1;
-                }
-            }
-        }
-
         Level {
             squares: std::array::from_fn(|row| std::array::from_fn(|col| squares[row][col])),
-            tiles: tiles,
         }
     }
 
@@ -117,8 +86,16 @@ impl Level {
     }
 
     pub fn state_at(&self, coords: Coords) -> State {
-        let index = row(coords) * self.width() + col(coords);
-        self.tiles[index].clone()
+        let (row, col) = coords;
+        self.squares[row][col]
+    }
+
+    pub fn crate_max(&self) -> usize {
+        self.squares
+            .iter()
+            .flatten()
+            .filter(|state| **state == State::Crate || **state == State::Stored)
+            .count()
     }
 
     pub fn pretty_print(&self) -> String {
@@ -135,19 +112,25 @@ impl Level {
 
 pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {
     let mut levels = Vec::new();
-    let mut start = 0;
     let mut index = 0;
+    let mut start_index = 0;
+    let mut start = false;
+    let mut level_last_line = false;
     while index < bytes.len() {
-        if bytes[index] == 59 {
-            levels.push(Level::from_bytes(&bytes[start..index + 2]));
-            index += 2;
-            start = index + 2;
-        } else {
-            index += 1;
-        }
+        if bytes[index] == b'\n' {
+            if level_last_line {
+                levels.push(Level::from_bytes(&bytes[start_index..=index]));
+                level_last_line = false;
+                start_index = index + 1;
+            }
+        };
+        if bytes[index] == b';' {
+            level_last_line = true
+        };
+        index += 1
     }
-    if start < bytes.len() {
-        levels.push(Level::from_bytes(&bytes[start..]));
+    if level_last_line {
+        levels.push(Level::from_bytes(&bytes[start_index..]));
     }
     levels
 }
@@ -167,11 +150,12 @@ mod tests {
         .expect("Failed to find resource");
         println!("{:?}", bytes);
         let level = Level::from_bytes(&bytes);
-        assert_eq!(21, level.width());
-        assert_eq!(13, level.height());
-        assert_eq!(State::Wall, level.state_at((1, 6)));
+        assert_eq!(24, level.width());
+        assert_eq!(20, level.height());
+        assert_eq!(State::Wall, level.state_at((12, 5)));
         assert_eq!(State::Wall, level.state_at((1, 6)));
         assert_eq!(State::Crate, level.state_at((3, 6)));
         assert_eq!(State::Sokoban, level.state_at((9, 12)));
+        assert_eq!(6, level.crate_max());
     }
 }

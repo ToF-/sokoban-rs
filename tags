@@ -11,8 +11,8 @@ GAME_MAX	/Users/tof/Coding/sokoban-rs/src/game.rs	/^const GAME_MAX: usize = 90;$
 Game	/Users/tof/Coding/sokoban-rs/src/game.rs	/^pub struct Game {$/;"	s
 Grid	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^pub struct Grid {$/;"	s
 Level	/Users/tof/Coding/sokoban-rs/src/level.rs	/^pub struct Level {$/;"	s
-MAX_COL	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_COL: usize = 22;$/;"	c
-MAX_ROW	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_ROW: usize = 32;$/;"	c
+MAX_COL	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_COL: usize = 24;$/;"	c
+MAX_ROW	/Users/tof/Coding/sokoban-rs/src/level.rs	/^const MAX_ROW: usize = 20;$/;"	c
 PathFinder	/Users/tof/Coding/sokoban-rs/src/path_finder.rs	/^pub struct PathFinder {$/;"	s
 Puzzle	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^pub struct Puzzle {$/;"	s
 Sprite	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^pub struct Sprite {$/;"	s
@@ -35,6 +35,7 @@ col	/Users/tof/Coding/sokoban-rs/src/coords.rs	/^pub fn col(coords: Coords) -> u
 coords	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn coords(&self) -> Coords {$/;"	f
 crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn crate_coords() {$/;"	f
 crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn crate_coords(&self, crate_number: usize) -> Coords {$/;"	f
+crate_max	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn crate_max(&self) -> usize {$/;"	f
 fill_tiles_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: Fixed) {$/;"	f
 find_crate_index	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn find_crate_index() {$/;"	f
 find_crate_index_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {$/;"	f
