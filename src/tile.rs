@@ -1,4 +1,3 @@
-use gtk::prelude::Cast;
 use crate::HashMap;
 use crate::Level;
 use crate::Sprite;
@@ -6,6 +5,7 @@ use crate::State;
 use crate::UNIT;
 use crate::coords::Coords;
 use crate::gdk::Paintable;
+use crate::grid::Grid;
 use crate::state::STATE_MAX;
 use glib::ControlFlow;
 use glib::clone;
@@ -14,9 +14,12 @@ use gtk::Picture;
 use gtk::gdk;
 use gtk::gdk_pixbuf;
 use gtk::gio;
+use gtk::prelude::Cast;
 use gtk::prelude::FixedExt;
 use gtk::prelude::ObjectExt;
 use gtk::prelude::WidgetExt;
+use gtk::prelude::*;
+use gtk::{Snapshot, graphene, WidgetPaintable, gsk};
 use rand::Rng;
 use rand::RngExt;
 use rand::prelude::SliceRandom;
@@ -135,7 +138,13 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
     fixed
 }
 
-pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: Fixed) {
+pub fn fill_tiles_for_level(
+    level: &Level,
+    crate_sprites: &Vec<Sprite>,
+    grid_rc: Rc<RefCell<Grid>>,
+    fixed: &gtk::Fixed,
+) {
+    let fixed = fixed.clone();
     let level = level.clone();
     let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
     let mut all_coords: Vec<Coords> = Vec::new();
@@ -144,27 +153,31 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
             all_coords.push((row, col))
         }
     }
-    let mut child = fixed.first_child();
-    while let Some(widget) = child {
-        let next = widget.next_sibling();
-        fixed.remove(&widget);
-        child = next;
+    {
+        let mut grid = grid_rc.borrow_mut();
+        grid.clear();
     };
+
     all_coords.shuffle(&mut rng());
     let index_rc = Rc::new(Cell::new(0));
     let total = level.size();
     glib::timeout_add_local(
-        Duration::from_millis(10),
+        Duration::from_millis(1),
         clone!(
+            #[strong]
+            grid_rc,
             #[strong]
             crate_sprites_rc,
             #[strong]
             index_rc,
             move || {
+                let mut grid = grid_rc.borrow_mut();
                 let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut index = index_rc.get();
                 // stop when all tiles are put
                 if index >= total {
+                    let result = save_fixed_to_png(&fixed, "/Users/tof/Coding/sokoban-rs/foo.png");
+                    dbg!(&result);
                     glib::ControlFlow::Break
                 } else {
                     let (row, col) = all_coords[index];
@@ -190,17 +203,14 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
                         State::OnGoal => State::Goal,
                         _ => state,
                     };
-                    let picture = picture(&picture_state);
-                    let x = col as f64 * UNIT;
-                    let y = row as f64 * UNIT;
-                    while let Some(previous_picture) = picture_at(&fixed, x, y) { 
-                        dbg!("remove");
-                        fixed.remove(&previous_picture)
-                    };
-                    fixed.put(&picture, col as f64 * UNIT, row as f64 * UNIT);
+                    let mut sprite = Sprite::make_sprite(&state, (row, col));
+                    if state != State::Crate && state != State::Stored && state != State::Sokoban {
+                        sprite.put(&fixed, (row, col));
+                    }
+                    // grid.put(&sprite);
                     if let Some(crate_index) = crate_index_opt {
                         let mut sprite = &mut crate_sprites[crate_index];
-                        sprite.place(&fixed)
+                        // grid.put(&sprite)
                     };
                     index_rc.set(index + 1);
                     glib::ControlFlow::Continue
@@ -209,7 +219,7 @@ pub fn fill_tiles_for_level(level: &Level, crate_sprites: &Vec<Sprite>, fixed: F
         ),
     );
 }
-fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
+pub fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
     let mut child = fixed.first_child();
 
     while let Some(widget) = child {
@@ -219,7 +229,8 @@ fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
             let (child_x, child_y) = fixed.child_position(&widget);
 
             if child_x == x && child_y == y {
-                let picture = widget.downcast::<Picture>()
+                let picture = widget
+                    .downcast::<Picture>()
                     .expect("can't downcast widget to picture");
                 return Some(picture.clone());
             }
@@ -229,3 +240,51 @@ fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
     }
     None
 }
+
+
+fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::BoolError> {
+    let width = fixed.width() as f32;
+    let height = fixed.height() as f32;
+
+    if width <= 0.0 || height <= 0.0 {
+        eprintln!("Fixed has 0 size: {}x{}", width, height);
+        return Ok(());
+    }
+
+    let snapshot = Snapshot::new();
+
+    // Manually walk every child of Fixed and record it into the Snapshot
+    let mut child = fixed.first_child();
+    while let Some(widget) = child {
+        if widget.is_visible() {
+            let (x, y) = fixed.child_position(&widget);
+            snapshot.save();
+            snapshot.translate(&graphene::Point::new(x as f32, y as f32));
+
+            // Use WidgetPaintable on each Picture (or snapshot_child if subclassed)
+            let paintable = gtk::WidgetPaintable::new(Some(&widget));
+            paintable.snapshot(&snapshot, widget.width() as f64, widget.height() as f64);
+
+            snapshot.restore();
+        }
+        child = widget.next_sibling();
+    }
+
+    let Some(node) = snapshot.to_node() else {
+        eprintln!("Snapshot produced no render node!");
+        return Ok(());
+    };
+
+    let renderer = fixed
+        .native()
+        .expect("Fixed must be inside a realized window")
+        .renderer()
+        .expect("Surface must have a renderer");
+
+    // Pass explicit bounds so transparent areas aren't cropped out
+    let bounds = graphene::Rect::new(0.0, 0.0, width, height);
+    let texture: gdk::Texture = renderer.render_texture(&node, Some(&bounds));
+
+    texture.save_to_png(filename)
+}
+

@@ -4,6 +4,7 @@ use crate::UNIT;
 use crate::coords::Coords;
 use crate::paintable;
 use crate::picture;
+use crate::tile::picture_at;
 use gtk::Fixed;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
@@ -33,6 +34,11 @@ impl Sprite {
 
     pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {
         self.coords = coords;
+        let (x, y) = (coords.1 as f64 * UNIT, coords.0 as f64 * UNIT);
+        if let Some(previous) = picture_at(fixed, x, y) {
+            fixed.remove(&previous);
+            fixed.put(&previous, x, y)
+        };
         fixed.move_(
             &self.picture,
             coords.1 as f64 * UNIT,

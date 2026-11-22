@@ -10,6 +10,7 @@ use crate::Step;
 use crate::UNIT;
 use crate::coords::Coords;
 use crate::fixed_for_level;
+use crate::grid::Grid;
 use crate::path_finder::PathFinder;
 use crate::picture;
 use crate::tile::fill_tiles_for_level;
@@ -46,7 +47,9 @@ impl Game {
             let mut sprite = Sprite::make_sprite(&State::Crate, puzzle.crate_coords(crate_index));
             crate_sprites.push(sprite);
         }
-        fill_tiles_for_level(&levels[level_index], &crate_sprites, fixed.clone());
+        let level = &levels[level_index];
+        let grid_rc = Rc::new(RefCell::new(Grid::new(level.width(), level.height())));
+        fill_tiles_for_level(&levels[level_index], &crate_sprites, grid_rc, &fixed);
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
         Self {
             levels: levels.clone(),
