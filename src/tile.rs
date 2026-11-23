@@ -19,7 +19,7 @@ use gtk::prelude::FixedExt;
 use gtk::prelude::ObjectExt;
 use gtk::prelude::WidgetExt;
 use gtk::prelude::*;
-use gtk::{Snapshot, graphene, WidgetPaintable, gsk};
+use gtk::{Snapshot, WidgetPaintable, graphene, gsk};
 use rand::Rng;
 use rand::RngExt;
 use rand::prelude::SliceRandom;
@@ -174,10 +174,20 @@ pub fn fill_tiles_for_level(
                 let mut grid = grid_rc.borrow_mut();
                 let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut index = index_rc.get();
-                // stop when all tiles are put
+                // stop when all tiles are put and snapshot a texture for background
                 if index >= total {
-                    let result = save_fixed_to_png(&fixed, "/Users/tof/Coding/sokoban-rs/foo.png");
-                    dbg!(&result);
+                    let background_texture = background_texture(&fixed);
+                    println!(
+                        "Texture: {}x{}",
+                        background_texture.width(),
+                        background_texture.height()
+                    );
+                    save_fixed_to_png(&fixed, "./foo.png");
+                    clear_fixed(&fixed);
+                    let background_picture = gtk::Picture::for_paintable(&background_texture);
+                    background_picture
+                        .set_size_request(background_texture.width(), background_texture.height());
+                    fixed.put(&background_picture, 0.0, 0.0);
                     glib::ControlFlow::Break
                 } else {
                     let (row, col) = all_coords[index];
@@ -241,15 +251,9 @@ pub fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
     None
 }
 
-
-fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::BoolError> {
+fn background_texture(fixed: &gtk::Fixed) -> gdk::Texture {
     let width = fixed.width() as f32;
     let height = fixed.height() as f32;
-
-    if width <= 0.0 || height <= 0.0 {
-        eprintln!("Fixed has 0 size: {}x{}", width, height);
-        return Ok(());
-    }
 
     let snapshot = Snapshot::new();
 
@@ -271,8 +275,7 @@ fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::Boo
     }
 
     let Some(node) = snapshot.to_node() else {
-        eprintln!("Snapshot produced no render node!");
-        return Ok(());
+        panic!("can't snapshot.to_node()")
     };
 
     let renderer = fixed
@@ -284,7 +287,17 @@ fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::Boo
     // Pass explicit bounds so transparent areas aren't cropped out
     let bounds = graphene::Rect::new(0.0, 0.0, width, height);
     let texture: gdk::Texture = renderer.render_texture(&node, Some(&bounds));
-
+    texture
+}
+fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::BoolError> {
+    let texture = background_texture(fixed);
     texture.save_to_png(filename)
 }
 
+fn clear_fixed(fixed: &gtk::Fixed) {
+    let mut child = fixed.first_child();
+    while let Some(widget) = child {
+        child = widget.next_sibling();
+        fixed.remove(&widget);
+    }
+}
