@@ -137,18 +137,8 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
     fixed
 }
 
-pub fn fill_tiles_for_level(
-    level: &Level,
-    fixed_rc: Rc<RefCell<Fixed>>,
-    crate_sprites_rc: Rc<RefCell<Vec<Sprite>>>,
-    sokoban_sprite_rc: Rc<RefCell<Sprite>>,
-    level_ready_rc: Rc<Cell<bool>>,
-) {
-    let level = level.clone();
-    {
-        let fixed = fixed_rc.borrow_mut();
-        clear_fixed(&fixed);
-    }
+pub fn fill_level_background_tiles(level: &Level, level_ready_rc: Rc<Cell<bool>>) -> gtk::Fixed {
+    let fixed = fixed_for_level(level);
     let mut all_coords: Vec<Coords> = Vec::new();
     for row in 0..level.height() {
         for col in 0..level.width() {
@@ -157,107 +147,46 @@ pub fn fill_tiles_for_level(
     }
     all_coords.shuffle(&mut rng());
     let index_rc = Rc::new(Cell::new(0));
-    let total = level.size();
-    let background_ready_rc = Rc::new(Cell::new(false));
+    let done_rc = Rc::new(Cell::new(false));
+    let level = level.clone();
+    let fixed = fixed_for_level(level);
+
     glib::timeout_add_local(
-        Duration::from_millis(10),
+        Duration::from_millis(1),
         clone!(
             #[strong]
-            fixed_rc,
+            fixed,
             #[strong]
             index_rc,
             #[strong]
-            background_ready_rc,
+            done_rc,
             move || {
                 let mut index = index_rc.get();
-                let mut background_ready = background_ready_rc.get();
-                let (visible_crate_count, crate_total) = {
-                    let crate_sprites = crate_sprites_rc.borrow();
-                    (
-                        crate_sprites
-                            .iter()
-                            .filter(|sprite| sprite.is_visible())
-                            .count(),
-                        crate_sprites.len(),
-                    )
-                };
-                // stop when all tiles are put and snapshot a texture for background
-                if index >= total && !background_ready {
-                    let background_texture = background_texture(fixed_rc.clone());
-                    if let Ok(fixed) = fixed_rc.try_borrow_mut() {
-                        clear_fixed(&fixed);
-                        let background_picture = gtk::Picture::for_paintable(&background_texture);
-                        background_picture.set_size_request(
-                            background_texture.width(),
-                            background_texture.height(),
-                        );
-                        fixed.put(&background_picture, 0.0, 0.0);
-                        background_ready_rc.set(true);
-                    } else {
-                        println!("can't borrow mutably fixed");
+                let mut done = done_rc.get();
+                if index < level.size() {
+                    let coords = all_coords[index];
+                    let level_state = level.state_at(coords);
+                    let bg_state = match level_state {
+                        State::Crate => State::Floor,
+                        State::Stored => State::Goal,
+                        State::Sokoban => State::Floor,
+                        State::OnGoal => State::Goal,
+                        _ => level_state,
                     };
-                    dbg!("foo");
+                    let (row, col) = coords;
+                    let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
+                    let picture = picture(&bg_state);
+                    fixed.put(&picture, x, y);
+                    index_rc.set(index + 1);
                     glib::ControlFlow::Continue
-                } else if index >= total && background_ready && visible_crate_count < crate_total {
-                    if let Ok(fixed) = fixed_rc.try_borrow_mut() {
-                        let mut crate_sprites = crate_sprites_rc.borrow_mut();
-                        let sprite_index = crate_sprites
-                            .iter()
-                            .position(|sprite| !sprite.is_visible())
-                            .expect("can't find a not yet placed sprite");
-                        let mut sprite = &mut crate_sprites[sprite_index];
-                        sprite.place(&fixed);
-                    } else {
-                        println!("can't borrow mutably fixed");
-                    }
-                    glib::ControlFlow::Continue
-                } else if background_ready && visible_crate_count == crate_total {
-                    if let Ok(mut sokoban_sprite) = sokoban_sprite_rc.try_borrow_mut() {
-                        if let Ok(fixed) = fixed_rc.try_borrow_mut() {
-                            sokoban_sprite.place(&fixed);
-                            level_ready_rc.set(true);
-                            let data = picture_data(&fixed);
-                            glib::ControlFlow::Break
-                        } else {
-                            println!("can't borrow mutably fixed");
-                            glib::ControlFlow::Continue
-                        }
-                    } else {
-                        println!("can't mutably borrow sokoban_sprite");
-                        glib::ControlFlow::Continue
-                    }
                 } else {
-                    if let Ok(fixed) = fixed_rc.try_borrow_mut() {
-                        let (row, col) = all_coords[index];
-                        let state = level.state_at((row, col));
-                        let mut crate_index_opt: Option<usize> = None;
-                        let picture_state = match state {
-                            // if state is crate, put the floor first, then the crate
-                            State::Crate => State::Floor,
-                            State::Stored => State::Goal,
-                            State::Sokoban => State::Floor,
-                            State::OnGoal => State::Goal,
-                            _ => state,
-                        };
-                        if picture_state != State::Crate
-                            && picture_state != State::Stored
-                            && picture_state != State::Sokoban
-                        {
-                            let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
-                            let picture = picture(&picture_state);
-                            fixed.put(&picture, x, y);
-                            let picture_data = picture_data(&fixed);
-                            index_rc.set(index + 1);
-                        }
-                    } else {
-                        println!("can't borrow mutably fixed");
-                    };
-                    glib::ControlFlow::Continue
+                    glib::ControlFlow::Break
                 }
             }
         ),
     );
 }
+
 pub fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
     let mut child = fixed.first_child();
 
@@ -280,47 +209,43 @@ pub fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {
     None
 }
 
-fn background_texture(fixed_rc: Rc<RefCell<Fixed>>) -> gdk::Texture {
-    if let Ok(fixed) = fixed_rc.try_borrow_mut() {
-        let width = fixed.width() as f32;
-        let height = fixed.height() as f32;
+fn background_texture(fixed: &Fixed) -> gdk::Texture {
+    let width = fixed.width() as f32;
+    let height = fixed.height() as f32;
 
-        let snapshot = Snapshot::new();
+    let snapshot = Snapshot::new();
 
-        // Manually walk every child of Fixed and record it into the Snapshot
-        let mut child = fixed.first_child();
-        while let Some(widget) = child {
-            if widget.is_visible() {
-                let (x, y) = fixed.child_position(&widget);
-                snapshot.save();
-                snapshot.translate(&graphene::Point::new(x as f32, y as f32));
+    // Manually walk every child of Fixed and record it into the Snapshot
+    let mut child = fixed.first_child();
+    while let Some(widget) = child {
+        if widget.is_visible() {
+            let (x, y) = fixed.child_position(&widget);
+            snapshot.save();
+            snapshot.translate(&graphene::Point::new(x as f32, y as f32));
 
-                // Use WidgetPaintable on each Picture (or snapshot_child if subclassed)
-                let paintable = gtk::WidgetPaintable::new(Some(&widget));
-                paintable.snapshot(&snapshot, widget.width() as f64, widget.height() as f64);
+            // Use WidgetPaintable on each Picture (or snapshot_child if subclassed)
+            let paintable = gtk::WidgetPaintable::new(Some(&widget));
+            paintable.snapshot(&snapshot, widget.width() as f64, widget.height() as f64);
 
-                snapshot.restore();
-            }
-            child = widget.next_sibling();
+            snapshot.restore();
         }
-
-        let Some(node) = snapshot.to_node() else {
-            panic!("can't snapshot.to_node()")
-        };
-
-        let renderer = fixed
-            .native()
-            .expect("Fixed must be inside a realized window")
-            .renderer()
-            .expect("Surface must have a renderer");
-
-        // Pass explicit bounds so transparent areas aren't cropped out
-        let bounds = graphene::Rect::new(0.0, 0.0, width, height);
-        let texture: gdk::Texture = renderer.render_texture(&node, Some(&bounds));
-        texture
-    } else {
-        panic!("can't borrow mutably fixed")
+        child = widget.next_sibling();
     }
+
+    let Some(node) = snapshot.to_node() else {
+        panic!("can't snapshot.to_node()")
+    };
+
+    let renderer = fixed
+        .native()
+        .expect("Fixed must be inside a realized window")
+        .renderer()
+        .expect("Surface must have a renderer");
+
+    // Pass explicit bounds so transparent areas aren't cropped out
+    let bounds = graphene::Rect::new(0.0, 0.0, width, height);
+    let texture: gdk::Texture = renderer.render_texture(&node, Some(&bounds));
+    texture
 }
 
 fn picture_data(fixed: &gtk::Fixed) -> Vec<(f64, f64, bool)> {

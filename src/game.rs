@@ -13,10 +13,11 @@ use crate::fixed_for_level;
 use crate::grid::Grid;
 use crate::path_finder::PathFinder;
 use crate::picture;
-use crate::tile::fill_tiles_for_level;
+use crate::tile::fill_level_background_tiles;
 use gtk::glib::clone;
 use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;
+use gtk::DrawingArea;
 use std::cell::Cell;
 use std::cell::Ref;
 use std::ops::ControlFlow;
@@ -26,7 +27,6 @@ use std::time::Duration;
 pub struct Game {
     levels: Vec<Level>,
     level_index: usize,
-    pub fixed: gtk::Fixed,
     pub label: gtk::Label,
     pub puzzle_rc: Rc<RefCell<Puzzle>>,
     pub steps_rc: Rc<RefCell<Vec<Step>>>,
@@ -54,17 +54,12 @@ impl Game {
         let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
         let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
 
-        fill_tiles_for_level(
-            &levels[level_index],
-            fixed_rc,
-            crate_sprites_rc.clone(),
-            sokoban_sprite_rc.clone(),
-            level_ready_rc,
-        );
+        let fixed = fill_level_background_tiles(&levels[level_index], level_ready_rc);
+        //let texture = background_texture(&fixed);
+
         Self {
             levels: levels.clone(),
             level_index: level_index,
-            fixed: fixed,
             label: label,
             puzzle_rc: Rc::new(RefCell::new(puzzle)),
             steps_rc: Rc::new(RefCell::new(Vec::new())),

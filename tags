@@ -30,7 +30,7 @@ a_goal_is_added_a_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_goa
 a_goal_is_added_a_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    fn a_goal_is_added_a_sokoban() {$/;"	f
 add_crate	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_crate(self) -> State {$/;"	f
 add_sokoban	/Users/tof/Coding/sokoban-rs/src/state.rs	/^    pub fn add_sokoban(self) -> State {$/;"	f
-background_texture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^fn background_texture(fixed_rc: Rc<RefCell<Fixed>>) -> gdk::Texture {$/;"	f
+background_texture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^fn background_texture(fixed: &Fixed) -> gdk::Texture {$/;"	f
 between	/Users/tof/Coding/sokoban-rs/src/direction.rs	/^    pub fn between(origin: Coords, destination: Coords) -> Direction {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
 clear	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn clear(&mut self) {$/;"	f
@@ -41,7 +41,7 @@ crate_coords	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn crate_coords
 crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn crate_coords() {$/;"	f
 crate_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn crate_coords(&self, crate_number: usize) -> Coords {$/;"	f
 crate_max	/Users/tof/Coding/sokoban-rs/src/level.rs	/^    pub fn crate_max(&self) -> usize {$/;"	f
-fill_tiles_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fill_tiles_for_level($/;"	f
+fill_level_background_tiles	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fill_level_background_tiles(level: &Level, level_ready_rc: Rc<Cell<bool>>) -> gtk::Fixed {$/;"	f
 find_crate_index	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    fn find_crate_index() {$/;"	f
 find_crate_index_at	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {$/;"	f
 find_mark_at_coords	/Users/tof/Coding/sokoban-rs/src/puzzle.rs	/^    pub fn find_mark_at_coords(&self, target: Coords) -> Option<char> {$/;"	f
