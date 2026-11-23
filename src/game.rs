@@ -52,10 +52,11 @@ impl Game {
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
         let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites));
         let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
+        let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
 
         fill_tiles_for_level(
             &levels[level_index],
-            &fixed,
+            fixed_rc,
             crate_sprites_rc.clone(),
             sokoban_sprite_rc.clone(),
             level_ready_rc,
@@ -165,6 +166,7 @@ impl Game {
                     .expect("can't find crate");
                 let mut sprite = &mut crate_sprites[crate_index];
                 sprite.r#move(&fixed, target);
+                // sprite.place(&fixed);
             };
             let position = puzzle.sokoban_position();
             let mut sokoban_sprite = self.sokoban_sprite_rc.borrow_mut();
