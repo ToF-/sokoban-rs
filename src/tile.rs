@@ -95,9 +95,8 @@ pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };
 pub fn picture(state: &State) -> Picture {
     let paintable = paintable(state);
     let picture = Picture::for_paintable(&paintable);
-    picture.set_halign(gtk::Align::Center);
-    picture.set_valign(gtk::Align::Center);
     picture.set_can_shrink(false);
+    picture.set_size_request(32, 32);
     picture
 }
 
@@ -140,24 +139,17 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
 
 pub fn fill_tiles_for_level(
     level: &Level,
-    crate_sprites: &Vec<Sprite>,
-    grid_rc: Rc<RefCell<Grid>>,
     fixed: &gtk::Fixed,
 ) {
     let fixed = fixed.clone();
     let level = level.clone();
-    let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites.clone()));
+    clear_fixed(&fixed);
     let mut all_coords: Vec<Coords> = Vec::new();
     for row in 0..level.height() {
         for col in 0..level.width() {
             all_coords.push((row, col))
         }
     }
-    {
-        let mut grid = grid_rc.borrow_mut();
-        grid.clear();
-    };
-
     all_coords.shuffle(&mut rng());
     let index_rc = Rc::new(Cell::new(0));
     let total = level.size();
@@ -165,29 +157,20 @@ pub fn fill_tiles_for_level(
         Duration::from_millis(1),
         clone!(
             #[strong]
-            grid_rc,
-            #[strong]
-            crate_sprites_rc,
-            #[strong]
             index_rc,
             move || {
-                let mut grid = grid_rc.borrow_mut();
-                let mut crate_sprites = crate_sprites_rc.borrow_mut();
                 let mut index = index_rc.get();
                 // stop when all tiles are put and snapshot a texture for background
                 if index >= total {
-                    let background_texture = background_texture(&fixed);
-                    println!(
-                        "Texture: {}x{}",
-                        background_texture.width(),
-                        background_texture.height()
-                    );
-                    save_fixed_to_png(&fixed, "./foo.png");
-                    clear_fixed(&fixed);
-                    let background_picture = gtk::Picture::for_paintable(&background_texture);
-                    background_picture
-                        .set_size_request(background_texture.width(), background_texture.height());
-                    fixed.put(&background_picture, 0.0, 0.0);
+                    let fixed_clone = fixed.clone();
+                    glib::timeout_add_local_once(Duration::from_millis(20), move || {
+                        let background_texture = background_texture(&fixed_clone);
+                        clear_fixed(&fixed_clone);
+                        let background_picture = gtk::Picture::for_paintable(&background_texture);
+                        background_picture
+                            .set_size_request(background_texture.width(), background_texture.height());
+                        fixed_clone.put(&background_picture, 0.0, 0.0);
+                    });
                     glib::ControlFlow::Break
                 } else {
                     let (row, col) = all_coords[index];
@@ -195,34 +178,19 @@ pub fn fill_tiles_for_level(
                     let mut crate_index_opt: Option<usize> = None;
                     let picture_state = match state {
                         // if state is crate, put the floor first, then the crate
-                        State::Crate => {
-                            crate_index_opt = crate_sprites
-                                .iter()
-                                .position(|sprite| sprite.coords() == ((row, col)));
-                            State::Floor
-                        }
-                        // if the state is stored crate, put the goal first, then the crate
-                        State::Stored => {
-                            crate_index_opt = crate_sprites
-                                .iter()
-                                .position(|sprite| sprite.coords() == ((row, col)));
-                            State::Goal
-                        }
-                        // if the state is sokoban don't put it, as it comes later
+                        State::Crate => State::Floor,
+                        State::Stored => State::Goal,
                         State::Sokoban => State::Floor,
                         State::OnGoal => State::Goal,
                         _ => state,
                     };
-                    let mut sprite = Sprite::make_sprite(&state, (row, col));
-                    if state != State::Crate && state != State::Stored && state != State::Sokoban {
-                        sprite.put(&fixed, (row, col));
+                    if picture_state != State::Crate && picture_state != State::Stored && picture_state != State::Sokoban {
+                        let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
+                        let picture = picture(&picture_state);
+                        fixed.put(&picture, x, y);
+                        let picture_data = picture_data(&fixed);
+                        index_rc.set(index + 1);
                     }
-                    // grid.put(&sprite);
-                    if let Some(crate_index) = crate_index_opt {
-                        let mut sprite = &mut crate_sprites[crate_index];
-                        // grid.put(&sprite)
-                    };
-                    index_rc.set(index + 1);
                     glib::ControlFlow::Continue
                 }
             }
@@ -292,6 +260,24 @@ fn background_texture(fixed: &gtk::Fixed) -> gdk::Texture {
 fn save_fixed_to_png(fixed: &gtk::Fixed, filename: &str) -> Result<(), glib::BoolError> {
     let texture = background_texture(fixed);
     texture.save_to_png(filename)
+}
+
+fn picture_data(fixed: &gtk::Fixed) -> Vec<(f64, f64, bool)> {
+    let mut result = Vec::new();
+    let mut child = fixed.first_child();
+    while let Some(widget) = child {
+        let (x, y) = fixed.child_position(&widget);
+        let visible = widget.is_visible();
+        child = widget.next_sibling();
+        let picture = widget.downcast::<gtk::Picture>().expect("not a picture");
+        result.push((x, y, visible))
+    }
+    result.sort_by(|a, b| {
+        a.1.total_cmp(&b.1)
+            .then_with(|| a.0.total_cmp(&b.0))
+            .then_with(|| a.2.cmp(&b.2))
+    });
+    result
 }
 
 fn clear_fixed(fixed: &gtk::Fixed) {
