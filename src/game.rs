@@ -43,16 +43,15 @@ impl Game {
         let fixed = fixed_for_level(&levels[level_index]);
         let label = gtk::Label::new(Some(&format!("{}", level_index)));
         let level = &levels[level_index];
-        fill_tiles_for_level(&levels[level_index], &fixed);
         for crate_index in 0..puzzle.max_crate() {
             let crate_coords = puzzle.crate_coords(crate_index);
             let mut sprite = Sprite::make_sprite(&State::Crate, puzzle.crate_coords(crate_index));
             crate_sprites.push(sprite);
         }
-        for mut sprite in crate_sprites.iter_mut() {
-            sprite.place(&fixed);
-        }
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
+        let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites));
+        let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
+        fill_tiles_for_level(&levels[level_index], &fixed, crate_sprites_rc.clone(), sokoban_sprite_rc.clone());
         Self {
             levels: levels.clone(),
             level_index: level_index,
@@ -60,8 +59,8 @@ impl Game {
             label: label,
             puzzle_rc: Rc::new(RefCell::new(puzzle)),
             steps_rc: Rc::new(RefCell::new(Vec::new())),
-            sokoban_sprite_rc: Rc::new(RefCell::new(sokoban_sprite)),
-            crate_sprites_rc: Rc::new(RefCell::new(crate_sprites.clone())),
+            sokoban_sprite_rc: sokoban_sprite_rc.clone(),
+            crate_sprites_rc: crate_sprites_rc.clone(),
             mark_sprites_rc: Rc::new(RefCell::new(HashMap::new())),
         }
     }

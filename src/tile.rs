@@ -140,6 +140,8 @@ pub fn fixed_for_level(level: &Level) -> gtk::Fixed {
 pub fn fill_tiles_for_level(
     level: &Level,
     fixed: &gtk::Fixed,
+    crate_sprites_rc: Rc<RefCell<Vec<Sprite>>>,
+    sokoban_sprite_rc: Rc<RefCell<Sprite>>,
 ) {
     let fixed = fixed.clone();
     let level = level.clone();

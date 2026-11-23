@@ -15,6 +15,7 @@ pub struct Sprite {
     picture: Picture,
     coords: Coords,
     z_order: usize,
+    is_visible: bool,
 }
 
 impl Sprite {
@@ -25,6 +26,7 @@ impl Sprite {
             picture: picture,
             coords: coords,
             z_order: state.z_order(),
+            is_visible: false,
         }
     }
 
@@ -51,7 +53,8 @@ impl Sprite {
             &self.picture,
             self.coords.1 as f64 * UNIT,
             self.coords.0 as f64 * UNIT,
-        )
+        );
+        self.is_visible = true;
     }
 
     pub fn put(&mut self, fixed: &Fixed, coords: Coords) {
@@ -60,11 +63,13 @@ impl Sprite {
             &self.picture,
             coords.1 as f64 * UNIT,
             coords.0 as f64 * UNIT,
-        )
+        );
+        self.is_visible = true;
     }
 
     pub fn remove(&mut self, fixed: &Fixed) {
         fixed.remove(&self.picture);
+        self.is_visible = false;
     }
 
     pub fn set_picture(&mut self, state: &State) {
