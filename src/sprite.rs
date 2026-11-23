@@ -34,6 +34,10 @@ impl Sprite {
         self.z_order
     }
 
+    pub fn is_visible(&self) -> bool {
+        self.is_visible
+    }
+
     pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {
         self.coords = coords;
         let (x, y) = (coords.1 as f64 * UNIT, coords.0 as f64 * UNIT);

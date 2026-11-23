@@ -142,6 +142,7 @@ pub fn fill_tiles_for_level(
     fixed: &gtk::Fixed,
     crate_sprites_rc: Rc<RefCell<Vec<Sprite>>>,
     sokoban_sprite_rc: Rc<RefCell<Sprite>>,
+    level_ready_rc: Rc<Cell<bool>>,
 ) {
     let fixed = fixed.clone();
     let level = level.clone();
@@ -162,17 +163,54 @@ pub fn fill_tiles_for_level(
             index_rc,
             move || {
                 let mut index = index_rc.get();
+                let (visible_crate_count, crate_total) = {
+                    let crate_sprites = crate_sprites_rc.borrow();
+                    (
+                        crate_sprites
+                            .iter()
+                            .filter(|sprite| sprite.is_visible())
+                            .count(),
+                        crate_sprites.len(),
+                    )
+                };
+                let sokoban_sprite = sokoban_sprite_rc.borrow();
                 // stop when all tiles are put and snapshot a texture for background
-                if index >= total {
+                if index >= total && visible_crate_count == 0 {
                     let fixed_clone = fixed.clone();
-                    glib::timeout_add_local_once(Duration::from_millis(20), move || {
-                        let background_texture = background_texture(&fixed_clone);
-                        clear_fixed(&fixed_clone);
-                        let background_picture = gtk::Picture::for_paintable(&background_texture);
-                        background_picture
-                            .set_size_request(background_texture.width(), background_texture.height());
-                        fixed_clone.put(&background_picture, 0.0, 0.0);
-                    });
+                    glib::timeout_add_local_once(
+                        Duration::from_millis(200),
+                        clone!(
+                            #[strong]
+                            crate_sprites_rc,
+                            #[strong]
+                            level_ready_rc,
+                            move || {
+                                let background_texture = background_texture(&fixed_clone);
+                                clear_fixed(&fixed_clone);
+                                let background_picture =
+                                    gtk::Picture::for_paintable(&background_texture);
+                                background_picture.set_size_request(
+                                    background_texture.width(),
+                                    background_texture.height(),
+                                );
+                                fixed_clone.put(&background_picture, 0.0, 0.0);
+                                level_ready_rc.set(true);
+                            }
+                        ),
+                    );
+                    dbg!("foo");
+                    glib::ControlFlow::Continue
+                } else if index >= total && visible_crate_count < crate_total {
+                    let mut crate_sprites = crate_sprites_rc.borrow_mut();
+                    let sprite_index = crate_sprites.iter()
+                        .position(|sprite| ! sprite.is_visible())
+                        .expect("can't find a not yet placed sprite");
+                    let mut sprite = &mut crate_sprites[sprite_index];
+                    sprite.place(&fixed);
+                    glib::ControlFlow::Continue
+                } else if visible_crate_count == crate_total && !sokoban_sprite.is_visible() {
+                    glib::ControlFlow::Break
+                } else if visible_crate_count == crate_total && sokoban_sprite.is_visible() {
                     glib::ControlFlow::Break
                 } else {
                     let (row, col) = all_coords[index];
@@ -186,7 +224,10 @@ pub fn fill_tiles_for_level(
                         State::OnGoal => State::Goal,
                         _ => state,
                     };
-                    if picture_state != State::Crate && picture_state != State::Stored && picture_state != State::Sokoban {
+                    if picture_state != State::Crate
+                        && picture_state != State::Stored
+                        && picture_state != State::Sokoban
+                    {
                         let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
                         let picture = picture(&picture_state);
                         fixed.put(&picture, x, y);

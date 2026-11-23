@@ -17,6 +17,7 @@ use crate::tile::fill_tiles_for_level;
 use gtk::glib::clone;
 use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;
+use std::cell::Cell;
 use std::cell::Ref;
 use std::ops::ControlFlow;
 use std::time::Duration;
@@ -37,7 +38,7 @@ pub struct Game {
 const GAME_MAX: usize = 90;
 
 impl Game {
-    pub fn new(levels: &Vec<Level>, level_index: usize) -> Self {
+    pub fn new(levels: &Vec<Level>, level_index: usize, level_ready_rc: Rc<Cell<bool>>) -> Self {
         let puzzle = Puzzle::from_level(&levels[level_index]);
         let mut crate_sprites = Vec::new();
         let fixed = fixed_for_level(&levels[level_index]);
@@ -51,7 +52,14 @@ impl Game {
         let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
         let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites));
         let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
-        fill_tiles_for_level(&levels[level_index], &fixed, crate_sprites_rc.clone(), sokoban_sprite_rc.clone());
+
+        fill_tiles_for_level(
+            &levels[level_index],
+            &fixed,
+            crate_sprites_rc.clone(),
+            sokoban_sprite_rc.clone(),
+            level_ready_rc,
+        );
         Self {
             levels: levels.clone(),
             level_index: level_index,
@@ -69,20 +77,22 @@ impl Game {
         self.levels.clone()
     }
 
-    pub fn next_level(game: &Game) -> Self {
+    pub fn next_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {
         let mut level_index = game.level_index() + 1;
         if level_index == GAME_MAX {
             level_index = 1
         };
-        Self::new(&game.levels(), level_index)
+        level_ready_rc.set(false);
+        Self::new(&game.levels(), level_index, level_ready_rc)
     }
 
-    pub fn previous_level(game: &Game) -> Self {
+    pub fn previous_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {
         let mut level_index = game.level_index() - 1;
         if level_index == 0 {
             level_index = GAME_MAX - 1
         };
-        Self::new(&game.levels(), level_index)
+        level_ready_rc.set(false);
+        Self::new(&game.levels(), level_index, level_ready_rc)
     }
 
     pub fn level_index(&self) -> usize {
