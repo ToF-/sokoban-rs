@@ -36,8 +36,8 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn make_tile(state: &Element) -> Self {
-        let tile_name = match state {
+    pub fn make_tile(element: &Element) -> Self {
+        let tile_name = match element {
             Element::Crate => "crate",
             Element::Floor => "floor",
             Element::Goal => "goal",
@@ -77,23 +77,23 @@ impl Tiles {
     pub fn from_picture_files() -> Self {
         let tiles = (0usize..STATE_MAX)
             .map(|index| {
-                let state = Element::try_from(index).expect("index out of bound for Element");
-                Tile::make_tile(&state)
+                let element = Element::try_from(index).expect("index out of bound for Element");
+                Tile::make_tile(&element)
             })
             .collect();
         Self { tiles }
     }
 
-    pub fn paintable(&self, state: &Element) -> Paintable {
-        self.tiles[*state as usize].paintable()
+    pub fn paintable(&self, element: &Element) -> Paintable {
+        self.tiles[*element as usize].paintable()
     }
 }
 thread_local! {
 pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };
 }
 
-pub fn picture(state: &Element) -> Picture {
-    let paintable = paintable(state);
+pub fn picture(element: &Element) -> Picture {
+    let paintable = paintable(element);
     let picture = Picture::for_paintable(&paintable);
     picture.set_can_shrink(false);
     picture.set_size_request(32, 32);
@@ -119,10 +119,10 @@ pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {
     picture
 }
 
-pub fn paintable(state: &Element) -> Paintable {
+pub fn paintable(element: &Element) -> Paintable {
     TILES.with(|cell| {
         let tiles = cell.get_or_init(Tiles::from_picture_files);
-        tiles.paintable(state).clone()
+        tiles.paintable(element).clone()
     })
 }
 
@@ -228,22 +228,22 @@ pub fn fill_tiles_for_level(
                 } else {
                     if let Ok(fixed) = fixed_rc.try_borrow_mut() {
                         let (row, col) = all_coords[index];
-                        let state = level.state_at((row, col));
+                        let element = level.element_at((row, col));
                         let mut crate_index_opt: Option<usize> = None;
-                        let picture_state = match state {
-                            // if state is crate, put the floor first, then the crate
+                        let picture_element = match element {
+                            // if element is crate, put the floor first, then the crate
                             Element::Crate => Element::Floor,
                             Element::Stored => Element::Goal,
                             Element::Sokoban => Element::Floor,
                             Element::OnGoal => Element::Goal,
-                            _ => state,
+                            _ => element,
                         };
-                        if picture_state != Element::Crate
-                            && picture_state != Element::Stored
-                            && picture_state != Element::Sokoban
+                        if picture_element != Element::Crate
+                            && picture_element != Element::Stored
+                            && picture_element != Element::Sokoban
                         {
                             let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
-                            let picture = picture(&picture_state);
+                            let picture = picture(&picture_element);
                             fixed.put(&picture, x, y);
                             let picture_data = picture_data(&fixed);
                             index_rc.set(index + 1);

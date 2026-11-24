@@ -77,9 +77,9 @@ impl Level {
         let mut to_paint: VecDeque<(Coords, Element)> = VecDeque::new();
         let mut visited: HashSet<Coords> = HashSet::new();
         to_paint.push_back(((0, 0), Element::Grass_1));
-        while let Some((position, state)) = to_paint.pop_front() {
+        while let Some((position, element)) = to_paint.pop_front() {
             let (row, col) = position;
-            squares[row][col] = state;
+            squares[row][col] = element;
             for direction in [
                 Direction::Up,
                 Direction::Right,
@@ -87,14 +87,14 @@ impl Level {
                 Direction::Left,
             ] {
                 if let Some(destination) = adjacent(position, direction) {
-                    let next_state = if state == Element::Grass_1 {
+                    let next_element = if element == Element::Grass_1 {
                         Element::Grass_2
                     } else {
                         Element::Grass_1
                     };
                     let (row, col) = destination;
                     if !visited.contains(&destination) && squares[row][col] == Element::Floor {
-                        to_paint.push_back((destination, next_state));
+                        to_paint.push_back((destination, next_element));
                         let _ = visited.insert(destination);
                     }
                 }
@@ -113,7 +113,7 @@ impl Level {
         MAX_COL * MAX_ROW
     }
 
-    pub fn state_at(&self, coords: Coords) -> Element {
+    pub fn element_at(&self, coords: Coords) -> Element {
         let (row, col) = coords;
         self.squares[row][col]
     }
@@ -122,7 +122,7 @@ impl Level {
         self.squares
             .iter()
             .flatten()
-            .filter(|state| **state == Element::Crate || **state == Element::Stored)
+            .filter(|element| **element == Element::Crate || **element == Element::Stored)
             .count()
     }
 
@@ -130,8 +130,8 @@ impl Level {
         let mut result = Vec::new();
         for row in 0..self.height() {
             for col in 0..self.width() {
-                let state = self.squares[row][col];
-                if state == Element::Crate || state == Element::Stored {
+                let element = self.squares[row][col];
+                if element == Element::Crate || element == Element::Stored {
                     result.push((row, col))
                 }
             }
@@ -142,7 +142,7 @@ impl Level {
         let mut result = String::new();
         for row in 0..self.height() {
             for col in 0..self.width() {
-                result.push(char::from(self.state_at((row, col))))
+                result.push(char::from(self.element_at((row, col))))
             }
             result.push('\n');
         }
@@ -187,7 +187,7 @@ mod tests {
     fn initialize_from_bytes() {
         gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
         let bytes = gio::resources_lookup_data(
-            "/com/example/MyApp/files/level_00.txt",
+            "/com/example/MyApp/files/level_01.txt",
             gio::ResourceLookupFlags::NONE,
         )
         .expect("Failed to find resource");
@@ -196,17 +196,17 @@ mod tests {
 -|-|-|-|-|-|-|-|-|-|-|-|
 |-|-|-|-|-|-|-|-|-|-|-|-
 -|-|-|-|-|-|-|-|-|-|-|-|
-|-|-|-|-|-|-|-|-|-|-|-|-
--|-|-|-|-|-|-|-|-|-|-|-|
-|-|-|-|'''''''''''|-|-|-
--|-|-|-'#########'-|-|-|
-|-|-|-|'#       #'|-|-|-
--|-|-|-'#.. $ $@#'-|-|-|
-|-|-|-|'#       #'|-|-|-
--|-|-|-'#########'-|-|-|
-|-|-|-|'''''''''''|-|-|-
--|-|-|-|-|-|-|-|-|-|-|-|
-|-|-|-|-|-|-|-|-|-|-|-|-
+|-|-|-|#####|-|-|-|-|-|-
+-|-|-|-#   #-|-|-|-|-|-|
+|-|-|-|#$  #|-|-|-|-|-|-
+-|-|-###  $##|-|-|-|-|-|
+|-|-|#  $ $ #-|-|-|-|-|-
+-|-### # ## #|-|######-|
+|-|#   # ## #####  ..#|-
+-|-# $  $          ..#-|
+|-|##### ### #@##  ..#|-
+-|-|-|-#     #########-|
+|-|-|-|#######|-|-|-|-|-
 -|-|-|-|-|-|-|-|-|-|-|-|
 |-|-|-|-|-|-|-|-|-|-|-|-
 -|-|-|-|-|-|-|-|-|-|-|-|
@@ -214,6 +214,7 @@ mod tests {
 ";
 
         let level = Level::from_bytes(&bytes);
+        println!("{}", level.pretty_print());
         assert_eq!(expected, level.pretty_print());
     }
 }

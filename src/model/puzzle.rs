@@ -4,13 +4,14 @@ use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
 use crate::model::element;
 use crate::model::element::Element;
+use crate::model::puzzle::Element::Floor;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Puzzle {
-    pieces: HashMap<Coords, Element>,
-    sokoban_position: Coords,
+    elements: HashMap<Coords, Element>,
+    sokoban_coords: Coords,
     goals: HashSet<Coords>,
     crates: Vec<Coords>,
     marks: HashMap<char, Coords>,
@@ -18,50 +19,61 @@ pub struct Puzzle {
 
 impl Puzzle {
     pub fn from_level(level: &Level) -> Self {
-        let mut pieces = HashMap::new();
-        let mut sokoban_position = (0, 0);
+        let mut elements = HashMap::new();
+        let mut sokoban_coords = (0, 0);
         let mut goals = HashSet::new();
         let mut crates = Vec::new();
         let mut marks = HashMap::new();
         for col in 0..level.width() {
             for row in 0..level.height() {
-                let state = level.state_at((row, col));
-                if state == Element::Goal {
-                    goals.insert((row, col));
-                    pieces.insert((row, col), Element::Floor);
-                } else if state == Element::Stored {
-                    goals.insert((row, col));
-                    crates.push((row, col));
-                    pieces.insert((row, col), Element::Crate);
-                } else if state == Element::Sokoban {
-                    pieces.insert((row, col), Element::Sokoban);
-                    sokoban_position = (row, col);
-                } else if state == Element::Crate {
-                    crates.push((row, col));
-                    pieces.insert((row, col), Element::Crate);
-                } else if state != Element::Outside {
-                    pieces.insert((row, col), state.clone());
-                }
+                let coords = (row, col);
+                let level_element = level.element_at(coords);
+                let puzzle_element = match level_element {
+                    Element::Crate => {
+                        crates.push(coords);
+                        Element::Crate
+                    }
+                    Element::Stored => {
+                        goals.insert(coords);
+                        crates.push(coords);
+                        Element::Crate
+                    }
+                    Element::Sokoban => {
+                        sokoban_coords = coords;
+                        Element::Sokoban
+                    }
+                    Element::OnGoal => {
+                        sokoban_coords = coords;
+                        goals.insert(coords);
+                        Element::Sokoban
+                    }
+                    Element::Goal => {
+                        goals.insert(coords);
+                        Element::Floor
+                    }
+                    other => other,
+                };
+                elements.insert(coords, puzzle_element.clone());
             }
         }
         Self {
-            pieces,
-            sokoban_position,
+            elements,
+            sokoban_coords,
             goals,
             crates,
             marks,
         }
     }
 
-    pub fn pieces(&self) -> HashMap<Coords, Element> {
-        self.pieces.clone()
+    pub fn elements(&self) -> HashMap<Coords, Element> {
+        self.elements.clone()
     }
-    pub fn sokoban_position(&self) -> Coords {
-        self.sokoban_position
+    pub fn sokoban_coords(&self) -> Coords {
+        self.sokoban_coords
     }
 
-    pub fn state_at(&self, coords: Coords) -> Element {
-        self.pieces.get(&coords).expect("illegal coords").clone()
+    pub fn element_at(&self, coords: Coords) -> Element {
+        self.elements.get(&coords).expect("illegal coords").clone()
     }
 
     pub fn is_solved(&self) -> bool {
@@ -71,14 +83,14 @@ impl Puzzle {
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
-        if let Some(destination) = adjacent(self.sokoban_position(), direction)
-            && let Some(piece) = self.pieces.get(&destination)
+        if let Some(destination) = adjacent(self.sokoban_coords(), direction)
+            && let Some(piece) = self.elements.get(&destination)
         {
             if *piece == Element::Floor || *piece == Element::Goal {
                 true
             } else if *piece == Element::Crate {
                 if let Some(target) = adjacent(destination, direction)
-                    && let Some(piece) = self.pieces.get(&target)
+                    && let Some(piece) = self.elements.get(&target)
                 {
                     *piece == Element::Floor || *piece == Element::Goal
                 } else {
@@ -107,30 +119,30 @@ impl Puzzle {
     }
 
     pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {
-        let origin_state = self.state_at(origin);
+        let origin_element = self.element_at(origin);
         if let Some(destination) = adjacent(origin, direction) {
-            let destination_state = self.state_at(destination);
-            let target_state = if origin_state == Element::Sokoban {
-                destination_state.cover(Element::Sokoban)
-            } else if origin_state == Element::Crate {
-                destination_state.cover(Element::Crate)
+            let destination_element = self.element_at(destination);
+            let target_element = if origin_element == Element::Sokoban {
+                destination_element.cover(Element::Sokoban)
+            } else if origin_element == Element::Crate {
+                destination_element.cover(Element::Crate)
             } else {
-                destination_state
+                destination_element
             };
-            let clean_state = if origin_state == Element::Sokoban {
-                destination_state.uncover()
-            } else if origin_state == Element::Crate {
-                destination_state.uncover()
+            let clean_element = if origin_element == Element::Sokoban {
+                destination_element.uncover()
+            } else if origin_element == Element::Crate {
+                destination_element.uncover()
             } else {
-                destination_state
+                destination_element
             };
-            if let Some(piece) = self.pieces.get_mut(&destination) {
-                *piece = target_state
+            if let Some(piece) = self.elements.get_mut(&destination) {
+                *piece = target_element
             };
-            if let Some(piece) = self.pieces.get_mut(&origin) {
-                *piece = clean_state
+            if let Some(piece) = self.elements.get_mut(&origin) {
+                *piece = clean_element
             };
-            if origin_state == Element::Crate {
+            if origin_element == Element::Crate {
                 let crate_index = self
                     .find_crate_index_at(origin)
                     .expect("can't find crate index");
@@ -140,9 +152,9 @@ impl Puzzle {
     }
 
     pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
-        let origin = self.sokoban_position();
+        let origin = self.sokoban_coords();
         if let Some(destination) = adjacent(origin, direction) {
-            let target_opt = if let Some(piece) = self.pieces.get(&destination) {
+            let target_opt = if let Some(piece) = self.elements.get(&destination) {
                 if *piece == Element::Crate {
                     adjacent(destination, direction)
                 } else {
@@ -155,7 +167,7 @@ impl Puzzle {
                 self.move_piece_at(destination, direction)
             };
             self.move_piece_at(origin, direction);
-            self.sokoban_position = destination;
+            self.sokoban_coords = destination;
             target_opt
         } else {
             None
@@ -163,7 +175,7 @@ impl Puzzle {
     }
 
     pub fn insert_mark(&mut self, letter: char) {
-        let coords = self.sokoban_position();
+        let coords = self.sokoban_coords();
         let _ = self.marks.insert(letter, coords);
     }
 
@@ -178,7 +190,7 @@ impl Puzzle {
     }
 
     pub fn remove_mark(&mut self, letter: char) {
-        let coords = self.sokoban_position();
+        let coords = self.sokoban_coords();
         self.marks.remove(&letter);
     }
 
@@ -186,7 +198,7 @@ impl Puzzle {
         let mut result = String::new();
         let mut width: usize = 0;
         let mut height: usize = 0;
-        for (coords, _) in &self.pieces {
+        for (coords, _) in &self.elements {
             let (row, col) = coords;
             if *row >= height {
                 height = row + 1;
@@ -197,7 +209,7 @@ impl Puzzle {
         }
         for row in 0..height {
             for col in 0..width {
-                if let Some(piece) = self.pieces.get(&(row, col)) {
+                if let Some(piece) = self.elements.get(&(row, col)) {
                     result.push(char::from(*piece))
                 } else {
                     result.push(' ')
@@ -214,7 +226,7 @@ mod tests {
     use super::*;
     use gtk::gio;
 
-    fn puzzle_1() -> Puzzle {
+    fn puzzle() -> Puzzle {
         gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
         let bytes = gio::resources_lookup_data(
             "/com/example/MyApp/files/level_01.txt",
@@ -225,71 +237,93 @@ mod tests {
         Puzzle::from_level(&level)
     }
 
-    #[ignore]
     #[test]
     fn initialize_from_level() {
-        let puzzle = puzzle_1();
-        assert_eq!((9, 12), puzzle.sokoban_position());
+        let puzzle = puzzle();
+        let mut goals: Vec<&Coords> = puzzle.goals.iter().collect::<Vec<&Coords>>();
+        goals.sort();
+        let expected: Vec<&Coords> = [
+            &(11, 19),
+            &(11, 20),
+            &(12, 19),
+            &(12, 20),
+            &(13, 19),
+            &(13, 20),
+        ]
+        .to_vec();
+        assert_eq!(expected, goals);
+        let mut crates: Vec<Coords> = puzzle.crates.clone();
+        crates.sort();
+
+        let expected: Vec<Coords> = vec![(7, 8), (8, 10), (9, 8), (9, 10), (12, 5), (12, 8)];
+
+        assert_eq!(expected, crates);
+        assert_eq!((13, 14), puzzle.sokoban_coords());
         assert_eq!(false, puzzle.is_solved());
     }
 
-    #[ignore]
     #[test]
     fn sokoban_cannot_move_into_wall() {
-        let puzzle = puzzle_1();
+        let puzzle = puzzle();
+        let coords = puzzle.sokoban_coords();
+        let coords_up = adjacent(coords, Direction::Up);
+        println!("{}", puzzle.pretty_print());
+        dbg!(coords);
+        dbg!(coords_up);
+        assert_eq!(
+            Some(&Element::Floor),
+            puzzle.elements().get(&coords_up.unwrap())
+        );
         assert_eq!(false, puzzle.can_move(Direction::Left));
         assert_eq!(false, puzzle.can_move(Direction::Down));
         assert_eq!(false, puzzle.can_move(Direction::Right));
         assert_eq!(true, puzzle.can_move(Direction::Up));
     }
 
-    #[ignore]
     #[test]
     fn sokoban_can_move_on_floor() {
-        let mut puzzle = puzzle_1();
+        let mut puzzle = puzzle();
         puzzle.r#move(Direction::Up);
-        assert_eq!((8, 12), puzzle.sokoban_position());
+        assert_eq!((12, 14), puzzle.sokoban_coords());
         puzzle.r#move(Direction::Left);
         puzzle.r#move(Direction::Left);
-        assert_eq!((8, 10), puzzle.sokoban_position());
+        assert_eq!((12, 12), puzzle.sokoban_coords());
     }
-    #[ignore]
     #[test]
     fn sokoban_can_push_a_crate() {
-        let mut puzzle = puzzle_1();
+        let mut puzzle = puzzle();
         puzzle.r#move(Direction::Up);
-        assert_eq!((8, 12), puzzle.sokoban_position());
+        assert_eq!((12, 14), puzzle.sokoban_coords());
         for _ in 0..9 {
             puzzle.r#move(Direction::Left);
         }
         println!("{}", puzzle.pretty_print());
-        assert_eq!((8, 3), puzzle.sokoban_position());
-        assert_eq!(Element::Sokoban, puzzle.state_at((8, 3)));
-        assert_eq!(Element::Crate, puzzle.state_at((8, 2)));
+        assert_eq!((12, 5), puzzle.sokoban_coords());
+        assert_eq!(Element::Sokoban, puzzle.element_at((12, 5)));
+        assert_eq!(Element::Crate, puzzle.element_at((12, 4)));
         assert!(!puzzle.can_move(Direction::Left));
     }
-    #[ignore]
     #[test]
     fn max_crates() {
-        let puzzle = puzzle_1();
+        let puzzle = puzzle();
         assert_eq!(6, puzzle.max_crate())
     }
-    #[ignore]
     #[test]
     fn find_crate_index() {
-        let puzzle = puzzle_1();
+        let puzzle = puzzle();
+        println!("{}", puzzle.pretty_print());
+        dbg!(&puzzle.crates);
         assert_eq!(None, puzzle.find_crate_index_at((8, 12)));
-        assert_eq!(Some(0), puzzle.find_crate_index_at((8, 3)));
-        assert_eq!(Some(1), puzzle.find_crate_index_at((3, 6)));
-        assert_eq!(Some(2), puzzle.find_crate_index_at((5, 6)));
-        assert_eq!(Some(3), puzzle.find_crate_index_at((8, 6)));
-        assert_eq!(Some(4), puzzle.find_crate_index_at((4, 8)));
-        assert_eq!(Some(5), puzzle.find_crate_index_at((5, 8)));
+        assert_eq!(Some(0), puzzle.find_crate_index_at((12, 5)));
+        assert_eq!(Some(1), puzzle.find_crate_index_at((7, 8)));
+        assert_eq!(Some(2), puzzle.find_crate_index_at((9, 8)));
+        assert_eq!(Some(3), puzzle.find_crate_index_at((12, 8)));
+        assert_eq!(Some(4), puzzle.find_crate_index_at((8, 10)));
+        assert_eq!(Some(5), puzzle.find_crate_index_at((9, 10)));
     }
-    #[ignore]
     #[test]
     fn crate_coords() {
-        let puzzle = puzzle_1();
-        assert_eq!((8, 3), puzzle.crate_coords(0));
+        let puzzle = puzzle();
+        assert_eq!((12, 5), puzzle.crate_coords(0));
     }
 }

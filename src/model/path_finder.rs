@@ -22,7 +22,7 @@ pub struct PathFinder {
 impl PathFinder {
     pub fn new(puzzle: &Puzzle) -> Self {
         let mut blocks = HashSet::new();
-        for (coords, state) in puzzle.pieces() {
+        for (coords, state) in puzzle.elements() {
             if state == Element::Wall || state == Element::Crate || state == Element::Stored {
                 let _ = blocks.insert(coords);
             }

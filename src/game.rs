@@ -50,7 +50,7 @@ impl Game {
             let mut sprite = Sprite::make_sprite(&Element::Crate, puzzle.crate_coords(crate_index));
             crate_sprites.push(sprite);
         }
-        let mut sokoban_sprite = Sprite::make_sprite(&Element::Sokoban, puzzle.sokoban_position());
+        let mut sokoban_sprite = Sprite::make_sprite(&Element::Sokoban, puzzle.sokoban_coords());
         let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites));
         let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
         let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
@@ -124,7 +124,7 @@ impl Game {
                         sprite.r#move(&fixed, crate_destination);
                     };
                     let mut sokoban_sprite = self.sokoban_sprite_rc.borrow_mut();
-                    let position = puzzle.sokoban_position();
+                    let position = puzzle.sokoban_coords();
                     sokoban_sprite.r#move(&fixed, position);
                 }
             }
@@ -155,7 +155,7 @@ impl Game {
         }
         let fixed = &self.fixed;
         if puzzle.can_move(direction) {
-            let origin = puzzle.sokoban_position();
+            let origin = puzzle.sokoban_coords();
             let destination = adjacent(origin, direction).expect("can't get adjacent coords");
             let target_opt = puzzle.r#move(direction);
             let mut crate_index = 0;
@@ -169,7 +169,7 @@ impl Game {
                 sprite.r#move(&fixed, target);
                 // sprite.place(&fixed);
             };
-            let position = puzzle.sokoban_position();
+            let position = puzzle.sokoban_coords();
             let mut sokoban_sprite = self.sokoban_sprite_rc.borrow_mut();
             let direction_state = match direction {
                 Direction::Right => Element::Right,
@@ -213,7 +213,7 @@ impl Game {
         };
         let letter_opt = {
             let puzzle = self.puzzle_rc.borrow();
-            let coords = puzzle.sokoban_position();
+            let coords = puzzle.sokoban_coords();
             puzzle.find_mark_at_coords(coords)
         };
         if let Some(letter) = letter_opt {
@@ -226,7 +226,7 @@ impl Game {
             _ => return,
         };
         let mut puzzle = self.puzzle_rc.borrow_mut();
-        let coords = puzzle.sokoban_position();
+        let coords = puzzle.sokoban_coords();
         let mut sprite = Sprite::make_sprite(&mark_state, coords);
         sprite.place(&self.fixed);
         let mut mark_sprites = self.mark_sprites_rc.borrow_mut();
@@ -253,7 +253,7 @@ impl Game {
     pub fn goto(&mut self, letter: char) {
         let directions_opt = {
             let puzzle = self.puzzle_rc.borrow();
-            let origin = puzzle.sokoban_position();
+            let origin = puzzle.sokoban_coords();
             if let Some(target) = puzzle.find_mark_coords(letter) {
                 let mut path_finder = PathFinder::new(&puzzle);
                 path_finder.find_path(origin, target)
