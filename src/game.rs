@@ -11,7 +11,7 @@ use crate::UNIT;
 use crate::model::coords::Coords;
 use crate::fixed_for_level;
 use crate::grid::Grid;
-use crate::path_finder::PathFinder;
+use crate::model::path_finder::PathFinder;
 use crate::picture;
 use crate::tile::fill_tiles_for_level;
 use gtk::glib::clone;

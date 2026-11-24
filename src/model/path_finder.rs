@@ -1,4 +1,4 @@
-use crate::path_finder::state::State;
+use crate::model::state::State;
 use crate::Direction;
 use crate::Direction::Left;
 use crate::Direction::Down;
