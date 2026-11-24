@@ -1,7 +1,7 @@
 use crate::Picture;
 use crate::UNIT;
 use crate::model::coords::Coords;
-use crate::model::state::State;
+use crate::model::element::Element;
 use crate::paintable;
 use crate::picture;
 use crate::tile::picture_at;
@@ -11,7 +11,7 @@ use gtk::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct Sprite {
-    state: State,
+    state: Element,
     picture: Picture,
     coords: Coords,
     z_order: usize,
@@ -19,7 +19,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    pub fn make_sprite(state: &State, coords: Coords) -> Self {
+    pub fn make_sprite(state: &Element, coords: Coords) -> Self {
         let picture = picture(&state);
         Self {
             state: state.clone(),
@@ -76,7 +76,7 @@ impl Sprite {
         self.is_visible = false;
     }
 
-    pub fn set_picture(&mut self, state: &State) {
+    pub fn set_picture(&mut self, state: &Element) {
         self.picture = picture(&state);
     }
 

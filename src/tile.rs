@@ -5,8 +5,8 @@ use crate::UNIT;
 use crate::gdk::Paintable;
 use crate::grid::Grid;
 use crate::model::coords::Coords;
-use crate::model::state::STATE_MAX;
-use crate::model::state::State;
+use crate::model::element::STATE_MAX;
+use crate::model::element::Element;
 use glib::ControlFlow;
 use glib::clone;
 use gtk::Fixed;
@@ -36,24 +36,24 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn make_tile(state: &State) -> Self {
+    pub fn make_tile(state: &Element) -> Self {
         let tile_name = match state {
-            State::Crate => "crate",
-            State::Floor => "floor",
-            State::Goal => "goal",
-            State::Outside => "grass_2",
-            State::Sokoban => "sokoban",
-            State::Stored => "stored",
-            State::Wall => "wall",
-            State::Down => "arrow_down",
-            State::Right => "arrow_right",
-            State::Up => "arrow_up",
-            State::Left => "arrow_left",
-            State::Mark_A => "mark_a",
-            State::Mark_B => "mark_b",
-            State::Mark_C => "mark_c",
-            State::Grass_1 => "grass_1",
-            State::Grass_2 => "grass_2",
+            Element::Crate => "crate",
+            Element::Floor => "floor",
+            Element::Goal => "goal",
+            Element::Outside => "grass_2",
+            Element::Sokoban => "sokoban",
+            Element::Stored => "stored",
+            Element::Wall => "wall",
+            Element::Down => "arrow_down",
+            Element::Right => "arrow_right",
+            Element::Up => "arrow_up",
+            Element::Left => "arrow_left",
+            Element::Mark_A => "mark_a",
+            Element::Mark_B => "mark_b",
+            Element::Mark_C => "mark_c",
+            Element::Grass_1 => "grass_1",
+            Element::Grass_2 => "grass_2",
             _ => "floor",
         };
         let file_name = format!("/com/example/MyApp/images/{}.png", tile_name);
@@ -77,14 +77,14 @@ impl Tiles {
     pub fn from_picture_files() -> Self {
         let tiles = (0usize..STATE_MAX)
             .map(|index| {
-                let state = State::try_from(index).expect("index out of bound for State");
+                let state = Element::try_from(index).expect("index out of bound for Element");
                 Tile::make_tile(&state)
             })
             .collect();
         Self { tiles }
     }
 
-    pub fn paintable(&self, state: &State) -> Paintable {
+    pub fn paintable(&self, state: &Element) -> Paintable {
         self.tiles[*state as usize].paintable()
     }
 }
@@ -92,7 +92,7 @@ thread_local! {
 pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };
 }
 
-pub fn picture(state: &State) -> Picture {
+pub fn picture(state: &Element) -> Picture {
     let paintable = paintable(state);
     let picture = Picture::for_paintable(&paintable);
     picture.set_can_shrink(false);
@@ -119,7 +119,7 @@ pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {
     picture
 }
 
-pub fn paintable(state: &State) -> Paintable {
+pub fn paintable(state: &Element) -> Paintable {
     TILES.with(|cell| {
         let tiles = cell.get_or_init(Tiles::from_picture_files);
         tiles.paintable(state).clone()
@@ -232,15 +232,15 @@ pub fn fill_tiles_for_level(
                         let mut crate_index_opt: Option<usize> = None;
                         let picture_state = match state {
                             // if state is crate, put the floor first, then the crate
-                            State::Crate => State::Floor,
-                            State::Stored => State::Goal,
-                            State::Sokoban => State::Floor,
-                            State::OnGoal => State::Goal,
+                            Element::Crate => Element::Floor,
+                            Element::Stored => Element::Goal,
+                            Element::Sokoban => Element::Floor,
+                            Element::OnGoal => Element::Goal,
                             _ => state,
                         };
-                        if picture_state != State::Crate
-                            && picture_state != State::Stored
-                            && picture_state != State::Sokoban
+                        if picture_state != Element::Crate
+                            && picture_state != Element::Stored
+                            && picture_state != Element::Sokoban
                         {
                             let (x, y) = (col as f64 * UNIT, row as f64 * UNIT);
                             let picture = picture(&picture_state);

@@ -2,14 +2,14 @@ use crate::Level;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
-use crate::model::state;
-use crate::model::state::State;
+use crate::model::element;
+use crate::model::element::Element;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Puzzle {
-    pieces: HashMap<Coords, State>,
+    pieces: HashMap<Coords, Element>,
     sokoban_position: Coords,
     goals: HashSet<Coords>,
     crates: Vec<Coords>,
@@ -26,20 +26,20 @@ impl Puzzle {
         for col in 0..level.width() {
             for row in 0..level.height() {
                 let state = level.state_at((row, col));
-                if state == State::Goal {
+                if state == Element::Goal {
                     goals.insert((row, col));
-                    pieces.insert((row, col), State::Floor);
-                } else if state == State::Stored {
+                    pieces.insert((row, col), Element::Floor);
+                } else if state == Element::Stored {
                     goals.insert((row, col));
                     crates.push((row, col));
-                    pieces.insert((row, col), State::Crate);
-                } else if state == State::Sokoban {
-                    pieces.insert((row, col), State::Sokoban);
+                    pieces.insert((row, col), Element::Crate);
+                } else if state == Element::Sokoban {
+                    pieces.insert((row, col), Element::Sokoban);
                     sokoban_position = (row, col);
-                } else if state == State::Crate {
+                } else if state == Element::Crate {
                     crates.push((row, col));
-                    pieces.insert((row, col), State::Crate);
-                } else if state != State::Outside {
+                    pieces.insert((row, col), Element::Crate);
+                } else if state != Element::Outside {
                     pieces.insert((row, col), state.clone());
                 }
             }
@@ -53,14 +53,14 @@ impl Puzzle {
         }
     }
 
-    pub fn pieces(&self) -> HashMap<Coords, State> {
+    pub fn pieces(&self) -> HashMap<Coords, Element> {
         self.pieces.clone()
     }
     pub fn sokoban_position(&self) -> Coords {
         self.sokoban_position
     }
 
-    pub fn state_at(&self, coords: Coords) -> State {
+    pub fn state_at(&self, coords: Coords) -> Element {
         self.pieces.get(&coords).expect("illegal coords").clone()
     }
 
@@ -74,13 +74,13 @@ impl Puzzle {
         if let Some(destination) = adjacent(self.sokoban_position(), direction)
             && let Some(piece) = self.pieces.get(&destination)
         {
-            if *piece == State::Floor || *piece == State::Goal {
+            if *piece == Element::Floor || *piece == Element::Goal {
                 true
-            } else if *piece == State::Crate {
+            } else if *piece == Element::Crate {
                 if let Some(target) = adjacent(destination, direction)
                     && let Some(piece) = self.pieces.get(&target)
                 {
-                    *piece == State::Floor || *piece == State::Goal
+                    *piece == Element::Floor || *piece == Element::Goal
                 } else {
                     true
                 }
@@ -110,17 +110,17 @@ impl Puzzle {
         let origin_state = self.state_at(origin);
         if let Some(destination) = adjacent(origin, direction) {
             let destination_state = self.state_at(destination);
-            let target_state = if origin_state == State::Sokoban {
-                destination_state.add_sokoban()
-            } else if origin_state == State::Crate {
-                destination_state.add_crate()
+            let target_state = if origin_state == Element::Sokoban {
+                destination_state.cover(Element::Sokoban)
+            } else if origin_state == Element::Crate {
+                destination_state.cover(Element::Crate)
             } else {
                 destination_state
             };
-            let clean_state = if origin_state == State::Sokoban {
-                destination_state.remove_sokoban()
-            } else if origin_state == State::Crate {
-                destination_state.remove_crate()
+            let clean_state = if origin_state == Element::Sokoban {
+                destination_state.uncover()
+            } else if origin_state == Element::Crate {
+                destination_state.uncover()
             } else {
                 destination_state
             };
@@ -130,7 +130,7 @@ impl Puzzle {
             if let Some(piece) = self.pieces.get_mut(&origin) {
                 *piece = clean_state
             };
-            if origin_state == State::Crate {
+            if origin_state == Element::Crate {
                 let crate_index = self
                     .find_crate_index_at(origin)
                     .expect("can't find crate index");
@@ -143,7 +143,7 @@ impl Puzzle {
         let origin = self.sokoban_position();
         if let Some(destination) = adjacent(origin, direction) {
             let target_opt = if let Some(piece) = self.pieces.get(&destination) {
-                if *piece == State::Crate {
+                if *piece == Element::Crate {
                     adjacent(destination, direction)
                 } else {
                     None
@@ -264,8 +264,8 @@ mod tests {
         }
         println!("{}", puzzle.pretty_print());
         assert_eq!((8, 3), puzzle.sokoban_position());
-        assert_eq!(State::Sokoban, puzzle.state_at((8, 3)));
-        assert_eq!(State::Crate, puzzle.state_at((8, 2)));
+        assert_eq!(Element::Sokoban, puzzle.state_at((8, 3)));
+        assert_eq!(Element::Crate, puzzle.state_at((8, 2)));
         assert!(!puzzle.can_move(Direction::Left));
     }
     #[ignore]

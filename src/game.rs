@@ -12,7 +12,7 @@ use crate::grid::Grid;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::path_finder::PathFinder;
-use crate::model::state::State;
+use crate::model::element::Element;
 use crate::picture;
 use crate::tile::fill_tiles_for_level;
 use gtk::glib::clone;
@@ -47,10 +47,10 @@ impl Game {
         let level = &levels[level_index];
         for crate_index in 0..puzzle.max_crate() {
             let crate_coords = puzzle.crate_coords(crate_index);
-            let mut sprite = Sprite::make_sprite(&State::Crate, puzzle.crate_coords(crate_index));
+            let mut sprite = Sprite::make_sprite(&Element::Crate, puzzle.crate_coords(crate_index));
             crate_sprites.push(sprite);
         }
-        let mut sokoban_sprite = Sprite::make_sprite(&State::Sokoban, puzzle.sokoban_position());
+        let mut sokoban_sprite = Sprite::make_sprite(&Element::Sokoban, puzzle.sokoban_position());
         let crate_sprites_rc = Rc::new(RefCell::new(crate_sprites));
         let sokoban_sprite_rc = Rc::new(RefCell::new(sokoban_sprite));
         let fixed_rc = Rc::new(RefCell::new(fixed.clone()));
@@ -172,10 +172,10 @@ impl Game {
             let position = puzzle.sokoban_position();
             let mut sokoban_sprite = self.sokoban_sprite_rc.borrow_mut();
             let direction_state = match direction {
-                Direction::Right => State::Right,
-                Direction::Down => State::Down,
-                Direction::Up => State::Up,
-                Direction::Left => State::Left,
+                Direction::Right => Element::Right,
+                Direction::Down => Element::Down,
+                Direction::Up => Element::Up,
+                Direction::Left => Element::Left,
             };
             sokoban_sprite.remove(&fixed);
             sokoban_sprite.set_picture(&direction_state);
@@ -192,7 +192,7 @@ impl Game {
         if puzzle.is_solved() {
             for crate_index in 0..puzzle.max_crate() {
                 let coords = puzzle.crate_coords(crate_index);
-                let mut sprite = Sprite::make_sprite(&State::Stored, coords);
+                let mut sprite = Sprite::make_sprite(&Element::Stored, coords);
                 sprite.place(fixed);
             }
         };
@@ -220,9 +220,9 @@ impl Game {
             self.unmark(letter);
         };
         let mark_state = match letter {
-            'a' => State::Mark_A,
-            'b' => State::Mark_B,
-            'c' => State::Mark_C,
+            'a' => Element::Mark_A,
+            'b' => Element::Mark_B,
+            'c' => Element::Mark_C,
             _ => return,
         };
         let mut puzzle = self.puzzle_rc.borrow_mut();

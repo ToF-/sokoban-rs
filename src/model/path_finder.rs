@@ -8,8 +8,8 @@ use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::direction;
 use crate::model::puzzle;
-use crate::model::state;
-use crate::model::state::State;
+use crate::model::element;
+use crate::model::element::Element;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -23,7 +23,7 @@ impl PathFinder {
     pub fn new(puzzle: &Puzzle) -> Self {
         let mut blocks = HashSet::new();
         for (coords, state) in puzzle.pieces() {
-            if state == State::Wall || state == State::Crate || state == State::Stored {
+            if state == Element::Wall || state == Element::Crate || state == Element::Stored {
                 let _ = blocks.insert(coords);
             }
         }
