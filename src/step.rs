@@ -1,3 +1,4 @@
+use crate::model::coords::adjacent;
 use crate::Direction;
 use crate::model::coords::Coords;
 
@@ -10,7 +11,8 @@ pub struct Step {
 
 impl Step {
     pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {
-        let destination = direction.from(origin);
+        let destination = adjacent(origin, direction)
+            .expect("can't from origin to direction");
         Self {
             from: origin,
             to: destination,
@@ -20,7 +22,8 @@ impl Step {
                     crate_index,
                     Box::new(Self {
                         from: destination,
-                        to: direction.from(destination),
+                        to: adjacent(destination, direction).
+                            expect("can't move to target"),
                         pushing: None,
                     }),
                 )),

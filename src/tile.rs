@@ -196,7 +196,6 @@ pub fn fill_tiles_for_level(
                     } else {
                         println!("can't borrow mutably fixed");
                     };
-                    dbg!("foo");
                     glib::ControlFlow::Continue
                 } else if index >= total && background_ready && visible_crate_count < crate_total {
                     if let Ok(fixed) = fixed_rc.try_borrow_mut() {

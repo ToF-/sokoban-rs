@@ -38,7 +38,7 @@ mod tests {
     }
 
     #[test]
-    fn adjacent_coords() {
+    fn adjacent_coords_in_given_direction() {
         assert_eq!(Some((0, 1)), adjacent((0, 0), Direction::Right));
         assert_eq!(None, adjacent((0, MAX_COL - 1), Direction::Right));
         assert_eq!(Some((2, 0)), adjacent((1, 0), Direction::Down));

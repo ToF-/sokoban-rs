@@ -5,6 +5,7 @@ use crate::Direction::Right;
 use crate::Direction::Up;
 use crate::Puzzle;
 use crate::model::coords::Coords;
+use crate::model::coords::adjacent;
 use crate::model::direction;
 use crate::model::puzzle;
 use crate::model::state;
@@ -32,8 +33,9 @@ impl PathFinder {
     fn possible_moves(&self, origin: Coords) -> Vec<Coords> {
         let mut result = Vec::new();
         for direction in [Up, Right, Down, Left] {
-            let coords = direction.from(origin);
-            if !self.blocks.contains(&coords) {
+            if let Some(coords) = adjacent(origin, direction)
+                && !self.blocks.contains(&coords)
+            {
                 result.push(coords)
             }
         }
@@ -73,8 +75,10 @@ impl PathFinder {
                     Direction::Down,
                     Direction::Left,
                 ] {
-                    let destination = direction.from(position);
-                    if !self.blocks.contains(&destination) && !visited.contains(&destination) {
+                    if let Some(destination) = adjacent(position, direction)
+                        && !self.blocks.contains(&destination)
+                        && !visited.contains(&destination)
+                    {
                         to_visit.push_back((destination, Some(position)));
                     }
                 }

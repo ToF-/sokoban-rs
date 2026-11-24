@@ -1,5 +1,6 @@
 use crate::Level;
 use crate::model::coords::Coords;
+use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
 use crate::model::state;
 use crate::model::state::State;
@@ -70,13 +71,15 @@ impl Puzzle {
     }
 
     pub fn can_move(&self, direction: Direction) -> bool {
-        let destination = direction.from(self.sokoban_position());
-        if let Some(piece) = self.pieces.get(&destination) {
+        if let Some(destination) = adjacent(self.sokoban_position(), direction)
+            && let Some(piece) = self.pieces.get(&destination)
+        {
             if *piece == State::Floor || *piece == State::Goal {
                 true
             } else if *piece == State::Crate {
-                let target = direction.from(destination);
-                if let Some(piece) = self.pieces.get(&target) {
+                if let Some(target) = adjacent(destination, direction)
+                    && let Some(piece) = self.pieces.get(&target)
+                {
                     *piece == State::Floor || *piece == State::Goal
                 } else {
                     true
@@ -105,42 +108,44 @@ impl Puzzle {
 
     pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {
         let origin_state = self.state_at(origin);
-        let destination = direction.from(origin);
-        let destination_state = self.state_at(destination);
-        let target_state = if origin_state == State::Sokoban {
-            destination_state.add_sokoban()
-        } else if origin_state == State::Crate {
-            destination_state.add_crate()
-        } else {
-            destination_state
-        };
-        let clean_state = if origin_state == State::Sokoban {
-            destination_state.remove_sokoban()
-        } else if origin_state == State::Crate {
-            destination_state.remove_crate()
-        } else {
-            destination_state
-        };
-        if let Some(piece) = self.pieces.get_mut(&destination) {
-            *piece = target_state
-        };
-        if let Some(piece) = self.pieces.get_mut(&origin) {
-            *piece = clean_state
-        };
-        if origin_state == State::Crate {
-            let crate_index = self
-                .find_crate_index_at(origin)
-                .expect("can't find crate index");
-            self.crates[crate_index] = destination;
+        if let Some(destination) = adjacent(origin, direction) {
+            let destination_state = self.state_at(destination);
+            let target_state = if origin_state == State::Sokoban {
+                destination_state.add_sokoban()
+            } else if origin_state == State::Crate {
+                destination_state.add_crate()
+            } else {
+                destination_state
+            };
+            let clean_state = if origin_state == State::Sokoban {
+                destination_state.remove_sokoban()
+            } else if origin_state == State::Crate {
+                destination_state.remove_crate()
+            } else {
+                destination_state
+            };
+            if let Some(piece) = self.pieces.get_mut(&destination) {
+                *piece = target_state
+            };
+            if let Some(piece) = self.pieces.get_mut(&origin) {
+                *piece = clean_state
+            };
+            if origin_state == State::Crate {
+                let crate_index = self
+                    .find_crate_index_at(origin)
+                    .expect("can't find crate index");
+                self.crates[crate_index] = destination;
+            }
         }
     }
 
     pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
         let origin = self.sokoban_position();
-        let destination = direction.from(origin);
+        if let Some(destination) = adjacent(origin, direction) {
+        
         let target_opt = if let Some(piece) = self.pieces.get(&destination) {
             if *piece == State::Crate {
-                Some(direction.from(destination))
+                adjacent(destination, direction)
             } else {
                 None
             }
@@ -153,6 +158,9 @@ impl Puzzle {
         self.move_piece_at(origin, direction);
         self.sokoban_position = destination;
         target_opt
+        } else {
+            None
+        }
     }
 
     pub fn insert_mark(&mut self, letter: char) {

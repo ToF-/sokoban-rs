@@ -1,5 +1,6 @@
 use crate::Direction;
 use crate::model::coords::Coords;
+use crate::model::coords::adjacent;
 use crate::model::coords::col;
 use crate::model::coords::row;
 use crate::model::state::State;
@@ -85,17 +86,18 @@ impl Level {
                 Direction::Down,
                 Direction::Left,
             ] {
-                let destination = direction.from(position);
-                let next_state = if state == State::Grass_1 {
-                    State::Grass_2
-                } else {
-                    State::Grass_1
-                };
-                let (row, col) = destination;
-                if row < MAX_ROW && col < MAX_COL && !visited.contains(&destination) {
-                    if squares[row][col] == State::Floor {
-                        to_paint.push_back((destination, next_state));
-                        let _ = visited.insert(destination);
+                if let Some(destination) = adjacent(position, direction) {
+                    let next_state = if state == State::Grass_1 {
+                        State::Grass_2
+                    } else {
+                        State::Grass_1
+                    };
+                    let (row, col) = destination;
+                    if row < MAX_ROW && col < MAX_COL && !visited.contains(&destination) {
+                        if squares[row][col] == State::Floor {
+                            to_paint.push_back((destination, next_state));
+                            let _ = visited.insert(destination);
+                        }
                     }
                 }
             }

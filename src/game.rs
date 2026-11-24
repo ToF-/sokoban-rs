@@ -10,6 +10,7 @@ use crate::UNIT;
 use crate::fixed_for_level;
 use crate::grid::Grid;
 use crate::model::coords::Coords;
+use crate::model::coords::adjacent;
 use crate::model::path_finder::PathFinder;
 use crate::model::state::State;
 use crate::picture;
@@ -155,7 +156,7 @@ impl Game {
         let fixed = &self.fixed;
         if puzzle.can_move(direction) {
             let origin = puzzle.sokoban_position();
-            let destination = direction.from(origin);
+            let destination = adjacent(origin, direction).expect("can't get adjacent coords");
             let target_opt = puzzle.r#move(direction);
             let mut crate_index = 0;
             if let Some(target) = target_opt {

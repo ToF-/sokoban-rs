@@ -11,28 +11,6 @@ pub enum Direction {
 }
 
 impl Direction {
-    pub fn from(&self, coords: Coords) -> Coords {
-        let (row, col) = coords;
-        match self {
-            Direction::Left => {
-                if col > 0 {
-                    (row, col - 1)
-                } else {
-                    (row, 0)
-                }
-            }
-            Direction::Up => {
-                if row > 0 {
-                    (row - 1, col)
-                } else {
-                    (0, col)
-                }
-            }
-            Direction::Right => (row, col + 1),
-            Direction::Down => (row + 1, col),
-        }
-    }
-
     pub fn directions() -> [Direction; 4] {
         [
             Direction::Up,
