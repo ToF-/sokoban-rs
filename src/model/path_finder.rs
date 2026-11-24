@@ -110,14 +110,23 @@ mod tests {
         Puzzle::from_level(&level)
     }
 
-    #[ignore]
     #[test]
     fn path_finder_finds_a_path_in_a_puzzle_if_unencumbered_by_crates() {
+        let puzzle = puzzle_1();
+        let coords = puzzle.sokoban_coords();
+        let coords_up = adjacent(coords, Direction::Up).expect("can't access coords");
         let mut path_finder = PathFinder::new(&puzzle_1());
-        let result = path_finder.find_path((9, 12), (8, 12));
+        let result = path_finder.find_path(coords, coords_up);
         assert_eq!(Some(vec![Direction::Up]), result);
+
+        let coords_up_left_left_left = adjacent(coords, Direction::Up)
+            .and_then(|pos| adjacent(pos, Direction::Left))
+            .and_then(|pos| adjacent(pos, Direction::Left))
+            .and_then(|pos| adjacent(pos, Direction::Left))
+            .expect("can't access coords");
+
         let mut path_finder = PathFinder::new(&puzzle_1());
-        let result = path_finder.find_path((9, 12), (8, 9));
+        let result = path_finder.find_path(coords, coords_up_left_left_left);
         assert_eq!(
             Some(vec![
                 Direction::Up,
@@ -129,8 +138,8 @@ mod tests {
         );
         let mut path_finder = PathFinder::new(&puzzle_1());
         let result = path_finder
-            .find_path((9, 12), (5, 9))
+            .find_path(coords, (coords.0 - 2, coords.1 + 6))
             .expect("didn't find a path");
-        assert_eq!(7, result.len());
+        assert_eq!(8, result.len());
     }
 }
