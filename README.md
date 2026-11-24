@@ -31,6 +31,16 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 
 ### Model
 
+Coords : a pair of coordinates, row and column
+
+Level : a map of Coords to Piece
+
+Direction : Left Up Down Right
+
+Step : a move from the character from one location in one direction, including pushing a crate or not
+
+Puzzle : a representation of the current level to solve, a collection of piece
+
 Piece : an area or object in the puzzle : Wall, Floor, Goal, Crate, Stored Crate, Sokoban, Sokoban On Goal
 
 A piece in coords c can be changed when "covered" by another piece:
@@ -67,10 +77,28 @@ Thus a Crate cannot cover a Crate
 
 Use railway programming to check possible moves and execute them
 
- Coords : a pair of coordinates, row and column
- Level : a map of Coords to Piece
- Direction : Left Up Down Right
- Step : a move from the character from one location in one direction, including pushing a crate or not
- Puzzle : a representation of the current level to solve
+### Graphics
+
+Tile : a 32x32 pixels picture representing a piece
+
+Sprite : a graphic entity formed with a tile that can placed and moved on a drawing area
+
+Background : A drawing area that was built with tiles of all the fixed pieces and snaphot
+
+Game : the main process of the application:
+- build the level
+- listen to keyboard strokes
+- process keyboard strokes:
+    - up,right,down,left, (or d,r,s,t on my keyboard)
+    - u for undo, * for restart
+    - n for next level, p for previous level
+    - q for quitting
+
+### Features
+
+- animated set up of level
+- undo, restart
+- set a mark, go to a mark
+- save level score
 
 
