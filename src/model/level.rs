@@ -15,7 +15,7 @@ pub struct Level {
 const MAX_COL: usize = 24;
 const MAX_ROW: usize = 20;
 
-fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
+fn calibrate(bytes: &[u8]) -> Coords {
     let mut start_col: usize = MAX_COL + 1;
     let mut start_row: usize = MAX_ROW + 1;
     let mut end_col: usize = 0;
@@ -29,18 +29,10 @@ fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
                 col = 0;
             }
             b'#' => {
-                if col < start_col {
-                    start_col = col
-                };
-                if row < start_row {
-                    start_row = row
-                };
-                if col > end_col {
-                    end_col = col
-                };
-                if row > end_row {
-                    end_row = row
-                };
+                start_col = start_col.min(col);
+                start_row = start_row.min(row);
+                end_col = end_col.max(col);
+                end_row = end_row.max(row);
                 col += 1;
             }
             _ => {
@@ -48,22 +40,22 @@ fn level_limits(bytes: &[u8]) -> (Coords, Coords) {
             }
         }
     }
-    ((start_row, start_col), (end_row, end_col))
+        let height = end_row - start_row + 1;
+        let width = end_col - start_col + 1;
+        ((MAX_ROW - height) / 2 , (MAX_COL - width) / 2)
 }
+
 impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
         let mut squares = vec![vec![Element::Floor; MAX_COL]; MAX_ROW];
-        let ((start_row, start_col), (end_row, end_col)) = level_limits(bytes);
-        let height = end_row - start_row + 1;
-        let width = end_col - start_col + 1;
-        let mut row: usize = (MAX_ROW - height) / 2;
-        let mut col: usize = (MAX_COL - width) / 2;
-
+        let (start_row, start_col) = calibrate(bytes);
+        let mut row = start_row;
+        let mut col = start_col;
         for byte in bytes {
             match byte {
                 b'\n' => {
                     row += 1;
-                    col = (MAX_COL - width) / 2;
+                    col = start_col;
                 }
 
                 _ => {

@@ -30,6 +30,7 @@ adjacent	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^pub fn
 adjacent_coords_in_given_direction	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^    fn adjacent_coords_in_given_direction() {$/;"	f
 background_texture	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^fn background_texture(fixed_rc: Rc<RefCell<Fixed>>) -> gdk::Texture {$/;"	f
 between	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn between(origin: Coords, destination: Coords) -> Direction {$/;"	f
+calibrate	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^fn calibrate(bytes: &[u8]) -> Coords {$/;"	f
 can_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
 clear	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn clear(&mut self) {$/;"	f
 clear_fixed	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^fn clear_fixed(fixed: &gtk::Fixed) {$/;"	f
@@ -68,7 +69,6 @@ insert_mark	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^   
 is_solved	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 is_visible	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^    pub fn is_visible(&self) -> bool {$/;"	f
 level_index	/Users/christophethibaut/Coding/sokoban-rs/src/game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
-level_limits	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^fn level_limits(bytes: &[u8]) -> (Coords, Coords) {$/;"	f
 levels	/Users/christophethibaut/Coding/sokoban-rs/src/game.rs	/^    pub fn levels(&self) -> Vec<Level> {$/;"	f
 levels_from_bytes	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {$/;"	f
 list_of_directions	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    fn list_of_directions() {$/;"	f
