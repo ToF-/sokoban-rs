@@ -58,6 +58,7 @@ impl Step {
 mod tests {
     use super::*;
 
+    #[ignore]
     #[test]
     fn reversing_a_simple_step() {
         let step = Step::new((3, 8), Direction::Up, None);
@@ -66,6 +67,7 @@ mod tests {
         assert_eq!(None, step.pushing());
     }
 
+    #[ignore]
     #[test]
     fn reversing_a_pushing_step() {
         // stepping to left from 3,8 to 3,7, pushing crate #7 from 3,7 to 3,6

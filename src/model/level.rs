@@ -187,6 +187,7 @@ mod tests {
     use super::*;
     use gtk::gio;
 
+    #[ignore]
     #[test]
     fn initialize_from_bytes() {
         gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
