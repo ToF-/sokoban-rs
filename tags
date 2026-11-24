@@ -26,6 +26,7 @@ TILES	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub static TILES:
 Tile	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub struct Tile {$/;"	s
 Tiles	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub struct Tiles {$/;"	s
 UNIT	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^const UNIT: f64 = 32.0;$/;"	c
+acquire_level_elements	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    fn acquire_level_elements(squares: &mut Vec<Vec<Element>>, bytes: &[u8], coords: Coords) {$/;"	f
 adjacent	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^pub fn adjacent(coords: Coords, direction: Direction) -> Option<Coords> {$/;"	f
 adjacent_coords_in_given_direction	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^    fn adjacent_coords_in_given_direction() {$/;"	f
 background_texture	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^fn background_texture(fixed_rc: Rc<RefCell<Fixed>>) -> gdk::Texture {$/;"	f
@@ -46,6 +47,7 @@ crate_coords	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^  
 crate_max	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    pub fn crate_max(&self) -> usize {$/;"	f
 direction_between_coords	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    fn direction_between_coords() {$/;"	f
 directions	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn directions() -> [Direction; 4] {$/;"	f
+fill_around_wall_elements	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    fn fill_around_wall_elements(squares: &mut Vec<Vec<Element>>) {$/;"	f
 fill_tiles_for_level	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub fn fill_tiles_for_level($/;"	f
 find_crate_index	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn find_crate_index() {$/;"	f
 find_crate_index_at	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {$/;"	f

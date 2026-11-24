@@ -1,4 +1,3 @@
-
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(usize)]
 pub enum Element {
@@ -94,19 +93,18 @@ impl From<Element> for char {
 }
 
 impl Element {
-
     pub fn cover(self, other: Element) -> Element {
         match self {
             Element::Floor => match other {
                 Element::Crate => Element::Crate,
                 Element::Sokoban => Element::Sokoban,
                 _ => self,
-            }
+            },
             Element::Goal => match other {
                 Element::Crate => Element::Stored,
                 Element::Sokoban => Element::OnGoal,
                 _ => self,
-            }
+            },
             _ => self,
         }
     }
@@ -120,7 +118,6 @@ impl Element {
             _ => self,
         }
     }
-
 
     pub fn z_order(self) -> usize {
         match self {

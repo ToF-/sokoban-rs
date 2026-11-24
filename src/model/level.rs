@@ -40,32 +40,40 @@ fn calibrate(bytes: &[u8]) -> Coords {
             }
         }
     }
-        let height = end_row - start_row + 1;
-        let width = end_col - start_col + 1;
-        ((MAX_ROW - height) / 2 , (MAX_COL - width) / 2)
+    let height = end_row - start_row + 1;
+    let width = end_col - start_col + 1;
+    ((MAX_ROW - height) / 2, (MAX_COL - width) / 2)
 }
 
 impl Level {
     pub fn from_bytes(bytes: &[u8]) -> Level {
         let mut squares = vec![vec![Element::Floor; MAX_COL]; MAX_ROW];
         let (start_row, start_col) = calibrate(bytes);
+        Self::acquire_level_elements(&mut squares, bytes, (start_row, start_col));
+        Self::fill_around_wall_elements(&mut squares);
+        Level {
+            squares: std::array::from_fn(|row| std::array::from_fn(|col| squares[row][col])),
+        }
+    }
+
+    fn acquire_level_elements(squares: &mut Vec<Vec<Element>>, bytes: &[u8], coords: Coords) {
+        let (start_row, start_col) = coords;
         let mut row = start_row;
         let mut col = start_col;
         for byte in bytes {
-            match byte {
-                b'\n' => {
-                    row += 1;
-                    col = start_col;
-                }
-
-                _ => {
-                    if col < MAX_COL {
-                        squares[row][col] = Element::from(*byte);
-                        col += 1;
-                    }
+            if *byte == b'\n' {
+                row += 1;
+                col = start_col;
+            } else {
+                if col < MAX_COL {
+                    squares[row][col] = Element::from(*byte);
+                    col += 1;
                 }
             }
         }
+    }
+
+    fn fill_around_wall_elements(squares: &mut Vec<Vec<Element>>) {
         let mut to_paint: VecDeque<(Coords, Element)> = VecDeque::new();
         let mut visited: HashSet<Coords> = HashSet::new();
         to_paint.push_back(((0, 0), Element::Grass_1));
@@ -85,20 +93,14 @@ impl Level {
                         Element::Grass_1
                     };
                     let (row, col) = destination;
-                    if row < MAX_ROW && col < MAX_COL && !visited.contains(&destination) {
-                        if squares[row][col] == Element::Floor {
-                            to_paint.push_back((destination, next_state));
-                            let _ = visited.insert(destination);
-                        }
+                    if !visited.contains(&destination) && squares[row][col] == Element::Floor {
+                        to_paint.push_back((destination, next_state));
+                        let _ = visited.insert(destination);
                     }
                 }
             }
         }
-        Level {
-            squares: std::array::from_fn(|row| std::array::from_fn(|col| squares[row][col])),
-        }
     }
-
     pub fn width(&self) -> usize {
         MAX_COL
     }
@@ -181,23 +183,37 @@ mod tests {
     use super::*;
     use gtk::gio;
 
-    #[ignore]
     #[test]
     fn initialize_from_bytes() {
         gio::resources_register_include!("myapp.gresource").expect("Failed to register resources.");
         let bytes = gio::resources_lookup_data(
-            "/com/example/MyApp/files/level_01.txt",
+            "/com/example/MyApp/files/level_00.txt",
             gio::ResourceLookupFlags::NONE,
         )
         .expect("Failed to find resource");
-        println!("{:?}", bytes);
+        let expected = "-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|'''''''''''|-|-|-
+-|-|-|-'#########'-|-|-|
+|-|-|-|'#       #'|-|-|-
+-|-|-|-'#.. $ $@#'-|-|-|
+|-|-|-|'#       #'|-|-|-
+-|-|-|-'#########'-|-|-|
+|-|-|-|'''''''''''|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+-|-|-|-|-|-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|-|-|-|-|-
+";
+
         let level = Level::from_bytes(&bytes);
-        assert_eq!(24, level.width());
-        assert_eq!(20, level.height());
-        assert_eq!(Element::Wall, level.state_at((12, 5)));
-        assert_eq!(Element::Wall, level.state_at((1, 6)));
-        assert_eq!(Element::Crate, level.state_at((3, 6)));
-        assert_eq!(Element::Sokoban, level.state_at((9, 12)));
-        assert_eq!(6, level.crate_max());
+        assert_eq!(expected, level.pretty_print());
     }
 }
