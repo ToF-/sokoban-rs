@@ -142,22 +142,21 @@ impl Puzzle {
     pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
         let origin = self.sokoban_position();
         if let Some(destination) = adjacent(origin, direction) {
-        
-        let target_opt = if let Some(piece) = self.pieces.get(&destination) {
-            if *piece == State::Crate {
-                adjacent(destination, direction)
+            let target_opt = if let Some(piece) = self.pieces.get(&destination) {
+                if *piece == State::Crate {
+                    adjacent(destination, direction)
+                } else {
+                    None
+                }
             } else {
                 None
-            }
-        } else {
-            None
-        };
-        if let Some(target) = target_opt {
-            self.move_piece_at(destination, direction)
-        };
-        self.move_piece_at(origin, direction);
-        self.sokoban_position = destination;
-        target_opt
+            };
+            if let Some(target) = target_opt {
+                self.move_piece_at(destination, direction)
+            };
+            self.move_piece_at(origin, direction);
+            self.sokoban_position = destination;
+            target_opt
         } else {
             None
         }
