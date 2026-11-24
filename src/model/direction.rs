@@ -1,6 +1,6 @@
-use crate::coords::Coords;
-use crate::coords::col;
-use crate::coords::row;
+use crate::model::coords::Coords;
+use crate::model::coords::col;
+use crate::model::coords::row;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Direction {

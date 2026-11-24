@@ -1,11 +1,14 @@
+use crate::path_finder::state::State;
 use crate::Direction;
-use crate::Direction::Down;
 use crate::Direction::Left;
+use crate::Direction::Down;
 use crate::Direction::Right;
 use crate::Direction::Up;
+use crate::model::direction;
+use crate::model::puzzle;
+use crate::model::state;
 use crate::Puzzle;
-use crate::State;
-use crate::coords::Coords;
+use crate::model::coords::Coords;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;

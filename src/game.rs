@@ -1,3 +1,4 @@
+use crate::model::state::State;
 use crate::Direction;
 use crate::HashMap;
 use crate::Level;
@@ -5,10 +6,9 @@ use crate::Puzzle;
 use crate::Rc;
 use crate::RefCell;
 use crate::Sprite;
-use crate::State;
 use crate::Step;
 use crate::UNIT;
-use crate::coords::Coords;
+use crate::model::coords::Coords;
 use crate::fixed_for_level;
 use crate::grid::Grid;
 use crate::path_finder::PathFinder;

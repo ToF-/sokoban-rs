@@ -1,12 +1,12 @@
+use crate::model::state::STATE_MAX;
 use crate::HashMap;
 use crate::Level;
 use crate::Sprite;
-use crate::State;
+use crate::model::state::State;
 use crate::UNIT;
-use crate::coords::Coords;
+use crate::model::coords::Coords;
 use crate::gdk::Paintable;
 use crate::grid::Grid;
-use crate::state::STATE_MAX;
 use glib::ControlFlow;
 use glib::clone;
 use gtk::Fixed;

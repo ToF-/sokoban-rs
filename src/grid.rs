@@ -1,6 +1,6 @@
+use crate::model::coords::Coords;
 use crate::Sprite;
 use crate::UNIT;
-use crate::coords::Coords;
 use crate::tile::picture_at;
 use gtk::prelude::FixedExt;
 use gtk::prelude::WidgetExt;

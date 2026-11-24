@@ -1,5 +1,5 @@
 use crate::Direction;
-use crate::coords::Coords;
+use crate::model::coords::Coords;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Step {

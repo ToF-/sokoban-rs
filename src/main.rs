@@ -1,11 +1,10 @@
-use crate::direction::Direction;
+use crate::model::puzzle::Puzzle;
+use crate::model::direction::Direction;
 use crate::game::Game;
 use crate::gdk::Key;
 use crate::level::Level;
 use crate::level::levels_from_bytes;
-use crate::puzzle::Puzzle;
 use crate::sprite::Sprite;
-use crate::state::State;
 use crate::step::Step;
 use crate::tile::TILES;
 use crate::tile::Tiles;
@@ -21,15 +20,12 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub mod coords;
-pub mod direction;
+pub mod model;
 pub mod game;
 pub mod grid;
 pub mod level;
 pub mod path_finder;
-pub mod puzzle;
 pub mod sprite;
-pub mod state;
 pub mod step;
 pub mod tile;
 
