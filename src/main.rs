@@ -20,9 +20,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub mod model;
 pub mod game;
 pub mod grid;
+pub mod model;
 pub mod sprite;
 pub mod step;
 pub mod tile;

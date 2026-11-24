@@ -1,8 +1,8 @@
-use crate::model::state::State;
-use crate::model::direction::Direction;
 use crate::Level;
-use crate::model::state;
 use crate::model::coords::Coords;
+use crate::model::direction::Direction;
+use crate::model::state;
+use crate::model::state::State;
 use std::collections::HashMap;
 use std::collections::HashSet;
 

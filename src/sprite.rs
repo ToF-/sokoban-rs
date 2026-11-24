@@ -1,7 +1,7 @@
 use crate::Picture;
-use crate::model::state::State;
 use crate::UNIT;
 use crate::model::coords::Coords;
+use crate::model::state::State;
 use crate::paintable;
 use crate::picture;
 use crate::tile::picture_at;
