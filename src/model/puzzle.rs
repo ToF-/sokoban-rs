@@ -28,32 +28,27 @@ impl Puzzle {
             for row in 0..level.height() {
                 let coords = (row, col);
                 let level_element = level.element_at(coords);
-                let puzzle_element = match level_element {
+                match level_element {
                     Element::Crate => {
                         crates.push(coords);
-                        Element::Crate
                     }
                     Element::Stored => {
                         goals.insert(coords);
                         crates.push(coords);
-                        Element::Crate
                     }
                     Element::Sokoban => {
                         sokoban_coords = coords;
-                        Element::Sokoban
                     }
                     Element::OnGoal => {
                         sokoban_coords = coords;
                         goals.insert(coords);
-                        Element::Sokoban
                     }
                     Element::Goal => {
                         goals.insert(coords);
-                        Element::Floor
                     }
-                    other => other,
+                    other => {}
                 };
-                elements.insert(coords, puzzle_element.clone());
+                elements.insert(coords, level_element.clone());
             }
         }
         Self {
