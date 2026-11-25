@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+BasicStep	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^pub struct BasicStep {$/;"	s
 Coords	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub type Coords = (usize, usize);$/;"	T
 Direction	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^pub enum Direction {$/;"	g
 Element	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^pub enum Element {$/;"	g
@@ -20,6 +21,7 @@ MAX_ROW	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^const MAX_ROW: usize =
 PathFinder	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^pub struct PathFinder {$/;"	s
 Puzzle	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^pub struct Puzzle {$/;"	s
 STATE_MAX	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^pub const STATE_MAX: usize = 17;$/;"	c
+STEP_RULES	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^pub static STEP_RULES: LazyLock<HashMap<&'static (Element,Element), (Element,Element)>> =$/;"	c
 Sprite	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^pub struct Sprite {$/;"	s
 Step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^pub struct Step {$/;"	s
 TILES	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };$/;"	c
@@ -29,7 +31,11 @@ UNIT	/Users/tof/Coding/sokoban-rs/src/main.rs	/^const UNIT: f64 = 32.0;$/;"	c
 acquire_level_elements	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    fn acquire_level_elements(squares: &mut Vec<Vec<Element>>, bytes: &[u8], coords: Coords) {$/;"	f
 adjacent	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub fn adjacent(coords: Coords, direction: Direction) -> Option<Coords> {$/;"	f
 adjacent_coords_in_given_direction	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^    fn adjacent_coords_in_given_direction() {$/;"	f
+after	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn after(&self) -> (Element, Element) {$/;"	f
 background_texture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^fn background_texture(fixed_rc: Rc<RefCell<Fixed>>) -> gdk::Texture {$/;"	f
+basic_steps_for_a_wall_is_none	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn basic_steps_for_a_wall_is_none() {$/;"	f
+basic_steps_for_walking	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn basic_steps_for_walking() {$/;"	f
+before	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn before(&self) -> (Element, Element) {$/;"	f
 between	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn between(origin: Coords, destination: Coords) -> Direction {$/;"	f
 calibrate	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^fn calibrate(bytes: &[u8]) -> Coords {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
@@ -71,6 +77,7 @@ height	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn height(&self
 initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    fn initialize_from_bytes() {$/;"	f
 initialize_from_level	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn initialize_from_level() {$/;"	f
 insert_mark	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn insert_mark(&mut self, letter: char) {$/;"	f
+is_identical	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn is_identical(&self) -> bool {$/;"	f
 is_solved	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 is_visible	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn is_visible(&self) -> bool {$/;"	f
 level_index	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
@@ -87,6 +94,7 @@ move_piece_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn move
 move_towards	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn move_towards(&self, direction: Direction) {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn new(width: usize, height: usize) -> Self {$/;"	f
+new	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn new(puzzle: &Puzzle,  from: Coords, to: Coords) -> Option<Self>  {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    pub fn new(puzzle: &Puzzle) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {$/;"	f
 next_level	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn next_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
@@ -106,6 +114,7 @@ previous_level	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn previous_le
 pushing	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn pushing(&self) -> Option<(usize, Box<Step>)> {$/;"	f
 put	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn put(&mut self, sprite: &Sprite) {$/;"	f
 put	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn put(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
+puzzle	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn puzzle() -> Puzzle {$/;"	f
 puzzle	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn puzzle() -> Puzzle {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
 r	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {$/;"	f
@@ -113,7 +122,9 @@ r	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn r#move(&mut self, fixe
 remove	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn remove(&mut self, fixed: &Fixed) {$/;"	f
 remove_mark	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn remove_mark(&mut self, letter: char) {$/;"	f
 restart	/Users/tof/Coding/sokoban-rs/src/game.rs	/^    pub fn restart(&self) {$/;"	f
+reverse	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn reverse(&self) -> Self {$/;"	f
 reverse	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    pub fn reverse(&self) -> Self {$/;"	f
+reverse_of_walking	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn reverse_of_walking() {$/;"	f
 reversing_a_pushing_step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_pushing_step() {$/;"	f
 reversing_a_simple_step	/Users/tof/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_simple_step() {$/;"	f
 row	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub fn row(coords: Coords) -> usize {$/;"	f
