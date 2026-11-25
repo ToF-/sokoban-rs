@@ -5,6 +5,7 @@ use crate::model::direction::Direction;
 use crate::model::element;
 use crate::model::element::Element;
 use crate::model::puzzle::Element::Floor;
+use crate::model::puzzle_move::PuzzleMove;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -69,6 +70,30 @@ impl Puzzle {
 
     pub fn element_at(&self, coords: Coords) -> Element {
         self.elements.get(&coords).expect("illegal coords").clone()
+    }
+
+    pub fn puzzle_move(&mut self, direction: Direction) {
+        if let Some(PuzzleMove { basic_steps }) =
+            PuzzleMove::new(self, self.sokoban_coords, direction)
+        {
+            for basic_step in basic_steps {
+                // BasicStep { from: (13, 14), to: (12, 14), origin_before: Sokoban, origin_after: Floor, destination_before: Floor, destination_after: Sokoban }
+                println!("moving {:?} from {:?} to {:?}", basic_step.origin_before,  basic_step.from, basic_step.to);
+                self.elements
+                    .entry(basic_step.from)
+                    .and_modify(|element| *element = basic_step.origin_after)
+                    .or_insert(basic_step.origin_after);
+                self.elements
+                    .entry(basic_step.to)
+                    .and_modify(|element| *element = basic_step.destination_after)
+                    .or_insert(basic_step.destination_after);
+                if basic_step.destination_after == Element::Sokoban {
+                    self.sokoban_coords = basic_step.to
+                };
+            };
+            println!("{}", self.pretty_print());
+
+        }
     }
 
     pub fn is_solved(&self) -> bool {
@@ -320,5 +345,12 @@ mod tests {
     fn crate_coords() {
         let puzzle = puzzle();
         assert_eq!((12, 5), puzzle.crate_coords(0));
+    }
+    #[test]
+    fn making_a_puzzle_move() {
+        let mut puzzle = puzzle();
+        assert_eq!((13, 14), puzzle.sokoban_coords());
+        puzzle.puzzle_move(Direction::Up);
+        assert_eq!((12, 14), puzzle.sokoban_coords());
     }
 }

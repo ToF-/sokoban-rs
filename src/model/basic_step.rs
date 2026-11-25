@@ -55,14 +55,14 @@ pub fn step_rules(before: &(Element, Element)) -> Option<(Element, Element)> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicStep {
-    from: Coords,
-    to: Coords,
-    origin_before: Element,
-    origin_after: Element,
-    destination_before: Element,
-    destination_after: Element,
+    pub from: Coords,
+    pub to: Coords,
+    pub origin_before: Element,
+    pub origin_after: Element,
+    pub destination_before: Element,
+    pub destination_after: Element,
 }
 
 impl BasicStep {
