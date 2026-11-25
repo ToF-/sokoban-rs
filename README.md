@@ -167,11 +167,13 @@ step | E[c] | E[c+d] | E[c+d+d] | comment |
 | before |  S  |  T  | G |         |
 | after |  F  |  G  | T  | moving a crate on goals |
 
-To make a move, get elements in coords, coords + direction, coords + direction + direction, (C,D,E)
+To make a move, get elements in coords, coords + direction, coords + direction + direction, (org,dst,tgt)
 
-- if step(D,E) = NoMove, move(C,D,E) = Some([Step(D,E),Step(C,D)]
-- if step(D,E) = Blocked, Move(C,D,E) = None
-- if step(D,E) = Move, move(C,D,E) = Some([Step(D,E), Step(C,D)])
+- if step(dst,tgt) = NoMove, Move = (org',dst') = Step(org,dst)
+- if step(dst,tgt) = Blocked, Move = Blocked
+- if step(dst,tgt) = Move, Move = (dst',tgt') = Step(dst,tgt) then (org',dst'') = Step(org,dst') 
+- if step(dst,tgt) = Move, Move = (dst',tgt') = Step(dst,tgt) 
+- if step(dst,tgt) = Move, Move = (dst',tgt') = Step(dst,tgt) 
 - if step(D,E) = Move and Step(C,D) = Blocked, move(C,D,E) = None
 
 to reverse (undo) a move, apply reversed steps in reverse order

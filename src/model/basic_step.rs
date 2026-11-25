@@ -45,14 +45,18 @@ pub static STEP_RULES: LazyLock<HashMap<&'static (Element, Element), (Element, E
     });
 
 pub fn step_rules(before: &(Element, Element)) -> Option<(Element, Element)> {
+    println!("step rules: {:?},{:?}", before.0, before.1);
     let (from, to) = before;
+    let result = 
     if *from == Element::Floor || *from == Element::Goal {
         Some(before.clone())
     } else if *to == Element::Wall || *to == Element::Crate || *to == Element::Stored {
         None
     } else {
         STEP_RULES.get(before).copied()
-    }
+    };
+    println!("result: {:?}", result);
+    result
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
