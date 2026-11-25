@@ -37,45 +37,148 @@ Level : a map of Coords to Piece
 
 Direction : Left Up Down Right
 
-Step : a move from the character from one location in one direction, including pushing a crate or not
+Move : the (sokoban) character walking in one direction or pushing a crate in one direction
+
+Step : elementary parts of a move, involving an element at a location and the element at an adjactent location
 
 Puzzle : a representation of the current level to solve, a collection of piece
 
-Piece : an area or object in the puzzle : Wall, Floor, Goal, Crate, Stored Crate, Sokoban, Sokoban On Goal
+Element : an object in the puzzle : Wall, Floor, Goal, Crate, Stored (crate), Sokoban, (sokoban) On Goal
 
-A piece in coords c can be changed when "covered" by another piece:
+rules of elementary steps:
 
-- Floor in c + Sokoban → Sokoban in c
-- Floor in c + Crate → Crate in c
-- Goal in c + Sokoban → Sokoban on Goal in c
-- Goal in c + Crate → Stored Crate in c
 
-A piece can be changed when "uncovered" by another piece:
+step | E[c] | E[c+d] | comment |
+| ---  | --- | --- | --- | --- |
+| before |  F  |  x  |        |
+| after |  F  |  x  | no move |
+| | | | |
+| before |  G  |  x  |        |
+| after |  G  |  x  | no move |
+| | | | |
+| before |  W  |  x  |        |
+| after |  W  |  x  | no move |
+| | | | |
+| before |  x  |  W  |        |
+| after |  x  |  W  | blocked by wall |
+| | | | |
+| before |  C  |  C  |        |
+| after |  C  |  C  | blocking crate |
+| | | | |
+| before |  C  |  T  |        |
+| after |  C  |  T  | blocking stored crate |
+| | | | |
+| before |  T  |  C  |        |
+| after |  T  |  C  | blocked stored crate |
+| | | | |
+| before |  T  |  T  |        |
+| after |  T  |  T  | blocked stored crates |
+| | | | |
+| before |  S  |  F  |        |
+| after |  F  |  S  | walking |
+| | | | |
+| before |  S  |  G  |        |
+| after |  F  |  O  | walking on goal |
+| | | | |
+| before |  O  |  F  |        |
+| after |  G  |  S  | walking from goal |
+| | | | |
+| before |  O  |  G  |        |
+| after |  G  |  O  | walking frow goal to goal |
+| | | | |
+| before |  C  |  F  |        |
+| after |  F  |  C  | pushed crate |
+| | | | |
+| before |  C  |  G  |        |
+| after |  F  |  T  | stored crate |
+| | | | |
+| before |  T  |  F  |        |
+| after |  G  |  C  | de-stored crate |
+| | | | |
+| before |  T  |  G  |        |
+| after |  G  |  T  | crate pushed frow goal to goal |
 
-- Sokoban in c - Sokoban → Floor in c
-- Sokoban On Goal in c - Sokoban → Goal in c
-- Crate in c - Crate → Floor in c
-- Stored Crate in c - Crate → Goal in c
 
-Sokoban in c can be "moved" in direction d
+rules of moves :
 
-- Sokoban in c * c+d = Floor in c, p[c+d] + Sokoban in c+d
-- Sokoban on Goal in c * c+d Goal in c, p[c+d] + Sokoban in c+d
 
-A piece p can be "pushed" by Sokoban in c towards direction d :
+step | E[c] | E[c+d] | E[c+d+d] | comment |
+| ---  | --- | --- | --- | --- | --- |
+| before |  S  |  F  | x |         |
+| after |  F  |  S  | x  | walking |
+| | | | | |
+| before |  S  |  W  | x |         |
+| after |  S  |  W  | x  | blocked by wall |
+| | | | | |
+| before |  S  |  G  | x |         |
+| after |  F  |  O  | x  | walking on goal |
+| | | | | |
+| before |  O  |  F  | x |         |
+| after |  G  |  S  | x  | walking off goal |
+| | | | | |
+| before |  O  |  G  | x |         |
+| after |  G  |  O  | x  | walking on goals |
+| | | | | |
+| before |  S  |  C  | W |         |
+| after |  S  |  C  | W  | crate blocked by wall |
+| | | | | |
+| before |  S  |  T  | W |         |
+| after |  S  |  T  | W  | stored crate blocked by wall |
+| | | | | |
+| before |  O  |  C  | W |         |
+| after |  O  |  C  | W  | crate blocked by wall |
+| | | | | |
+| before |  O  |  T  | W |         |
+| after |  O  |  T  | W  | stored crate blocked by wall |
+| | | | | |
+| before |  S  |  C  | C |         |
+| after |  S  |  C  | C  | crate blocked by crate |
+| | | | | |
+| before |  S  |  T  |  C |         |
+| after |  S  |  T  | C  | stored crate blocked by crate |
+| | | | | |
+| before |  S  |  T  | T |         |
+| after |  S  |  T  | T  | stored crate blocked by stored crate |
+| | | | | |
+| before |  S  |  C  | T |         |
+| after |  S  |  C  | T  | crate blocked by stored crate |
+| | | | | |
+| before |  O  |  C  | C |         |
+| after |  O  |  C  | C  | crate blocked by crate |
+| | | | | |
+| before |  O  |  T  |  C |         |
+| after |  O  |  T  | C  | stored crate blocked by crate |
+| | | | | |
+| before |  O  |  T  | T |         |
+| after |  O  |  T  | T  | stored crate blocked by stored crate |
+| | | | | |
+| before |  O  |  C  | T |         |
+| after |  O  |  C  | T  | crate blocked by stored crate |
+| | | | | |
+| before |  S  |  C  | F |         |
+| after |  F  |  S  | C  | pushing a crate |
+| | | | | |
+| before |  S  |  C  | G |         |
+| after |  F  |  S  | T  | storing a crate |
+| | | | | |
+| before |  S  |  T  | F |         |
+| after |  F  |  G  | C  | destoring a crate |
+| | | | | |
+| before |  S  |  T  | G |         |
+| after |  F  |  G  | T  | moving a crate on goals |
 
-- Sokoban in c ^ Crate in c+d = p[c+d+d] + Crate in c+d+d, p[c+d] - Crate in c+d, p[c+d] + Sokoban in c+d, p[c] - Sokoban in c
+To make a move, get elements in coords, coords + direction, coords + direction + direction, (C,D,E)
 
-A step can be reversed by doing the opposite operations in reverse order:
+- if step(D,E) = NoMove, move(C,D,E) = Some([Step(D,E),Step(C,D)]
+- if step(D,E) = Blocked, Move(C,D,E) = None
+- if step(D,E) = Move, move(C,D,E) = Some([Step(D,E), Step(C,D)])
+- if step(D,E) = Move and Step(C,D) = Blocked, move(C,D,E) = None
 
-- reversing Sokoban in c * c+d = reversing Sokoban in c+d * c = p[c+d] - Sokoban in c+d, p[c] + Sokoban in c
-- reversing Sokoban in c ^ Crate in c+d = p[c] + Sokoban in c, p[c+d] - Sokoban in c+d, p[c+d] + Crate in c+d, p[c+d+d] - Crate in c+d+d
+to reverse (undo) a move, apply reversed steps in reverse order
+all valid moves are reversible
 
-Sokoban and Crates cannot cover any other piece than Floor or Goal
+reverse([Step(D,E),Step(C,D)] = [Step(D,C),Step(E,D)]
 
-Thus a Crate cannot cover a Crate
-
-Use railway programming to check possible moves and execute them
 
 ### Graphics
 
