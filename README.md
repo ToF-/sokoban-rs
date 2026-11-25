@@ -180,6 +180,8 @@ all valid moves are reversible
 reverse([Step(D,E),Step(C,D)] = [Step(D,C),Step(E,D)]
 
 
+use a Vec<Vec<Element>> instead of HashMap<Coords,Element>
+
 ### Graphics
 
 Tile : a 32x32 pixels picture representing a piece
