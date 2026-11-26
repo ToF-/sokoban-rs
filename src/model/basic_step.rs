@@ -170,7 +170,7 @@ mod tests {
         assert_eq!(expected, BasicStep::new(&puzzle, goal, goal_right));
     }
     #[test]
-    fn basic_steps_for_walking() {
+    fn basic_steps_for_walking_on_the_floor() {
         let puzzle = puzzle();
         let coords = puzzle.sokoban_coords();
         let coords_up = adjacent(coords, Direction::Up).expect("can't access adjacent");
@@ -180,19 +180,54 @@ mod tests {
         assert_eq!((Element::Sokoban, Element::Floor), step.before());
         assert_eq!((Element::Floor, Element::Sokoban), step.after());
     }
-    #[ignore]
     #[test]
-    fn reverse_of_walking() {
-        let puzzle = puzzle();
+    fn basic_steps_for_walking_on_a_goal() {
+        let mut puzzle = puzzle();
+        puzzle.set_element_at((12, 18), Element::Sokoban);
+        puzzle.set_element_at((13, 14), Element::Floor);
         let coords = puzzle.sokoban_coords();
-        let coords_up = adjacent(coords, Direction::Up).expect("can't access adjacent");
-        let step_opt = BasicStep::new(&puzzle, coords, coords_up);
+        let coords_right = adjacent(coords, Direction::Right).expect("can't access adjacent");
+        let step_opt = BasicStep::new(&puzzle, coords, coords_right);
         assert!(step_opt.is_some());
         let step = step_opt.unwrap();
-        println!("{:?}", step);
-        let reverse = step.reverse();
-        println!("{:?}", reverse);
-        assert_eq!((Element::Floor, Element::Sokoban), reverse.before());
-        assert_eq!((Element::Sokoban, Element::Floor), reverse.after());
+        assert_eq!((Element::Sokoban, Element::Goal), step.before());
+        assert_eq!((Element::Floor, Element::OnGoal), step.after());
+
+        puzzle.set_element_at((12, 19), Element::OnGoal);
+        puzzle.set_element_at((12, 18), Element::Floor);
+        let coords = puzzle.sokoban_coords();
+        let coords_right = adjacent(coords, Direction::Right).expect("can't access adjacent");
+        let step_opt = BasicStep::new(&puzzle, coords, coords_right);
+        assert!(step_opt.is_some());
+        let step = step_opt.unwrap();
+        assert_eq!((Element::OnGoal, Element::Goal), step.before());
+        assert_eq!((Element::Goal, Element::OnGoal), step.after());
+    }
+    #[test]
+    fn reverse_walking_from_floor() {
+        let mut puzzle = puzzle();
+        let coords = puzzle.sokoban_coords();
+        let coords_up = adjacent(coords, Direction::Up).expect("can't access adjacent");
+        let _ = BasicStep::new(&puzzle, coords, coords_up).and_then(|step| {
+            println!("{:?}", step);
+            let pets = step.reverse();
+            println!("{:?}", pets);
+            assert_eq!((Element::Sokoban, Element::Floor), pets.before());
+            assert_eq!((Element::Floor, Element::Sokoban), pets.after());
+            Some(pets)
+        });
+
+        puzzle.set_element_at((12, 18), Element::Sokoban);
+        puzzle.set_element_at((13, 14), Element::Floor);
+        let move_opt = puzzle.puzzle_move(Direction::Right);
+        let expected = Some(vec![BasicStep {
+            from: (12, 18),
+            to: (12, 19),
+            origin_before: Element::Sokoban,
+            origin_after: Element::Floor,
+            destination_before: Element::Goal,
+            destination_after: Element::OnGoal,
+        }]);
+        assert_eq!(expected, move_opt);
     }
 }

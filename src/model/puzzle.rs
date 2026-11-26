@@ -89,6 +89,13 @@ impl Puzzle {
         self.elements.get(&coords).expect("illegal coords").clone()
     }
 
+    pub fn set_element_at(&mut self, coords: Coords, new_element: Element) {
+        self.elements
+            .entry(coords)
+            .and_modify(|element| *element = new_element)
+            .or_insert(new_element);
+    }
+
     pub fn puzzle_step(&mut self, basic_step: &BasicStep) {
         self.elements
             .entry(basic_step.from)
