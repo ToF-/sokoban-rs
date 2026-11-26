@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 pub mod game;
+pub mod graphics;
 pub mod grid;
 pub mod model;
 pub mod sprite;

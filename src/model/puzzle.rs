@@ -1,5 +1,5 @@
-use crate::model::basic_step::BasicStep;
 use crate::Level;
+use crate::model::basic_step::BasicStep;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
@@ -16,6 +16,8 @@ pub struct Puzzle {
     goals: HashSet<Coords>,
     crates: Vec<Coords>,
     marks: HashMap<char, Coords>,
+    width: usize,
+    height: usize,
 }
 
 impl Puzzle {
@@ -58,7 +60,17 @@ impl Puzzle {
             goals,
             crates,
             marks,
+            width: level.width(),
+            height: level.height(),
         }
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 
     pub fn elements(&self) -> HashMap<Coords, Element> {
@@ -74,47 +86,46 @@ impl Puzzle {
 
     pub fn puzzle_step(&mut self, basic_step: BasicStep) {
         println!("puzzle_step {:?}", basic_step);
-       self.elements
-           .entry(basic_step.from)
-           .and_modify(|element| *element = basic_step.origin_after)
-           .or_insert(basic_step.origin_after);
+        self.elements
+            .entry(basic_step.from)
+            .and_modify(|element| *element = basic_step.origin_after)
+            .or_insert(basic_step.origin_after);
         self.elements
             .entry(basic_step.to)
             .and_modify(|element| *element = basic_step.destination_after)
             .or_insert(basic_step.destination_after);
         if basic_step.destination_after == Element::Sokoban
-            || basic_step.destination_after == Element::OnGoal {
-                self.sokoban_coords = basic_step.to
+            || basic_step.destination_after == Element::OnGoal
+        {
+            self.sokoban_coords = basic_step.to
         } else if basic_step.destination_after == Element::Crate
-            || basic_step.destination_after == Element::Stored {
-                let index = self.find_crate_index_at(basic_step.from)
-                    .expect("can't find crate");
-                self.crates[index] = basic_step.to;
+            || basic_step.destination_after == Element::Stored
+        {
+            let index = self
+                .find_crate_index_at(basic_step.from)
+                .expect("can't find crate");
+            self.crates[index] = basic_step.to;
         }
-    
     }
 
     pub fn puzzle_move(&mut self, direction: Direction) -> Option<Vec<BasicStep>> {
         let origin_coords = self.sokoban_coords;
-        let destination_coords = adjacent(origin_coords, direction)
-            .expect("unreachable destination");
-        let target_coords = adjacent(destination_coords, direction)
-            .expect("unreachable target");
-        BasicStep::new(self, destination_coords, target_coords)
-            .and_then(|step_1| {
-                if ! step_1.is_identical() {
-                    self.puzzle_step(step_1.clone())
-                };
-                BasicStep::new(self, origin_coords, destination_coords)
-                    .and_then(|step_2| {
-                        self.puzzle_step(step_2.clone());
-                        if ! step_1.is_identical() {
-                            Some(vec![step_1, step_2])
-                        } else {
-                            Some(vec![step_2])
-                        }
-                    })
+        let destination_coords =
+            adjacent(origin_coords, direction).expect("unreachable destination");
+        let target_coords = adjacent(destination_coords, direction).expect("unreachable target");
+        BasicStep::new(self, destination_coords, target_coords).and_then(|step_1| {
+            if !step_1.is_identical() {
+                self.puzzle_step(step_1.clone())
+            };
+            BasicStep::new(self, origin_coords, destination_coords).and_then(|step_2| {
+                self.puzzle_step(step_2.clone());
+                if !step_1.is_identical() {
+                    Some(vec![step_1, step_2])
+                } else {
+                    Some(vec![step_2])
+                }
             })
+        })
     }
 
     pub fn is_solved(&self) -> bool {
@@ -383,7 +394,8 @@ mod tests {
     fn pushing_a_crate() {
         let mut puzzle = puzzle();
         assert_eq!((13, 14), puzzle.sokoban_coords());
-        let moved_crate = puzzle.find_crate_index_at((12,8))
+        let moved_crate = puzzle
+            .find_crate_index_at((12, 8))
             .expect("can't find crate");
         puzzle.puzzle_move(Direction::Up);
         puzzle.puzzle_move(Direction::Left);
@@ -391,16 +403,15 @@ mod tests {
         puzzle.puzzle_move(Direction::Left);
         puzzle.puzzle_move(Direction::Left);
         puzzle.puzzle_move(Direction::Left);
-        let result  = puzzle.puzzle_move(Direction::Left);
+        let result = puzzle.puzzle_move(Direction::Left);
         dbg!(&result);
         assert_eq!((12, 8), puzzle.sokoban_coords());
-        assert_eq!(Element::Crate, puzzle.element_at((12,7)));
-        assert_eq!(Some(moved_crate), puzzle.find_crate_index_at((12,7)));
+        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
+        assert_eq!(Some(moved_crate), puzzle.find_crate_index_at((12, 7)));
         let result = puzzle.puzzle_move(Direction::Left);
         // this last move is not possible (blocked by a crate)
         let result = puzzle.puzzle_move(Direction::Left);
         println!("{}", puzzle.pretty_print());
         assert_eq!(None, result);
-
     }
 }
