@@ -1,5 +1,13 @@
+use gtk::gdk::prelude::GdkCairoContextExt;
+use gtk::gdk_pixbuf::Pixbuf;
+use gtk::prelude::DrawingAreaExtManual;
 use crate::game::Game;
 use crate::gdk::Key;
+use crate::graphics::char_display::CHAR_TILES;
+use crate::graphics::char_display::CharTiles;
+use crate::graphics::char_display::char_tile_pixbuf;
+use crate::model::coords::MAX_COL;
+use crate::model::coords::MAX_ROW;
 use crate::model::direction::Direction;
 use crate::model::level::Level;
 use crate::model::level::levels_from_bytes;
@@ -12,9 +20,10 @@ use crate::tile::fixed_for_level;
 use crate::tile::paintable;
 use crate::tile::picture;
 use crate::tile::solid_picture;
+use glib::clone;
 use gtk::gdk;
 use gtk::prelude::*;
-use gtk::{Application, Picture, gio, glib};
+use gtk::{Application, ApplicationWindow, DrawingArea, Picture, gio, glib};
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -37,21 +46,79 @@ fn main() -> glib::ExitCode {
         .application_id("com.example.MyApp")
         .build();
 
+    app.connect_activate(build_ascii_char_ui);
+    app.run()
+}
+pub fn build_ascii_char_ui(app: &Application) {
+    let drawing_area = DrawingArea::builder()
+        .content_width(MAX_COL as i32 * UNIT as i32)
+        .content_height(MAX_ROW as i32 * UNIT as i32)
+        .build();
+
+    let levels_file_name = format!("/com/example/MyApp/files/levels.txt");
+    let bytes = gio::resources_lookup_data(&levels_file_name, gio::ResourceLookupFlags::NONE)
+        .expect("Failed to find resource");
+    let levels = levels_from_bytes(&bytes);
+    let level_index = 1;
+    let puzzle = Puzzle::from_level(&levels[level_index]);
+    let puzzle_rc = Rc::new(RefCell::new(puzzle));
+    drawing_area.set_draw_func(clone!(
+        #[strong]
+        puzzle_rc,
+        move |_area, cr, _width, _height| {
+            cr.set_source_rgb(0.1, 0.1, 0.15);
+            cr.paint().expect("invalid cairo surface state");
+
+            let levels_file_name = format!("/com/example/MyApp/files/levels.txt");
+            let bytes =
+                gio::resources_lookup_data(&levels_file_name, gio::ResourceLookupFlags::NONE)
+                    .expect("Failed to find resource");
+            let levels = levels_from_bytes(&bytes);
+            let level_index = 1;
+            let puzzle = Puzzle::from_level(&levels[level_index]);
+            let puzzle_rc = Rc::new(RefCell::new(puzzle.clone()));
+            for row in 0..puzzle.height() {
+                for col in 0..puzzle.width() {
+                    let element = puzzle.element_at((row, col));
+                    let pixbuf = CHAR_TILES.with(|cell| {
+                        let char_tiles = cell.get_or_init(CharTiles::from_picture_files);
+                        char_tile_pixbuf(&element).clone()
+                    });
+                    cr.set_source_pixbuf(
+                        &pixbuf.clone(),
+                        col as f64 * UNIT as f64,
+                        row as f64 * UNIT as f64,
+                    );
+                }
+            }
+            cr.paint().expect("failed to paint sprites");
+        }
+    ));
+
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Sokoban")
+        .child(&drawing_area)
+        .build();
+
+    window.present();
+}
+
+/*
     app.connect_activate(|app| {
         let levels_file_name = format!("/com/example/MyApp/files/levels.txt");
         let bytes = gio::resources_lookup_data(&levels_file_name, gio::ResourceLookupFlags::NONE)
             .expect("Failed to find resource");
         let levels = levels_from_bytes(&bytes);
-        let level_index = 8;
-        let level_ready_rc = Rc::new(Cell::new(false));
-        let game_rc = Rc::new(RefCell::new(Game::new(&levels, 1, level_ready_rc.clone())));
-        let game = game_rc.borrow();
+        let level_index = 1;
+        let puzzle = Puzzle::from_level(&levels[level_index]);
+        let puzzle_rc = Rc::new(RefCell::new(puzzle));
         let window = gtk::ApplicationWindow::builder()
             .application(app)
-            .default_width(20 as i32 * UNIT as i32)
-            .default_height(20 as i32 * UNIT as i32)
-            .child(&game.fixed)
+            .default_width(MAX_COL as i32 * UNIT as i32)
+            .default_height(MAX_ROW as i32 * UNIT as i32)
             .build();
+
 
         let key_controller = gtk::EventControllerKey::new();
         key_controller.connect_key_pressed(glib::clone!(
@@ -187,3 +254,4 @@ fn main() -> glib::ExitCode {
 
     app.run()
 }
+*/

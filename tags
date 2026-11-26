@@ -40,10 +40,11 @@ basic_steps_for_a_wall_is_none	/Users/tof/Coding/sokoban-rs/src/model/basic_step
 basic_steps_for_walking	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn basic_steps_for_walking() {$/;"	f
 before	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    pub fn before(&self) -> (Element, Element) {$/;"	f
 between	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn between(origin: Coords, destination: Coords) -> Direction {$/;"	f
-build_ui	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^pub fn build_ui(app: &Application, puzzle_rc: Rc<RefCell<Puzzle>>) {$/;"	f
+build_ascii_char_ui	/Users/tof/Coding/sokoban-rs/src/main.rs	/^pub fn build_ascii_char_ui(app: &Application) {$/;"	f
 calibrate	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^fn calibrate(bytes: &[u8]) -> Coords {$/;"	f
 can_move	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
 char_element	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn char_element(index: usize) -> Element {$/;"	f
+char_tile_pixbuf	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^pub fn char_tile_pixbuf(element: &Element) -> Pixbuf {$/;"	f
 clear	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn clear(&mut self) {$/;"	f
 clear_fixed	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^fn clear_fixed(fixed: &gtk::Fixed) {$/;"	f
 col	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub fn col(coords: Coords) -> usize {$/;"	f
@@ -116,7 +117,7 @@ path_from	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn path_fr
 picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn picture(element: &Element) -> Picture {$/;"	f
 picture_at	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn picture_at(fixed: &gtk::Fixed, x: f64, y: f64) -> Option<Picture> {$/;"	f
 picture_data	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^fn picture_data(fixed: &gtk::Fixed) -> Vec<(f64, f64, bool)> {$/;"	f
-pixbuf	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn pixbuf(&self, element: &Element) -> Pixbuf {$/;"	f
+pixbuf	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn pixbuf(&self, index: usize) -> Pixbuf {$/;"	f
 place	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn place(&mut self, fixed: &Fixed) {$/;"	f
 possible_moves	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn possible_moves(&self, origin: Coords) -> Vec<Coords> {$/;"	f
 pretty_print	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
