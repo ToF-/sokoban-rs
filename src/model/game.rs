@@ -1,8 +1,8 @@
-use crate::model::basic_step::Move;
 use crate::Direction;
-use crate::levels_from_bytes;
-use crate::Puzzle;
 use crate::Level;
+use crate::Puzzle;
+use crate::levels_from_bytes;
+use crate::model::basic_step::Move;
 use gtk::gio;
 
 const GAME_MAX: usize = 90;

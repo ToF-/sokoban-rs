@@ -5,8 +5,8 @@ use crate::UNIT;
 use crate::gdk::Paintable;
 use crate::grid::Grid;
 use crate::model::coords::Coords;
+use crate::model::element::ELEMENT_MAX;
 use crate::model::element::Element;
-use crate::model::element::STATE_MAX;
 use glib::ControlFlow;
 use glib::clone;
 use gtk::Fixed;
@@ -75,7 +75,7 @@ pub struct Tiles {
 
 impl Tiles {
     pub fn from_picture_files() -> Self {
-        let tiles = (0usize..STATE_MAX)
+        let tiles = (0usize..ELEMENT_MAX)
             .map(|index| {
                 let element = Element::try_from(index).expect("index out of bound for Element");
                 Tile::make_tile(&element)

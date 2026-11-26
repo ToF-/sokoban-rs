@@ -2,63 +2,66 @@ use crate::Level;
 use crate::Puzzle;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
+use crate::model::element::ELEMENT_MAX;
 use crate::model::element::Element;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-pub static STEP_RULES: LazyLock<HashMap<&'static (Element, Element), (Element, Element)>> =
+pub static STEP_RULES: LazyLock<HashMap<(Element, Element), (Element, Element)>> =
     LazyLock::new(|| {
-        HashMap::from([
+        let mut result: HashMap<(Element, Element), (Element, Element)> = HashMap::new();
+        let mut immobile: HashMap<(Element, Element), (Element, Element)> = HashMap::new();
+        for space_element in [Element::Floor, Element::Goal] {
+            for value in 0..ELEMENT_MAX {
+                if let Ok(adjacent_element) = Element::try_from(value) {
+                    let pair = (space_element, adjacent_element);
+                    let _ = immobile.insert(pair.clone(), pair.clone());
+                }
+            }
+        }
+        result = HashMap::from([
             (
-                &(Element::Sokoban, Element::Floor),
+                (Element::Sokoban, Element::Floor),
                 (Element::Floor, Element::Sokoban),
             ),
             (
-                &(Element::OnGoal, Element::Floor),
+                (Element::OnGoal, Element::Floor),
                 (Element::Goal, Element::Sokoban),
             ),
             (
-                &(Element::Sokoban, Element::Goal),
+                (Element::Sokoban, Element::Goal),
                 (Element::Floor, Element::OnGoal),
             ),
             (
-                &(Element::OnGoal, Element::Goal),
+                (Element::OnGoal, Element::Goal),
                 (Element::Goal, Element::OnGoal),
             ),
             (
-                &(Element::Crate, Element::Floor),
+                (Element::Crate, Element::Floor),
                 (Element::Floor, Element::Crate),
             ),
             (
-                &(Element::Stored, Element::Floor),
+                (Element::Stored, Element::Floor),
                 (Element::Goal, Element::Crate),
             ),
             (
-                &(Element::Crate, Element::Goal),
+                (Element::Crate, Element::Goal),
                 (Element::Floor, Element::Stored),
             ),
             (
-                &(Element::Stored, Element::Goal),
+                (Element::Stored, Element::Goal),
                 (Element::Goal, Element::Stored),
             ),
-        ])
+        ]);
+        result.extend(&immobile);
+        result
     });
 
 pub fn step_rules(before: &(Element, Element)) -> Option<(Element, Element)> {
-    println!("step rules: {:?},{:?}", before.0, before.1);
-    let (from, to) = before;
-    let result = if *from == Element::Floor || *from == Element::Goal {
-        Some(before.clone())
-    } else if *to == Element::Wall || *to == Element::Crate || *to == Element::Stored {
-        None
-    } else {
-        STEP_RULES.get(before).copied()
-    };
-    println!("result: {:?}", result);
-    result
+    STEP_RULES.get(before).copied()
 }
 
-pub type Move =Vec<BasicStep>;
+pub type Move = Vec<BasicStep>;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicStep {
@@ -137,6 +140,34 @@ mod tests {
         let coords = puzzle.sokoban_coords();
         let coords_left = adjacent(coords, Direction::Left).expect("can't access adjacent");
         assert!(BasicStep::new(&puzzle, coords, coords_left).is_none());
+    }
+    #[test]
+    fn basic_steps_for_a_floor_or_a_goal_keep_things_in_place() {
+        let puzzle = puzzle();
+        let coords = puzzle.sokoban_coords();
+        let coords_up = adjacent(coords, Direction::Up).expect("can't access adjacent");
+        let expected = Some(BasicStep {
+            from: (12, 14),
+            to: (13, 14),
+            origin_before: Element::Floor,
+            origin_after: Element::Floor,
+            destination_before: Element::Sokoban,
+            destination_after: Element::Sokoban,
+        });
+        assert_eq!(expected, BasicStep::new(&puzzle, coords_up, coords));
+
+        let goal = (12, 20);
+        assert_eq!(Element::Goal, puzzle.element_at(goal));
+        let goal_right = adjacent(goal, Direction::Right).expect("can't access adjacent");
+        let expected = Some(BasicStep {
+            from: (12, 20),
+            to: (12, 21),
+            origin_before: Element::Goal,
+            origin_after: Element::Goal,
+            destination_before: Element::Wall,
+            destination_after: Element::Wall,
+        });
+        assert_eq!(expected, BasicStep::new(&puzzle, goal, goal_right));
     }
     #[test]
     fn basic_steps_for_walking() {

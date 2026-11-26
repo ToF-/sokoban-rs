@@ -20,7 +20,7 @@ pub enum Element {
     OnGoal = 16,
 }
 
-pub const STATE_MAX: usize = 17;
+pub const ELEMENT_MAX: usize = 17;
 
 impl From<u8> for Element {
     fn from(byte: u8) -> Self {

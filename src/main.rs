@@ -1,4 +1,3 @@
-use crate::model::game::Game;
 use crate::gdk::Key;
 use crate::graphics::char_display::CHAR_TILES;
 use crate::graphics::char_display::CharTiles;
@@ -6,6 +5,7 @@ use crate::graphics::char_display::char_tile_pixbuf;
 use crate::model::coords::MAX_COL;
 use crate::model::coords::MAX_ROW;
 use crate::model::direction::Direction;
+use crate::model::game::Game;
 use crate::model::level::Level;
 use crate::model::level::levels_from_bytes;
 use crate::model::puzzle::Puzzle;
@@ -93,94 +93,95 @@ pub fn build_ascii_char_ui(app: &Application) {
         glib::Propagation::Proceed,
         move |_controller, keyval, _keycode, state| {
             match keyval {
-                    gdk::Key::q => {
-                        app.quit();
-                        glib::Propagation::Stop
-                    }
-                    gdk::Key::A => {
-                        let mut game = game_rc.borrow_mut();
-                        game.mark('a');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::B => {
-                        let mut game = game_rc.borrow_mut();
-                        game.mark('b');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::C => {
-                        let mut game = game_rc.borrow_mut();
-                        game.mark('c');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::a => {
-                        let mut game = game_rc.borrow_mut();
-                        game.goto('a');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::b => {
-                        let mut game = game_rc.borrow_mut();
-                        game.goto('b');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::c => {
-                        let mut game = game_rc.borrow_mut();
-                        game.goto('c');
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::asterisk => {
-                        let mut game = game_rc.borrow_mut();
-                        game.restart();
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::u | gdk::Key::BackSpace => {
-                        {
+                gdk::Key::q => {
+                    app.quit();
+                    glib::Propagation::Stop
+                }
+                gdk::Key::A => {
+                    let mut game = game_rc.borrow_mut();
+                    game.mark('a');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::B => {
+                    let mut game = game_rc.borrow_mut();
+                    game.mark('b');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::C => {
+                    let mut game = game_rc.borrow_mut();
+                    game.mark('c');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::a => {
+                    let mut game = game_rc.borrow_mut();
+                    game.goto('a');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::b => {
+                    let mut game = game_rc.borrow_mut();
+                    game.goto('b');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::c => {
+                    let mut game = game_rc.borrow_mut();
+                    game.goto('c');
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::asterisk => {
+                    let mut game = game_rc.borrow_mut();
+                    game.restart();
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::u | gdk::Key::BackSpace => {
+                    {
                         let mut game = game_rc.borrow_mut();
                         game.undo();
-                        }
-                        drawing_area.queue_draw();
-                        glib::Propagation::Proceed
                     }
-                    gdk::Key::n | gdk::Key::Tab => {
-                        {
+                    drawing_area.queue_draw();
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::n | gdk::Key::Tab => {
+                    {
                         let mut game = game_rc.borrow_mut();
                         game.next_level();
-                        };
-                        drawing_area.queue_draw();
-                        glib::Propagation::Proceed
-                    }
-                    gdk::Key::p => {
-                        {
+                    };
+                    drawing_area.queue_draw();
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::p => {
+                    {
                         let mut game = game_rc.borrow_mut();
                         game.previous_level();
-                        }
-                        drawing_area.queue_draw();
-                        glib::Propagation::Proceed
                     }
-                    gdk::Key::Right
-                    | gdk::Key::r
-                    | gdk::Key::Left
-                    | gdk::Key::t
-                    | gdk::Key::Down
-                    | gdk::Key::s
-                    | gdk::Key::Up
-                    | gdk::Key::d => {
-                        let direction = match keyval {
-                            gdk::Key::Right | gdk::Key::r => Direction::Right,
-                            gdk::Key::Left | gdk::Key::t => Direction::Left,
-                            gdk::Key::Up | gdk::Key::d => Direction::Up,
-                            gdk::Key::Down | gdk::Key::s => Direction::Down,
-                            _ => Direction::Right,
-                        };
-                        {
+                    drawing_area.queue_draw();
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::Right
+                | gdk::Key::r
+                | gdk::Key::Left
+                | gdk::Key::t
+                | gdk::Key::Down
+                | gdk::Key::s
+                | gdk::Key::Up
+                | gdk::Key::d => {
+                    let direction = match keyval {
+                        gdk::Key::Right | gdk::Key::r => Direction::Right,
+                        gdk::Key::Left | gdk::Key::t => Direction::Left,
+                        gdk::Key::Up | gdk::Key::d => Direction::Up,
+                        gdk::Key::Down | gdk::Key::s => Direction::Down,
+                        _ => Direction::Right,
+                    };
+                    {
                         let mut game = game_rc.borrow_mut();
                         game.move_towards(direction);
-                        }
-                        drawing_area.queue_draw();
-                        glib::Propagation::Proceed
                     }
-                    _ => glib::Propagation::Proceed,
+                    drawing_area.queue_draw();
+                    glib::Propagation::Proceed
                 }
-            }));
+                _ => glib::Propagation::Proceed,
+            }
+        }
+    ));
 
     let window = ApplicationWindow::builder()
         .application(app)

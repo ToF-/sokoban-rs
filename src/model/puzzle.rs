@@ -1,6 +1,6 @@
-use crate::model::basic_step::Move;
 use crate::Level;
 use crate::model::basic_step::BasicStep;
+use crate::model::basic_step::Move;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
@@ -77,13 +77,12 @@ impl Puzzle {
         for row in 0..self.height() {
             for col in 0..self.width() {
                 let element = self.element_at((row, col));
-                if element == Element::Sokoban
-                    || element == Element::OnGoal {
-                        return (row, col)
+                if element == Element::Sokoban || element == Element::OnGoal {
+                    return (row, col);
                 }
             }
         }
-        ((0,0))
+        ((0, 0))
     }
 
     pub fn element_at(&self, coords: Coords) -> Element {
@@ -167,9 +166,8 @@ impl Puzzle {
         for row in 0..self.height() {
             for col in 0..self.width() {
                 let element = self.element_at((row, col));
-                if element == Element::Crate
-                    || element == Element::Stored {
-                        crates.push((row, col))
+                if element == Element::Crate || element == Element::Stored {
+                    crates.push((row, col))
                 }
             }
         }
@@ -329,7 +327,8 @@ mod tests {
         dbg!(&result);
         assert_eq!((12, 8), puzzle.sokoban_coords());
         assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        let pushing = puzzle.puzzle_move(Direction::Left)
+        let pushing = puzzle
+            .puzzle_move(Direction::Left)
             .expect("pushing not a valid move");
 
         assert_eq!((12, 7), puzzle.sokoban_coords());
