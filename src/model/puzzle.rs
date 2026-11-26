@@ -13,9 +13,7 @@ use std::collections::HashSet;
 #[derive(Clone, Debug)]
 pub struct Puzzle {
     elements: HashMap<Coords, Element>,
-    sokoban_coords: Coords,
     goals: HashSet<Coords>,
-    crates: Vec<Coords>,
     marks: HashMap<char, Coords>,
     width: usize,
     height: usize,
@@ -57,9 +55,7 @@ impl Puzzle {
         }
         Self {
             elements,
-            sokoban_coords,
             goals,
-            crates,
             marks,
             width: level.width(),
             height: level.height(),
@@ -78,30 +74,22 @@ impl Puzzle {
         self.elements.clone()
     }
     pub fn sokoban_coords(&self) -> Coords {
-        self.sokoban_coords
+        for row in 0..self.height() {
+            for col in 0..self.width() {
+                let element = self.element_at((row, col));
+                if element == Element::Sokoban
+                    || element == Element::OnGoal {
+                        return (row, col)
+                }
+            }
+        }
+        ((0,0))
     }
 
     pub fn element_at(&self, coords: Coords) -> Element {
         self.elements.get(&coords).expect("illegal coords").clone()
     }
 
-    pub fn update_positions(&mut self, basic_step: &BasicStep) {
-        dbg!(&self.crates);
-        if basic_step.destination_after == Element::Sokoban
-            || basic_step.destination_after == Element::OnGoal
-        {
-            println!("moving sokoban to {:?}", basic_step.to);
-            self.sokoban_coords = basic_step.to
-        } else if basic_step.destination_after == Element::Crate
-            || basic_step.destination_after == Element::Stored
-        {
-            let index = self
-                .find_crate_index_at(basic_step.from)
-                .expect("can't find crate");
-            self.crates[index] = basic_step.to;
-            println!("moving crate#{} from {:?} to {:?}", index, basic_step.from, basic_step.to);
-        }
-    }
     pub fn puzzle_step(&mut self, basic_step: &BasicStep) {
         self.elements
             .entry(basic_step.from)
@@ -111,11 +99,10 @@ impl Puzzle {
             .entry(basic_step.to)
             .and_modify(|element| *element = basic_step.destination_after)
             .or_insert(basic_step.destination_after);
-        self.update_positions(&basic_step);
     }
 
     pub fn puzzle_move(&mut self, direction: Direction) -> Option<Move> {
-        let origin_coords = self.sokoban_coords;
+        let origin_coords = self.sokoban_coords();
         let destination_coords =
             adjacent(origin_coords, direction).expect("unreachable destination");
         let target_coords = adjacent(destination_coords, direction).expect("unreachable target");
@@ -140,12 +127,11 @@ impl Puzzle {
         for step in steps.iter() {
             let basic_step = step.reverse();
             self.puzzle_step(&basic_step);
-        self.update_positions(&basic_step);
         }
     }
 
     pub fn is_solved(&self) -> bool {
-        self.crates
+        self.crates()
             .iter()
             .all(|crate_coords| self.goals.contains(crate_coords))
     }
@@ -173,21 +159,21 @@ impl Puzzle {
     }
 
     pub fn max_crate(&self) -> usize {
-        self.crates.len()
-    }
-
-    pub fn crate_coords(&self, crate_number: usize) -> Coords {
-        self.crates[crate_number]
+        self.crates().len()
     }
 
     pub fn crates(&self) -> Vec<Coords> {
-        self.crates.clone()
-    }
-
-    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {
-        self.crates
-            .iter()
-            .position(|&crate_coords| crate_coords == coords)
+        let mut crates = Vec::new();
+        for row in 0..self.height() {
+            for col in 0..self.width() {
+                let element = self.element_at((row, col));
+                if element == Element::Crate
+                    || element == Element::Stored {
+                        crates.push((row, col))
+                }
+            }
+        }
+        crates
     }
 
     pub fn insert_mark(&mut self, letter: char) {
@@ -268,7 +254,7 @@ mod tests {
         ]
         .to_vec();
         assert_eq!(expected, goals);
-        let mut crates: Vec<Coords> = puzzle.crates.clone();
+        let mut crates: Vec<Coords> = puzzle.crates().clone();
         crates.sort();
 
         let expected: Vec<Coords> = vec![(7, 8), (8, 10), (9, 8), (9, 10), (12, 5), (12, 8)];
@@ -302,24 +288,6 @@ mod tests {
         assert_eq!(6, puzzle.max_crate())
     }
     #[test]
-    fn find_crate_index() {
-        let puzzle = puzzle();
-        println!("{}", puzzle.pretty_print());
-        dbg!(&puzzle.crates);
-        assert_eq!(None, puzzle.find_crate_index_at((8, 12)));
-        assert_eq!(Some(0), puzzle.find_crate_index_at((12, 5)));
-        assert_eq!(Some(1), puzzle.find_crate_index_at((7, 8)));
-        assert_eq!(Some(2), puzzle.find_crate_index_at((9, 8)));
-        assert_eq!(Some(3), puzzle.find_crate_index_at((12, 8)));
-        assert_eq!(Some(4), puzzle.find_crate_index_at((8, 10)));
-        assert_eq!(Some(5), puzzle.find_crate_index_at((9, 10)));
-    }
-    #[test]
-    fn crate_coords() {
-        let puzzle = puzzle();
-        assert_eq!((12, 5), puzzle.crate_coords(0));
-    }
-    #[test]
     fn making_a_puzzle_move() {
         let mut puzzle = puzzle();
         assert_eq!((13, 14), puzzle.sokoban_coords());
@@ -331,9 +299,6 @@ mod tests {
     fn pushing_a_crate() {
         let mut puzzle = puzzle();
         assert_eq!((13, 14), puzzle.sokoban_coords());
-        let moved_crate = puzzle
-            .find_crate_index_at((12, 8))
-            .expect("can't find crate");
         puzzle.puzzle_move(Direction::Up);
         puzzle.puzzle_move(Direction::Left);
         puzzle.puzzle_move(Direction::Left);
@@ -344,7 +309,6 @@ mod tests {
         dbg!(&result);
         assert_eq!((12, 8), puzzle.sokoban_coords());
         assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        assert_eq!(Some(moved_crate), puzzle.find_crate_index_at((12, 7)));
         let result = puzzle.puzzle_move(Direction::Left);
         // this last move is not possible (blocked by a crate)
         let result = puzzle.puzzle_move(Direction::Left);
@@ -355,9 +319,6 @@ mod tests {
     fn undoing_pushing_a_crate() {
         let mut puzzle = puzzle();
         assert_eq!((13, 14), puzzle.sokoban_coords());
-        let moved_crate = puzzle
-            .find_crate_index_at((12, 8))
-            .expect("can't find crate");
         puzzle.puzzle_move(Direction::Up);
         puzzle.puzzle_move(Direction::Left);
         puzzle.puzzle_move(Direction::Left);
@@ -368,7 +329,6 @@ mod tests {
         dbg!(&result);
         assert_eq!((12, 8), puzzle.sokoban_coords());
         assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        assert_eq!(Some(moved_crate), puzzle.find_crate_index_at((12, 7)));
         let pushing = puzzle.puzzle_move(Direction::Left)
             .expect("pushing not a valid move");
 

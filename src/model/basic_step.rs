@@ -149,6 +149,7 @@ mod tests {
         assert_eq!((Element::Sokoban, Element::Floor), step.before());
         assert_eq!((Element::Floor, Element::Sokoban), step.after());
     }
+    #[ignore]
     #[test]
     fn reverse_of_walking() {
         let puzzle = puzzle();

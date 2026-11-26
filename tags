@@ -57,8 +57,6 @@ cover	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    pub fn cover(self,
 covering_an_element_with_a_crate_or_sokoban	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    fn covering_an_element_with_a_crate_or_sokoban() {$/;"	f
 covering_an_element_with_anything_else_is_inoperant	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    fn covering_an_element_with_anything_else_is_inoperant() {$/;"	f
 crate_coords	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn crate_coords(&self) -> Vec<Coords> {$/;"	f
-crate_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn crate_coords() {$/;"	f
-crate_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn crate_coords(&self, crate_number: usize) -> Coords {$/;"	f
 crate_max	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn crate_max(&self) -> usize {$/;"	f
 crates	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn crates(&self) -> Vec<Coords> {$/;"	f
 direction_between_coords	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    fn direction_between_coords() {$/;"	f
@@ -68,8 +66,6 @@ element_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn element
 elements	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn elements(&self) -> HashMap<Coords, Element> {$/;"	f
 fill_around_wall_elements	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    fn fill_around_wall_elements(squares: &mut Vec<Vec<Element>>) {$/;"	f
 fill_tiles_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fill_tiles_for_level($/;"	f
-find_crate_index	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn find_crate_index() {$/;"	f
-find_crate_index_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn find_crate_index_at(&self, coords: Coords) -> Option<usize> {$/;"	f
 find_mark_at_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn find_mark_at_coords(&self, target: Coords) -> Option<char> {$/;"	f
 find_mark_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn find_mark_coords(&self, letter: char) -> Option<Coords> {$/;"	f
 find_path	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    pub fn find_path(&mut self, origin: Coords, target: Coords) -> Option<Vec<Direction>> {$/;"	f
@@ -168,7 +164,6 @@ undo	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn undo(&mut self)
 undo	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn undo(&self) {$/;"	f
 undoing_pushing_a_crate	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn undoing_pushing_a_crate() {$/;"	f
 unmark	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn unmark(&self, letter: char) {$/;"	f
-update_positions	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn update_positions(&mut self, basic_step: &BasicStep) {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn width(&self) -> usize {$/;"	f

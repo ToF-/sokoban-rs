@@ -72,6 +72,8 @@ impl Game {
     }
 
     pub fn undo(&mut self) {
-        println!("here I should undo");
+        if let Some(move_) = self.moves.pop() {
+            self.puzzle.puzzle_undo(move_)
+        }
     }
 }

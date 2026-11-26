@@ -133,8 +133,11 @@ pub fn build_ascii_char_ui(app: &Application) {
                         glib::Propagation::Proceed
                     }
                     gdk::Key::u | gdk::Key::BackSpace => {
+                        {
                         let mut game = game_rc.borrow_mut();
                         game.undo();
+                        }
+                        drawing_area.queue_draw();
                         glib::Propagation::Proceed
                     }
                     gdk::Key::n | gdk::Key::Tab => {
