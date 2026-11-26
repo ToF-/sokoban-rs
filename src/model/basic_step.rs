@@ -58,6 +58,8 @@ pub fn step_rules(before: &(Element, Element)) -> Option<(Element, Element)> {
     result
 }
 
+pub type Move =Vec<BasicStep>;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicStep {
     pub from: Coords,
@@ -104,10 +106,10 @@ impl BasicStep {
         Self {
             from: self.to,
             to: self.from,
-            origin_before: self.origin_after,
-            origin_after: self.origin_before,
-            destination_before: self.destination_after,
-            destination_after: self.destination_before,
+            origin_before: self.origin_before,
+            origin_after: self.origin_after,
+            destination_before: self.destination_before,
+            destination_after: self.destination_after,
         }
     }
 }
@@ -155,7 +157,9 @@ mod tests {
         let step_opt = BasicStep::new(&puzzle, coords, coords_up);
         assert!(step_opt.is_some());
         let step = step_opt.unwrap();
+        println!("{:?}", step);
         let reverse = step.reverse();
+        println!("{:?}", reverse);
         assert_eq!((Element::Floor, Element::Sokoban), reverse.before());
         assert_eq!((Element::Sokoban, Element::Floor), reverse.after());
     }

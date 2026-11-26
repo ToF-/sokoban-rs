@@ -1,3 +1,4 @@
+use crate::model::basic_step::Move;
 use crate::Level;
 use crate::model::basic_step::BasicStep;
 use crate::model::coords::Coords;
@@ -84,19 +85,12 @@ impl Puzzle {
         self.elements.get(&coords).expect("illegal coords").clone()
     }
 
-    pub fn puzzle_step(&mut self, basic_step: BasicStep) {
-        println!("puzzle_step {:?}", basic_step);
-        self.elements
-            .entry(basic_step.from)
-            .and_modify(|element| *element = basic_step.origin_after)
-            .or_insert(basic_step.origin_after);
-        self.elements
-            .entry(basic_step.to)
-            .and_modify(|element| *element = basic_step.destination_after)
-            .or_insert(basic_step.destination_after);
+    pub fn update_positions(&mut self, basic_step: &BasicStep) {
+        dbg!(&self.crates);
         if basic_step.destination_after == Element::Sokoban
             || basic_step.destination_after == Element::OnGoal
         {
+            println!("moving sokoban to {:?}", basic_step.to);
             self.sokoban_coords = basic_step.to
         } else if basic_step.destination_after == Element::Crate
             || basic_step.destination_after == Element::Stored
@@ -105,20 +99,32 @@ impl Puzzle {
                 .find_crate_index_at(basic_step.from)
                 .expect("can't find crate");
             self.crates[index] = basic_step.to;
+            println!("moving crate#{} from {:?} to {:?}", index, basic_step.from, basic_step.to);
         }
     }
+    pub fn puzzle_step(&mut self, basic_step: &BasicStep) {
+        self.elements
+            .entry(basic_step.from)
+            .and_modify(|element| *element = basic_step.origin_after)
+            .or_insert(basic_step.origin_after);
+        self.elements
+            .entry(basic_step.to)
+            .and_modify(|element| *element = basic_step.destination_after)
+            .or_insert(basic_step.destination_after);
+        self.update_positions(&basic_step);
+    }
 
-    pub fn puzzle_move(&mut self, direction: Direction) -> Option<Vec<BasicStep>> {
+    pub fn puzzle_move(&mut self, direction: Direction) -> Option<Move> {
         let origin_coords = self.sokoban_coords;
         let destination_coords =
             adjacent(origin_coords, direction).expect("unreachable destination");
         let target_coords = adjacent(destination_coords, direction).expect("unreachable target");
         BasicStep::new(self, destination_coords, target_coords).and_then(|step_1| {
             if !step_1.is_identical() {
-                self.puzzle_step(step_1.clone())
+                self.puzzle_step(&step_1)
             };
             BasicStep::new(self, origin_coords, destination_coords).and_then(|step_2| {
-                self.puzzle_step(step_2.clone());
+                self.puzzle_step(&step_2);
                 if !step_1.is_identical() {
                     Some(vec![step_1, step_2])
                 } else {
@@ -126,6 +132,16 @@ impl Puzzle {
                 }
             })
         })
+    }
+
+    pub fn puzzle_undo(&mut self, move_: Move) {
+        let mut steps = move_.clone();
+        steps.reverse();
+        for step in steps.iter() {
+            let basic_step = step.reverse();
+            self.puzzle_step(&basic_step);
+        self.update_positions(&basic_step);
+        }
     }
 
     pub fn is_solved(&self) -> bool {
@@ -172,62 +188,6 @@ impl Puzzle {
         self.crates
             .iter()
             .position(|&crate_coords| crate_coords == coords)
-    }
-
-    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {
-        let origin_element = self.element_at(origin);
-        if let Some(destination) = adjacent(origin, direction) {
-            let destination_element = self.element_at(destination);
-            let target_element = if origin_element == Element::Sokoban {
-                destination_element.cover(Element::Sokoban)
-            } else if origin_element == Element::Crate {
-                destination_element.cover(Element::Crate)
-            } else {
-                destination_element
-            };
-            let clean_element = if origin_element == Element::Sokoban {
-                destination_element.uncover()
-            } else if origin_element == Element::Crate {
-                destination_element.uncover()
-            } else {
-                destination_element
-            };
-            if let Some(piece) = self.elements.get_mut(&destination) {
-                *piece = target_element
-            };
-            if let Some(piece) = self.elements.get_mut(&origin) {
-                *piece = clean_element
-            };
-            if origin_element == Element::Crate {
-                let crate_index = self
-                    .find_crate_index_at(origin)
-                    .expect("can't find crate index");
-                self.crates[crate_index] = destination;
-            }
-        }
-    }
-
-    pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {
-        let origin = self.sokoban_coords();
-        if let Some(destination) = adjacent(origin, direction) {
-            let target_opt = if let Some(piece) = self.elements.get(&destination) {
-                if *piece == Element::Crate {
-                    adjacent(destination, direction)
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
-            if let Some(target) = target_opt {
-                self.move_piece_at(destination, direction)
-            };
-            self.move_piece_at(origin, direction);
-            self.sokoban_coords = destination;
-            target_opt
-        } else {
-            None
-        }
     }
 
     pub fn insert_mark(&mut self, letter: char) {
@@ -337,29 +297,6 @@ mod tests {
     }
 
     #[test]
-    fn sokoban_can_move_on_floor() {
-        let mut puzzle = puzzle();
-        puzzle.r#move(Direction::Up);
-        assert_eq!((12, 14), puzzle.sokoban_coords());
-        puzzle.r#move(Direction::Left);
-        puzzle.r#move(Direction::Left);
-        assert_eq!((12, 12), puzzle.sokoban_coords());
-    }
-    #[test]
-    fn sokoban_can_push_a_crate() {
-        let mut puzzle = puzzle();
-        puzzle.r#move(Direction::Up);
-        assert_eq!((12, 14), puzzle.sokoban_coords());
-        for _ in 0..9 {
-            puzzle.r#move(Direction::Left);
-        }
-        println!("{}", puzzle.pretty_print());
-        assert_eq!((12, 5), puzzle.sokoban_coords());
-        assert_eq!(Element::Sokoban, puzzle.element_at((12, 5)));
-        assert_eq!(Element::Crate, puzzle.element_at((12, 4)));
-        assert!(!puzzle.can_move(Direction::Left));
-    }
-    #[test]
     fn max_crates() {
         let puzzle = puzzle();
         assert_eq!(6, puzzle.max_crate())
@@ -413,5 +350,35 @@ mod tests {
         let result = puzzle.puzzle_move(Direction::Left);
         println!("{}", puzzle.pretty_print());
         assert_eq!(None, result);
+    }
+    #[test]
+    fn undoing_pushing_a_crate() {
+        let mut puzzle = puzzle();
+        assert_eq!((13, 14), puzzle.sokoban_coords());
+        let moved_crate = puzzle
+            .find_crate_index_at((12, 8))
+            .expect("can't find crate");
+        puzzle.puzzle_move(Direction::Up);
+        puzzle.puzzle_move(Direction::Left);
+        puzzle.puzzle_move(Direction::Left);
+        puzzle.puzzle_move(Direction::Left);
+        puzzle.puzzle_move(Direction::Left);
+        puzzle.puzzle_move(Direction::Left);
+        let result = puzzle.puzzle_move(Direction::Left);
+        dbg!(&result);
+        assert_eq!((12, 8), puzzle.sokoban_coords());
+        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
+        assert_eq!(Some(moved_crate), puzzle.find_crate_index_at((12, 7)));
+        let pushing = puzzle.puzzle_move(Direction::Left)
+            .expect("pushing not a valid move");
+
+        assert_eq!((12, 7), puzzle.sokoban_coords());
+        assert_eq!(Element::Crate, puzzle.element_at((12, 6)));
+        println!("{}", puzzle.pretty_print());
+        puzzle.puzzle_undo(pushing);
+        println!("{}", puzzle.pretty_print());
+        assert_eq!((12, 8), puzzle.sokoban_coords());
+        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
+        println!("{}", puzzle.pretty_print());
     }
 }

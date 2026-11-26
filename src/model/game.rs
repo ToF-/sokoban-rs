@@ -1,3 +1,4 @@
+use crate::model::basic_step::Move;
 use crate::Direction;
 use crate::levels_from_bytes;
 use crate::Puzzle;
@@ -11,6 +12,7 @@ pub struct Game {
     levels: Vec<Level>,
     level_index: usize,
     puzzle: Puzzle,
+    moves: Vec<Move>,
 }
 
 impl Game {
@@ -21,10 +23,12 @@ impl Game {
         let levels = levels_from_bytes(&bytes);
         let level_index = 1;
         let puzzle = Puzzle::from_level(&levels[level_index]);
+        let moves = Vec::new();
         Self {
             levels,
             level_index,
             puzzle,
+            moves,
         }
     }
 
@@ -41,7 +45,9 @@ impl Game {
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
-        println!("here I should move sokoban in direction {:?}", direction);
+        if let Some(move_) = self.puzzle.puzzle_move(direction) {
+            self.moves.push(move_);
+        }
     }
 
     pub fn previous_level(&mut self) {

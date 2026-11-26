@@ -67,7 +67,6 @@ pub fn build_ascii_char_ui(app: &Application) {
 
             let game = game_rc.borrow_mut();
             let puzzle = game.puzzle();
-            println!("{}", puzzle.pretty_print());
             for row in 0..puzzle.height() {
                 for col in 0..puzzle.width() {
                     let element = puzzle.element_at((row, col));
@@ -169,8 +168,11 @@ pub fn build_ascii_char_ui(app: &Application) {
                             gdk::Key::Down | gdk::Key::s => Direction::Down,
                             _ => Direction::Right,
                         };
+                        {
                         let mut game = game_rc.borrow_mut();
                         game.move_towards(direction);
+                        }
+                        drawing_area.queue_draw();
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,

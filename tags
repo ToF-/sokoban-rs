@@ -23,6 +23,7 @@ MAX_COL	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^const MAX_COL: usize =
 MAX_COORDS	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub const MAX_COORDS: (usize, usize) = (MAX_ROW, MAX_COL);$/;"	c
 MAX_ROW	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub const MAX_ROW: usize = 20;$/;"	c
 MAX_ROW	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^const MAX_ROW: usize = 20;$/;"	c
+Move	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^pub type Move =Vec<BasicStep>;$/;"	T
 PathFinder	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^pub struct PathFinder {$/;"	s
 Puzzle	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^pub struct Puzzle {$/;"	s
 STATE_MAX	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^pub const STATE_MAX: usize = 17;$/;"	c
@@ -105,7 +106,6 @@ mark	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn mark(&mut self,
 mark	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn mark(&self, letter: char) {$/;"	f
 max_crate	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn max_crate(&self) -> usize {$/;"	f
 max_crates	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn max_crates() {$/;"	f
-move_piece_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn move_piece_at(&mut self, origin: Coords, direction: Direction) {$/;"	f
 move_towards	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn move_towards(&mut self, direction: Direction) {$/;"	f
 move_towards	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn move_towards(&self, direction: Direction) {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn new(width: usize, height: usize) -> Self {$/;"	f
@@ -139,9 +139,9 @@ puzzle	/Users/tof/Coding/sokoban-rs/src/model/basic_step.rs	/^    fn puzzle() ->
 puzzle	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn puzzle(&self) -> Puzzle {$/;"	f
 puzzle	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn puzzle() -> Puzzle {$/;"	f
 puzzle_1	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn puzzle_1() -> Puzzle {$/;"	f
-puzzle_move	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn puzzle_move(&mut self, direction: Direction) -> Option<Vec<BasicStep>> {$/;"	f
-puzzle_step	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn puzzle_step(&mut self, basic_step: BasicStep) {$/;"	f
-r	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn r#move(&mut self, direction: Direction) -> Option<Coords> {$/;"	f
+puzzle_move	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn puzzle_move(&mut self, direction: Direction) -> Option<Move> {$/;"	f
+puzzle_step	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn puzzle_step(&mut self, basic_step: &BasicStep) {$/;"	f
+puzzle_undo	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn puzzle_undo(&mut self, move_: Move) {$/;"	f
 r	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
 remove	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn remove(&mut self, fixed: &Fixed) {$/;"	f
 remove_mark	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn remove_mark(&mut self, letter: char) {$/;"	f
@@ -156,8 +156,6 @@ row	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub fn row(coords: Coords
 screen	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn screen(&self) -> gtk::Fixed {$/;"	f
 set_picture	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn set_picture(&mut self, state: &Element) {$/;"	f
 size	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn size(&self) -> usize {$/;"	f
-sokoban_can_move_on_floor	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn sokoban_can_move_on_floor() {$/;"	f
-sokoban_can_push_a_crate	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn sokoban_can_push_a_crate() {$/;"	f
 sokoban_cannot_move_into_wall	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn sokoban_cannot_move_into_wall() {$/;"	f
 sokoban_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn sokoban_coords(&self) -> Coords {$/;"	f
 solid_picture	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {$/;"	f
@@ -168,7 +166,9 @@ uncover	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    pub fn uncover(s
 uncovering_an_element_from_a_crate_or_sokoban	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    fn uncovering_an_element_from_a_crate_or_sokoban() {$/;"	f
 undo	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn undo(&mut self) {$/;"	f
 undo	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn undo(&self) {$/;"	f
+undoing_pushing_a_crate	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn undoing_pushing_a_crate() {$/;"	f
 unmark	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn unmark(&self, letter: char) {$/;"	f
+update_positions	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn update_positions(&mut self, basic_step: &BasicStep) {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn width(&self) -> usize {$/;"	f

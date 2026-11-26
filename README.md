@@ -5,6 +5,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 
 ##  Todo List
 
+- [ ] include tiles for numbers so that level number is part of the drawing
 - [ ] sounds
 - [ ] store levels done and the score (minimum moves to win)
 - [x] goto to a marked floor square  (g followed by a b c d or e) if it's on the puzzle and reachable without pushing any crate
