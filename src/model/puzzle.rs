@@ -81,7 +81,6 @@ impl Puzzle {
     }
 
     pub fn element_at(&self, coords: Coords) -> Element {
-        dbg!(&coords);
         self.elements.get(&coords).expect("illegal coords").clone()
     }
 

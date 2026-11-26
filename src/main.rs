@@ -1,6 +1,3 @@
-use gtk::gdk::prelude::GdkCairoContextExt;
-use gtk::gdk_pixbuf::Pixbuf;
-use gtk::prelude::DrawingAreaExtManual;
 use crate::game::Game;
 use crate::gdk::Key;
 use crate::graphics::char_display::CHAR_TILES;
@@ -22,6 +19,9 @@ use crate::tile::picture;
 use crate::tile::solid_picture;
 use glib::clone;
 use gtk::gdk;
+use gtk::gdk::prelude::GdkCairoContextExt;
+use gtk::gdk_pixbuf::Pixbuf;
+use gtk::prelude::DrawingAreaExtManual;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, DrawingArea, Picture, gio, glib};
 use std::cell::Cell;
@@ -76,6 +76,7 @@ pub fn build_ascii_char_ui(app: &Application) {
             let levels = levels_from_bytes(&bytes);
             let level_index = 1;
             let puzzle = Puzzle::from_level(&levels[level_index]);
+            println!("{}", puzzle.pretty_print());
             let puzzle_rc = Rc::new(RefCell::new(puzzle.clone()));
             for row in 0..puzzle.height() {
                 for col in 0..puzzle.width() {
@@ -84,14 +85,11 @@ pub fn build_ascii_char_ui(app: &Application) {
                         let char_tiles = cell.get_or_init(CharTiles::from_picture_files);
                         char_tile_pixbuf(&element).clone()
                     });
-                    cr.set_source_pixbuf(
-                        &pixbuf.clone(),
-                        col as f64 * UNIT as f64,
-                        row as f64 * UNIT as f64,
-                    );
+                    let (x, y) = (col as f64 * UNIT as f64, row as f64 * UNIT as f64);
+                    cr.set_source_pixbuf(&pixbuf.clone(), x, y);
+                    cr.paint().expect("failed to paint sprite");
                 }
             }
-            cr.paint().expect("failed to paint sprites");
         }
     ));
 

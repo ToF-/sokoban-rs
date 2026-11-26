@@ -83,6 +83,7 @@ pub fn make_char_tile(element: &Element) -> Pixbuf {
         Element::Floor => "floor_char",
         Element::Goal => "goal_char",
         Element::Sokoban => "sokoban_char",
+        Element::Crate => "crate_char",
         Element::Stored => "stored_char",
         Element::Wall => "wall_char",
         Element::OnGoal => "on_goal_char",
