@@ -4,10 +4,10 @@ use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
 use crate::model::element;
 use crate::model::element::Element;
-use crate::model::puzzle::Element::Floor;
 use crate::model::move_;
 use crate::model::move_::Move_;
 use crate::model::move_::move_;
+use crate::model::puzzle::Element::Floor;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -206,7 +206,7 @@ impl Puzzle {
         self.crates.clone()
     }
 
-    pub fn insert_mark(&mut self, letter: char) {
+    pub fn set_mark(&mut self, letter: char) {
         let coords = self.sokoban_coords();
         let _ = self.marks.insert(letter, coords);
     }
@@ -384,6 +384,18 @@ mod tests {
         puzzle.run(&solution());
         println!("{}", puzzle.pretty_print());
         assert!(puzzle.is_solved());
+    }
+    #[test]
+    fn puzzle_can_receive_a_letter_mark() {
+        let mut puzzle = puzzle();
+        puzzle.set_mark('a');
+        assert_eq!(Some((13, 14)), puzzle.find_mark_coords('a'));
+        puzzle.walk(Direction::Up);
+        puzzle.walk(Direction::Left);
+        puzzle.walk(Direction::Left);
+        puzzle.walk(Direction::Left);
+        puzzle.set_mark('b');
+        assert_eq!(Some((12, 11)), puzzle.find_mark_coords('b'));
     }
     pub fn solution() -> Vec<Direction> {
         vec![

@@ -18,9 +18,22 @@ pub enum Element {
     Right = 14,
     Down = 15,
     OnGoal = 16,
+    Mark_Lower_A = 17,
+    Mark_Lower_B = 18,
+    Mark_Lower_C = 19,
+    Digit_0 = 20,
+    Digit_1 = 21,
+    Digit_2 = 22,
+    Digit_3 = 23,
+    Digit_4 = 24,
+    Digit_5 = 25,
+    Digit_6 = 26,
+    Digit_7 = 27,
+    Digit_8 = 28,
+    Digit_9 = 29,
 }
 
-pub const ELEMENT_MAX: usize = 17;
+pub const ELEMENT_MAX: usize = 30;
 
 impl From<u8> for Element {
     fn from(byte: u8) -> Self {
@@ -67,6 +80,19 @@ impl TryFrom<usize> for Element {
             14 => Ok(Element::Right),
             15 => Ok(Element::Down),
             16 => Ok(Element::OnGoal),
+            17 => Ok(Element::Mark_Lower_A),
+            18 => Ok(Element::Mark_Lower_B),
+            19 => Ok(Element::Mark_Lower_C),
+            20 => Ok(Element::Digit_0),
+            21 => Ok(Element::Digit_1),
+            22 => Ok(Element::Digit_2),
+            23 => Ok(Element::Digit_3),
+            24 => Ok(Element::Digit_4),
+            25 => Ok(Element::Digit_5),
+            26 => Ok(Element::Digit_6),
+            27 => Ok(Element::Digit_7),
+            28 => Ok(Element::Digit_8),
+            29 => Ok(Element::Digit_9),
             _ => Err(()),
         }
     }
@@ -138,6 +164,19 @@ impl Element {
             Element::Mark_C => 1,
             Element::Grass_1 => 0,
             Element::Grass_2 => 0,
+            Element::Mark_Lower_A => 1,
+            Element::Mark_Lower_B => 1,
+            Element::Mark_Lower_C => 1,
+            Element::Digit_0 => 1,
+            Element::Digit_1 => 1,
+            Element::Digit_2 => 1,
+            Element::Digit_3 => 1,
+            Element::Digit_4 => 1,
+            Element::Digit_5 => 1,
+            Element::Digit_6 => 1,
+            Element::Digit_7 => 1,
+            Element::Digit_8 => 1,
+            Element::Digit_9 => 1,
         }
     }
 }

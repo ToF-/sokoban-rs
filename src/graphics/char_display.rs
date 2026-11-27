@@ -17,7 +17,7 @@ thread_local! {
 pub static CHAR_TILES: OnceCell<CharTiles> = const { OnceCell::new() };
 }
 
-pub const CHAR_ELEMENT_MAX: usize = 10;
+pub const CHAR_ELEMENT_MAX: usize = 13;
 
 pub struct CharTiles {
     tiles: Vec<Pixbuf>,
@@ -46,6 +46,9 @@ impl CharTiles {
             7 => Element::Stored,
             8 => Element::Wall,
             9 => Element::OnGoal,
+            10 => Element::Mark_A,
+            11 => Element::Mark_B,
+            12 => Element::Mark_C,
             _ => Element::Outside,
         }
     }
@@ -69,6 +72,9 @@ pub fn char_tile_pixbuf(element: &Element) -> Pixbuf {
             Element::Stored => 7,
             Element::Wall => 8,
             Element::OnGoal => 9,
+            Element::Mark_A => 10,
+            Element::Mark_B => 11,
+            Element::Mark_C => 12,
             _ => 0,
         };
         char_tiles.pixbuf(index).clone()
@@ -86,6 +92,9 @@ pub fn make_char_tile(element: &Element) -> Pixbuf {
         Element::Crate => "crate_char",
         Element::Stored => "stored_char",
         Element::Wall => "wall_char",
+        Element::Mark_A => "mark_a",
+        Element::Mark_B => "mark_b",
+        Element::Mark_C => "mark_c",
         Element::OnGoal => "on_goal_char",
         _ => "floor_char",
     };

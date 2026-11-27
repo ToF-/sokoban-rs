@@ -28,6 +28,19 @@
       <file>images/stored_char.png</file>
       <file>images/sokoban_char.png</file>
       <file>images/on_goal_char.png</file>
+      <file>images/mark_lower_a.png</file>
+      <file>images/mark_lower_b.png</file>
+      <file>images/mark_lower_c.png</file>
+      <file>images/0_char.png</file>
+      <file>images/1_char.png</file>
+      <file>images/2_char.png</file>
+      <file>images/3_char.png</file>
+      <file>images/4_char.png</file>
+      <file>images/5_char.png</file>
+      <file>images/6_char.png</file>
+      <file>images/7_char.png</file>
+      <file>images/8_char.png</file>
+      <file>images/9_char.png</file>
       <file>files/levels.txt</file>
       <file>files/level_00.txt</file>
       <file>files/level_01.txt</file>

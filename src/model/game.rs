@@ -4,7 +4,11 @@ use crate::Puzzle;
 use crate::levels_from_bytes;
 use crate::model::move_::Move_;
 use crate::model::move_::reverse_move;
+use crate::model::path_finder::PathFinder;
 use gtk::gio;
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::time::Duration;
 
 const GAME_MAX: usize = 90;
 
@@ -14,6 +18,8 @@ pub struct Game {
     level_index: usize,
     puzzle: Puzzle,
     moves: Vec<Vec<Move_>>,
+    auto_mode: bool,
+    directions: Vec<Direction>,
 }
 
 impl Game {
@@ -25,11 +31,15 @@ impl Game {
         let level_index = 1;
         let puzzle = Puzzle::from_level(&levels[level_index]);
         let moves = Vec::new();
+        let auto_mode = false;
+        let directions = Vec::new();
         Self {
             levels,
             level_index,
             puzzle,
             moves,
+            auto_mode,
+            directions,
         }
     }
 
@@ -50,12 +60,46 @@ impl Game {
         self.puzzle.clone()
     }
 
+    pub fn auto_mode(&self) -> bool {
+        self.auto_mode
+    }
+
+    pub fn direction(&self) -> Vec<Direction> {
+        self.directions.clone()
+    }
+
     pub fn goto(&mut self, letter: char) {
-        println!("here I should goto the letter {}", letter);
+        let directions_opt = {
+            let origin = self.puzzle.sokoban_coords();
+            if let Some(target) = self.puzzle.find_mark_coords(letter) {
+                let mut path_finder = PathFinder::new(&self.puzzle);
+                path_finder.find_path(origin, target)
+            } else {
+                None
+            }
+        };
+
+        if let Some(directions) = directions_opt {
+            self.directions = directions.clone();
+            self.auto_mode = true
+        }
+    }
+
+    pub fn auto(&mut self) {
+        println!("{}", self.directions.len());
+        if self.auto_mode() {
+            if !self.directions.is_empty() {
+                let direction = self.directions.remove(0);
+                println!("{:?}", &direction);
+                self.move_towards(direction)
+            } else {
+                self.auto_mode = false
+            }
+        }
     }
 
     pub fn mark(&mut self, letter: char) {
-        println!("here I should mark the letter {}", letter);
+        self.puzzle.set_mark(letter);
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
