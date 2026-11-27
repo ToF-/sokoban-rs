@@ -1,3 +1,5 @@
+use crate::model::puzzle_move::reverse_move;
+use crate::model::puzzle_move::PuzzleMove;
 use crate::Direction;
 use crate::Level;
 use crate::Puzzle;
@@ -12,7 +14,7 @@ pub struct Game {
     levels: Vec<Level>,
     level_index: usize,
     puzzle: Puzzle,
-    moves: Vec<Move>,
+    moves: Vec<Vec<PuzzleMove>>,
 }
 
 impl Game {
@@ -45,7 +47,9 @@ impl Game {
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
-        self.puzzle.walk(direction);
+        if let Some(moves) = self.puzzle.walk(direction) {
+            self.moves.push(moves)
+        }
     }
 
     pub fn previous_level(&mut self) {
@@ -65,13 +69,20 @@ impl Game {
         self.puzzle = Puzzle::from_level(&self.levels[self.level_index]);
     }
 
-    pub fn restart(&mut self) {
-        println!("here I should restart");
+    pub fn undo(&mut self) {
+        if let Some(moves) = self.moves.pop() {
+            let backwards = moves
+                .iter()
+                .rev()
+                .map(|puzzle_move| reverse_move(puzzle_move))
+                .collect();
+            self.puzzle.make_moves(backwards)
+        }
     }
 
-    pub fn undo(&mut self) {
-        if let Some(move_) = self.moves.pop() {
-            self.puzzle.puzzle_undo(move_)
+    pub fn restart(&mut self) {
+        while !self.moves.is_empty() {
+            self.undo()
         }
     }
 }

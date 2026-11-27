@@ -128,8 +128,11 @@ pub fn build_ascii_char_ui(app: &Application) {
                     glib::Propagation::Proceed
                 }
                 gdk::Key::asterisk => {
+                    {
                     let mut game = game_rc.borrow_mut();
                     game.restart();
+                    }
+                    drawing_area.queue_draw();
                     glib::Propagation::Proceed
                 }
                 gdk::Key::u | gdk::Key::BackSpace => {

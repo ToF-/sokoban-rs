@@ -55,9 +55,8 @@ impl Puzzle {
                     Element::Goal => {
                         goals.insert(coords);
                     }
-                    Element::Floor => {
-                    }
-                    other => is_floor = false
+                    Element::Floor => {}
+                    other => is_floor = false,
                 };
                 if is_floor {
                     floor.insert(coords);
@@ -97,7 +96,31 @@ impl Puzzle {
     }
 
     pub fn element_at(&self, coords: Coords) -> Element {
-        self.elements.get(&coords).expect("illegal coords").clone()
+        if coords == self.sokoban_coords() {
+            if self.goals.contains(&coords) {
+                Element::OnGoal
+            } else {
+                Element::Sokoban
+            }
+        } else if self.crates.contains(&coords) {
+            if self.goals.contains(&coords) {
+                Element::Stored
+            } else {
+                Element::Crate
+            }
+        } else if self.floor.contains(&coords) {
+            if self.goals.contains(&coords) {
+                Element::Goal
+            } else {
+                Element::Floor
+            }
+        } else {
+            if let Some(element) = self.elements.get(&coords) {
+                *element
+            } else {
+                Element::Outside
+            }
+        }
     }
 
     pub fn set_element_at(&mut self, coords: Coords, new_element: Element) {
@@ -129,9 +152,8 @@ impl Puzzle {
 
     pub fn possible_moves(&self, coords: Coords, direction: Direction) -> Option<Vec<PuzzleMove>> {
         self.destination(coords, direction).and_then(|destination| {
-            if self.crates.contains(&coords)
-                && self.crates.contains(&destination) {
-                    None
+            if self.crates.contains(&coords) && self.crates.contains(&destination) {
+                None
             } else {
                 let coords_dir: Coords = destination.clone();
                 if self.crates.contains(&destination) {
@@ -153,26 +175,25 @@ impl Puzzle {
 
     fn make_move(&mut self, move_: PuzzleMove) {
         let (coords, destination) = move_;
-          if let Some(mut pos) = self.crates.take(&coords) {
-              println!("moving crate from {:?} to {:?}", &coords, &destination);
-              self.crates.insert(destination);
-          } else if self.sokoban_coords == coords {
-              self.sokoban_coords = destination;
-          }
+        if let Some(mut pos) = self.crates.take(&coords) {
+            self.crates.insert(destination);
+        } else if self.sokoban_coords == coords {
+            self.sokoban_coords = destination;
+        }
     }
 
     pub fn make_moves(&mut self, moves: Vec<PuzzleMove>) {
         for move_ in moves {
             self.make_move(move_)
-        }
+        };
     }
 
-    pub fn walk(&mut self, direction: Direction) {
+    pub fn walk(&mut self, direction: Direction) -> Option<Vec<PuzzleMove>> {
         let coords = self.sokoban_coords();
-        self.possible_moves(coords, direction)
-            .map(|moves| {
-                self.make_moves(moves);
-            });
+        self.possible_moves(coords, direction).and_then(|moves| {
+            self.make_moves(moves.clone());
+            Some(moves)
+        })
     }
 
     pub fn puzzle_move(&mut self, direction: Direction) -> Option<Move> {
@@ -278,7 +299,7 @@ impl Puzzle {
         }
         for row in 0..height {
             for col in 0..width {
-                let coords = (row,col);
+                let coords = (row, col);
                 if coords == self.sokoban_coords() {
                     if self.goals.contains(&coords) {
                         result.push(char::from(Element::OnGoal))
@@ -302,7 +323,7 @@ impl Puzzle {
                         result.push(' ')
                     }
                 }
-            };
+            }
             result.push('\n');
         }
         result
@@ -354,35 +375,40 @@ mod tests {
     fn sokoban_cannot_move_into_walls() {
         let puzzle = puzzle();
         let coords = puzzle.sokoban_coords();
-        let coords_up = adjacent(coords, Direction::Up)
-            .expect("illegal coords");
-    
+        let coords_up = adjacent(coords, Direction::Up).expect("illegal coords");
+
         assert_eq!(None, puzzle.possible_moves(coords, Direction::Right));
         assert_eq!(None, puzzle.possible_moves(coords, Direction::Down));
         assert_eq!(None, puzzle.possible_moves(coords, Direction::Left));
-        assert_eq!(Some(vec![move_(coords, coords_up)]), puzzle.possible_moves(coords, Direction::Up));
+        assert_eq!(
+            Some(vec![move_(coords, coords_up)]),
+            puzzle.possible_moves(coords, Direction::Up)
+        );
     }
     #[test]
     fn sokoban_can_push_a_crate() {
         let mut puzzle = puzzle();
-        puzzle.set_element_at((12,9), Element::Sokoban);
-        puzzle.set_element_at((13,14), Element::Floor);
-        let coords = (12,9);
-        assert_eq!(Some(vec![((12, 8), (12, 7)), ((12, 9), (12, 8))]), puzzle.possible_moves(coords, Direction::Left));
+        puzzle.set_element_at((12, 9), Element::Sokoban);
+        puzzle.set_element_at((13, 14), Element::Floor);
+        let coords = (12, 9);
+        assert_eq!(
+            Some(vec![((12, 8), (12, 7)), ((12, 9), (12, 8))]),
+            puzzle.possible_moves(coords, Direction::Left)
+        );
     }
 
     #[test]
     fn sokoban_makes_a_walking_move() {
         let mut puzzle = puzzle();
         puzzle.walk(Direction::Up);
-        assert_eq!((12,14), puzzle.sokoban_coords());
+        assert_eq!((12, 14), puzzle.sokoban_coords());
     }
     #[test]
     fn sokoban_cannot_push_two_crates() {
         let mut puzzle = puzzle();
-        assert_eq!((13,14), puzzle.sokoban_coords());
-        assert!(puzzle.crates().contains(&(12,8)));
-        assert!(!puzzle.crates().contains(&(12,7)));
+        assert_eq!((13, 14), puzzle.sokoban_coords());
+        assert!(puzzle.crates().contains(&(12, 8)));
+        assert!(!puzzle.crates().contains(&(12, 7)));
         puzzle.walk(Direction::Up);
         println!("{}", puzzle.pretty_print());
         puzzle.walk(Direction::Left);
@@ -393,15 +419,21 @@ mod tests {
         puzzle.walk(Direction::Left);
         puzzle.walk(Direction::Left);
         assert_eq!((12, 7), puzzle.sokoban_coords());
-        assert!(puzzle.crates().contains(&(12,6)));
-        assert!(puzzle.crates().contains(&(12,5)));
+        assert!(puzzle.crates().contains(&(12, 6)));
+        assert!(puzzle.crates().contains(&(12, 5)));
         let coords = puzzle.sokoban_coords();
         assert_eq!(None, puzzle.possible_moves(coords, Direction::Left));
         puzzle.walk(Direction::Left);
         // no change effected by last walking
         assert_eq!((12, 7), puzzle.sokoban_coords());
-        assert!(puzzle.crates().contains(&(12,6)));
-        assert!(puzzle.crates().contains(&(12,5)));
+        assert!(puzzle.crates().contains(&(12, 6)));
+        assert!(puzzle.crates().contains(&(12, 5)));
+    }
+    #[test]
+    fn walking_returns_the_moves_that_were_made() {
+        let mut puzzle = puzzle();
+        assert_eq!(None, puzzle.walk(Direction::Down));
+        assert_eq!(Some(vec![((13,14),(12,14))]), puzzle.walk(Direction::Up));
     }
     #[ignore]
     #[test]
