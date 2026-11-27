@@ -45,9 +45,7 @@ impl Game {
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
-        if let Some(move_) = self.puzzle.puzzle_move(direction) {
-            self.moves.push(move_);
-        }
+        self.puzzle.walk(direction);
     }
 
     pub fn previous_level(&mut self) {

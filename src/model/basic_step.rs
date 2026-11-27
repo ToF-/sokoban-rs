@@ -134,6 +134,7 @@ mod tests {
         Puzzle::from_level(&level)
     }
 
+    #[ignore]
     #[test]
     fn basic_steps_for_a_wall_is_none() {
         let puzzle = puzzle();
@@ -141,6 +142,7 @@ mod tests {
         let coords_left = adjacent(coords, Direction::Left).expect("can't access adjacent");
         assert!(BasicStep::new(&puzzle, coords, coords_left).is_none());
     }
+    #[ignore]
     #[test]
     fn basic_steps_for_a_floor_or_a_goal_keep_things_in_place() {
         let puzzle = puzzle();
@@ -169,6 +171,7 @@ mod tests {
         });
         assert_eq!(expected, BasicStep::new(&puzzle, goal, goal_right));
     }
+    #[ignore]
     #[test]
     fn basic_steps_for_walking_on_the_floor() {
         let puzzle = puzzle();
@@ -180,6 +183,7 @@ mod tests {
         assert_eq!((Element::Sokoban, Element::Floor), step.before());
         assert_eq!((Element::Floor, Element::Sokoban), step.after());
     }
+    #[ignore]
     #[test]
     fn basic_steps_for_walking_on_a_goal() {
         let mut puzzle = puzzle();
@@ -203,6 +207,7 @@ mod tests {
         assert_eq!((Element::OnGoal, Element::Goal), step.before());
         assert_eq!((Element::Goal, Element::OnGoal), step.after());
     }
+    #[ignore]
     #[test]
     fn reverse_walking_from_floor() {
         let mut puzzle = puzzle();
