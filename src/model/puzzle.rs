@@ -5,9 +5,9 @@ use crate::model::direction::Direction;
 use crate::model::element;
 use crate::model::element::Element;
 use crate::model::puzzle::Element::Floor;
-use crate::model::puzzle_move;
-use crate::model::puzzle_move::PuzzleMove;
-use crate::model::puzzle_move::move_;
+use crate::model::move_;
+use crate::model::move_::Move_;
+use crate::model::move_::move_;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -137,7 +137,7 @@ impl Puzzle {
         }
     }
 
-    pub fn possible_moves(&self, coords: Coords, direction: Direction) -> Option<Vec<PuzzleMove>> {
+    pub fn possible_moves(&self, coords: Coords, direction: Direction) -> Option<Vec<Move_>> {
         self.destination(coords, direction).and_then(|destination| {
             if self.crates.contains(&coords) && self.crates.contains(&destination) {
                 None
@@ -146,21 +146,21 @@ impl Puzzle {
                 if self.crates.contains(&destination) {
                     self.possible_moves(destination, direction)
                         .and_then(|possible| {
-                            let crate_move: PuzzleMove = possible[0];
-                            let sokoban_move: PuzzleMove = (coords, coords_dir);
-                            let moves: Vec<PuzzleMove> = vec![crate_move, sokoban_move];
+                            let crate_move: Move_ = possible[0];
+                            let sokoban_move: Move_ = (coords, coords_dir);
+                            let moves: Vec<Move_> = vec![crate_move, sokoban_move];
                             Some(moves)
                         })
                 } else {
-                    let move_: PuzzleMove = (coords, coords_dir);
-                    let moves: Vec<PuzzleMove> = vec![move_];
+                    let move_: Move_ = (coords, coords_dir);
+                    let moves: Vec<Move_> = vec![move_];
                     Some(moves)
                 }
             }
         })
     }
 
-    fn make_move(&mut self, move_: PuzzleMove) {
+    fn make_move(&mut self, move_: Move_) {
         let (coords, destination) = move_;
         if let Some(mut pos) = self.crates.take(&coords) {
             self.crates.insert(destination);
@@ -169,13 +169,13 @@ impl Puzzle {
         }
     }
 
-    pub fn make_moves(&mut self, moves: Vec<PuzzleMove>) {
+    pub fn make_moves(&mut self, moves: Vec<Move_>) {
         for move_ in moves {
             self.make_move(move_)
         }
     }
 
-    pub fn walk(&mut self, direction: Direction) -> Option<Vec<PuzzleMove>> {
+    pub fn walk(&mut self, direction: Direction) -> Option<Vec<Move_>> {
         let coords = self.sokoban_coords();
         self.possible_moves(coords, direction).and_then(|moves| {
             self.make_moves(moves.clone());
@@ -196,28 +196,6 @@ impl Puzzle {
         self.crates()
             .iter()
             .all(|crate_coords| self.goals.contains(crate_coords))
-    }
-
-    pub fn can_move(&self, direction: Direction) -> bool {
-        if let Some(destination) = adjacent(self.sokoban_coords(), direction)
-            && let Some(piece) = self.elements.get(&destination)
-        {
-            if *piece == Element::Floor || *piece == Element::Goal {
-                true
-            } else if *piece == Element::Crate {
-                if let Some(target) = adjacent(destination, direction)
-                    && let Some(piece) = self.elements.get(&target)
-                {
-                    *piece == Element::Floor || *piece == Element::Goal
-                } else {
-                    true
-                }
-            } else {
-                false
-            }
-        } else {
-            true
-        }
     }
 
     pub fn max_crate(&self) -> usize {

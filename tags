@@ -23,11 +23,10 @@ MAX_COL	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^const MA
 MAX_COORDS	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^pub const MAX_COORDS: (usize, usize) = (MAX_ROW, MAX_COL);$/;"	c
 MAX_ROW	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^pub const MAX_ROW: usize = 20;$/;"	c
 MAX_ROW	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^const MAX_ROW: usize = 20;$/;"	c
+Move_	/Users/christophethibaut/Coding/sokoban-rs/src/model/move_.rs	/^pub type Move_ = (Coords, Coords);$/;"	T
 PathFinder	/Users/christophethibaut/Coding/sokoban-rs/src/model/path_finder.rs	/^pub struct PathFinder {$/;"	s
 Puzzle	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^pub struct Puzzle {$/;"	s
-PuzzleMove	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle_move.rs	/^pub type PuzzleMove = (Coords, Coords);$/;"	T
 Sprite	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^pub struct Sprite {$/;"	s
-Step	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^pub struct Step {$/;"	s
 TILES	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub static TILES: OnceCell<Tiles> = const { OnceCell::new() };$/;"	c
 Tile	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub struct Tile {$/;"	s
 Tiles	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub struct Tiles {$/;"	s
@@ -39,7 +38,6 @@ background_texture	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^fn b
 between	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn between(origin: Coords, destination: Coords) -> Direction {$/;"	f
 build_ascii_char_ui	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^pub fn build_ascii_char_ui(app: &Application) {$/;"	f
 calibrate	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^fn calibrate(bytes: &[u8]) -> Coords {$/;"	f
-can_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn can_move(&self, direction: Direction) -> bool {$/;"	f
 char_element	/Users/christophethibaut/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn char_element(index: usize) -> Element {$/;"	f
 char_tile_pixbuf	/Users/christophethibaut/Coding/sokoban-rs/src/graphics/char_display.rs	/^pub fn char_tile_pixbuf(element: &Element) -> Pixbuf {$/;"	f
 clear	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn clear(&mut self) {$/;"	f
@@ -71,7 +69,6 @@ floor	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub f
 follow_path	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn follow_path(&mut self, directions: &Vec<Direction>) {$/;"	f
 from	/Users/christophethibaut/Coding/sokoban-rs/src/model/element.rs	/^    fn from(byte: u8) -> Self {$/;"	f
 from	/Users/christophethibaut/Coding/sokoban-rs/src/model/element.rs	/^    fn from(state: Element) -> Self {$/;"	f
-from	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    pub fn from(&self) -> Coords {$/;"	f
 from_bytes	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    pub fn from_bytes(bytes: &[u8]) -> Level {$/;"	f
 from_level	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn from_level(level: &Level) -> Self {$/;"	f
 from_picture_files	/Users/christophethibaut/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn from_picture_files() -> Self {$/;"	f
@@ -92,22 +89,21 @@ levels_from_bytes	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	
 list_of_directions	/Users/christophethibaut/Coding/sokoban-rs/src/model/direction.rs	/^    fn list_of_directions() {$/;"	f
 main	/Users/christophethibaut/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_char_tile	/Users/christophethibaut/Coding/sokoban-rs/src/graphics/char_display.rs	/^pub fn make_char_tile(element: &Element) -> Pixbuf {$/;"	f
-make_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn make_move(&mut self, move_: PuzzleMove) {$/;"	f
-make_moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn make_moves(&mut self, moves: Vec<PuzzleMove>) {$/;"	f
+make_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn make_move(&mut self, move_: Move_) {$/;"	f
+make_moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn make_moves(&mut self, moves: Vec<Move_>) {$/;"	f
 make_sprite	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^    pub fn make_sprite(state: &Element, coords: Coords) -> Self {$/;"	f
 make_tile	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^    pub fn make_tile(element: &Element) -> Self {$/;"	f
 mark	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn mark(&mut self, letter: char) {$/;"	f
 mark	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn mark(&self, letter: char) {$/;"	f
 max_crate	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn max_crate(&self) -> usize {$/;"	f
-move_	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle_move.rs	/^pub fn move_(coords: Coords, destination: Coords) -> PuzzleMove {$/;"	f
+move_	/Users/christophethibaut/Coding/sokoban-rs/src/model/move_.rs	/^pub fn move_(coords: Coords, destination: Coords) -> Move_ {$/;"	f
 move_towards	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn move_towards(&mut self, direction: Direction) {$/;"	f
 move_towards	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn move_towards(&self, direction: Direction) {$/;"	f
-moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn moves(&self) -> Vec<Vec<PuzzleMove>> {$/;"	f
+moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn moves(&self) -> Vec<Vec<Move_>> {$/;"	f
 new	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn new(width: usize, height: usize) -> Self {$/;"	f
 new	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn new() -> Self {$/;"	f
 new	/Users/christophethibaut/Coding/sokoban-rs/src/model/path_finder.rs	/^    pub fn new(puzzle: &Puzzle) -> Self {$/;"	f
 new	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
-new	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    pub fn new(origin: Coords, direction: Direction, pushing: Option<usize>) -> Self {$/;"	f
 next_level	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn next_level(&mut self) {$/;"	f
 next_level	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn next_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
 paintable	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^    pub fn paintable(&self) -> Paintable {$/;"	f
@@ -121,12 +117,11 @@ picture_data	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^fn picture
 pixbuf	/Users/christophethibaut/Coding/sokoban-rs/src/graphics/char_display.rs	/^    pub fn pixbuf(&self, index: usize) -> Pixbuf {$/;"	f
 place	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^    pub fn place(&mut self, fixed: &Fixed) {$/;"	f
 possible_moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn possible_moves(&self, origin: Coords) -> Vec<Coords> {$/;"	f
-possible_moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn possible_moves(&self, coords: Coords, direction: Direction) -> Option<Vec<PuzzleMove>> {$/;"	f
+possible_moves	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn possible_moves(&self, coords: Coords, direction: Direction) -> Option<Vec<Move_>> {$/;"	f
 pretty_print	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 pretty_print	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn pretty_print(&self) -> String {$/;"	f
 previous_level	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn previous_level(&mut self) {$/;"	f
 previous_level	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn previous_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
-pushing	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    pub fn pushing(&self) -> Option<(usize, Box<Step>)> {$/;"	f
 put	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn put(&mut self, sprite: &Sprite) {$/;"	f
 put	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^    pub fn put(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
 puzzle	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn puzzle(&self) -> Puzzle {$/;"	f
@@ -139,10 +134,7 @@ remove	/Users/christophethibaut/Coding/sokoban-rs/src/sprite.rs	/^    pub fn rem
 remove_mark	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn remove_mark(&mut self, letter: char) {$/;"	f
 restart	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn restart(&mut self) {$/;"	f
 restart	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn restart(&self) {$/;"	f
-reverse	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    pub fn reverse(&self) -> Self {$/;"	f
-reverse_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle_move.rs	/^pub fn reverse_move(puzzle_move: &PuzzleMove) -> PuzzleMove {$/;"	f
-reversing_a_pushing_step	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_pushing_step() {$/;"	f
-reversing_a_simple_step	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    fn reversing_a_simple_step() {$/;"	f
+reverse_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/move_.rs	/^pub fn reverse_move(puzzle_move: &Move_) -> Move_ {$/;"	f
 row	/Users/christophethibaut/Coding/sokoban-rs/src/model/coords.rs	/^pub fn row(coords: Coords) -> usize {$/;"	f
 run	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn run(&mut self, directions: &Vec<Direction>) {$/;"	f
 screen	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn screen(&self) -> gtk::Fixed {$/;"	f
@@ -156,14 +148,13 @@ sokoban_coords	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^
 sokoban_makes_a_walking_move	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn sokoban_makes_a_walking_move() {$/;"	f
 solid_picture	/Users/christophethibaut/Coding/sokoban-rs/src/tile.rs	/^pub fn solid_picture(width: i32, height: i32, rgba: u32) -> gtk::Picture {$/;"	f
 solution	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn solution() -> Vec<Direction> {$/;"	f
-to	/Users/christophethibaut/Coding/sokoban-rs/src/step.rs	/^    pub fn to(&self) -> Coords {$/;"	f
 try_from	/Users/christophethibaut/Coding/sokoban-rs/src/model/element.rs	/^    fn try_from(value: usize) -> Result<Self, Self::Error> {$/;"	f
 uncover	/Users/christophethibaut/Coding/sokoban-rs/src/model/element.rs	/^    pub fn uncover(self) -> Element {$/;"	f
 uncovering_an_element_from_a_crate_or_sokoban	/Users/christophethibaut/Coding/sokoban-rs/src/model/element.rs	/^    fn uncovering_an_element_from_a_crate_or_sokoban() {$/;"	f
 undo	/Users/christophethibaut/Coding/sokoban-rs/src/model/game.rs	/^    pub fn undo(&mut self) {$/;"	f
 undo	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn undo(&self) {$/;"	f
 unmark	/Users/christophethibaut/Coding/sokoban-rs/src/old_game.rs	/^    pub fn unmark(&self, letter: char) {$/;"	f
-walk	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn walk(&mut self, direction: Direction) -> Option<Vec<PuzzleMove>> {$/;"	f
+walk	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn walk(&mut self, direction: Direction) -> Option<Vec<Move_>> {$/;"	f
 walking_returns_the_moves_that_were_made	/Users/christophethibaut/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn walking_returns_the_moves_that_were_made() {$/;"	f
 width	/Users/christophethibaut/Coding/sokoban-rs/src/grid.rs	/^    pub fn width(&self) -> usize {$/;"	f
 width	/Users/christophethibaut/Coding/sokoban-rs/src/model/level.rs	/^    pub fn width(&self) -> usize {$/;"	f

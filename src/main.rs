@@ -10,7 +10,6 @@ use crate::model::level::Level;
 use crate::model::level::levels_from_bytes;
 use crate::model::puzzle::Puzzle;
 use crate::sprite::Sprite;
-use crate::step::Step;
 use crate::tile::TILES;
 use crate::tile::Tiles;
 use crate::tile::fixed_for_level;
@@ -33,7 +32,6 @@ pub mod graphics;
 pub mod grid;
 pub mod model;
 pub mod sprite;
-pub mod step;
 pub mod tile;
 
 const UNIT: f64 = 32.0;

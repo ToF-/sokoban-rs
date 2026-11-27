@@ -2,8 +2,8 @@ use crate::Direction;
 use crate::Level;
 use crate::Puzzle;
 use crate::levels_from_bytes;
-use crate::model::puzzle_move::PuzzleMove;
-use crate::model::puzzle_move::reverse_move;
+use crate::model::move_::Move_;
+use crate::model::move_::reverse_move;
 use gtk::gio;
 
 const GAME_MAX: usize = 90;
@@ -13,7 +13,7 @@ pub struct Game {
     levels: Vec<Level>,
     level_index: usize,
     puzzle: Puzzle,
-    moves: Vec<Vec<PuzzleMove>>,
+    moves: Vec<Vec<Move_>>,
 }
 
 impl Game {
@@ -33,7 +33,7 @@ impl Game {
         }
     }
 
-    pub fn moves(&self) -> Vec<Vec<PuzzleMove>> {
+    pub fn moves(&self) -> Vec<Vec<Move_>> {
         self.moves.clone()
     }
 
@@ -86,7 +86,7 @@ impl Game {
             let backwards = moves
                 .iter()
                 .rev()
-                .map(|puzzle_move| reverse_move(puzzle_move))
+                .map(|move_| reverse_move(move_))
                 .collect();
             self.puzzle.make_moves(backwards)
         }
