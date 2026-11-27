@@ -1,6 +1,4 @@
 use crate::Level;
-use crate::model::basic_step::BasicStep;
-use crate::model::basic_step::Move;
 use crate::model::coords::Coords;
 use crate::model::coords::adjacent;
 use crate::model::direction::Direction;
@@ -130,17 +128,6 @@ impl Puzzle {
             .or_insert(new_element);
     }
 
-    pub fn puzzle_step(&mut self, basic_step: &BasicStep) {
-        self.elements
-            .entry(basic_step.from)
-            .and_modify(|element| *element = basic_step.origin_after)
-            .or_insert(basic_step.origin_after);
-        self.elements
-            .entry(basic_step.to)
-            .and_modify(|element| *element = basic_step.destination_after)
-            .or_insert(basic_step.destination_after);
-    }
-
     fn destination(&self, coords: Coords, direction: Direction) -> Option<Coords> {
         let destination = adjacent(coords, direction).expect("illegal coords");
         if self.floor.contains(&destination) {
@@ -185,7 +172,7 @@ impl Puzzle {
     pub fn make_moves(&mut self, moves: Vec<PuzzleMove>) {
         for move_ in moves {
             self.make_move(move_)
-        };
+        }
     }
 
     pub fn walk(&mut self, direction: Direction) -> Option<Vec<PuzzleMove>> {
@@ -196,32 +183,9 @@ impl Puzzle {
         })
     }
 
-    pub fn puzzle_move(&mut self, direction: Direction) -> Option<Move> {
-        let origin_coords = self.sokoban_coords();
-        let destination_coords =
-            adjacent(origin_coords, direction).expect("unreachable destination");
-        let target_coords = adjacent(destination_coords, direction).expect("unreachable target");
-        BasicStep::new(self, destination_coords, target_coords).and_then(|step_1| {
-            if !step_1.is_identical() {
-                self.puzzle_step(&step_1)
-            };
-            BasicStep::new(self, origin_coords, destination_coords).and_then(|step_2| {
-                self.puzzle_step(&step_2);
-                if !step_1.is_identical() {
-                    Some(vec![step_1, step_2])
-                } else {
-                    Some(vec![step_2])
-                }
-            })
-        })
-    }
-
-    pub fn puzzle_undo(&mut self, move_: Move) {
-        let mut steps = move_.clone();
-        steps.reverse();
-        for step in steps.iter() {
-            let basic_step = step.reverse();
-            self.puzzle_step(&basic_step);
+    pub fn run(&mut self, directions: &Vec<Direction>) {
+        for direction in directions.iter() {
+            self.walk(*direction);
         }
     }
 
@@ -433,70 +397,278 @@ mod tests {
     fn walking_returns_the_moves_that_were_made() {
         let mut puzzle = puzzle();
         assert_eq!(None, puzzle.walk(Direction::Down));
-        assert_eq!(Some(vec![((13,14),(12,14))]), puzzle.walk(Direction::Up));
+        assert_eq!(Some(vec![((13, 14), (12, 14))]), puzzle.walk(Direction::Up));
     }
-    #[ignore]
     #[test]
-    fn max_crates() {
-        let puzzle = puzzle();
-        assert_eq!(6, puzzle.max_crate())
-    }
-    #[ignore]
-    #[test]
-    fn making_a_puzzle_move() {
+    fn puzzle_is_solved_when_all_crates_are_on_goal() {
         let mut puzzle = puzzle();
-        assert_eq!((13, 14), puzzle.sokoban_coords());
-        let result = puzzle.puzzle_move(Direction::Up);
-        dbg!(&result);
-        assert_eq!((12, 14), puzzle.sokoban_coords());
+        assert!(!puzzle.is_solved());
+        puzzle.run(&solution());
+        println!("{}", puzzle.pretty_print());
+        assert!(puzzle.is_solved());
     }
-    #[ignore]
-    #[test]
-    fn pushing_a_crate() {
-        let mut puzzle = puzzle();
-        assert_eq!((13, 14), puzzle.sokoban_coords());
-        puzzle.puzzle_move(Direction::Up);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        let result = puzzle.puzzle_move(Direction::Left);
-        dbg!(&result);
-        assert_eq!((12, 8), puzzle.sokoban_coords());
-        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        let result = puzzle.puzzle_move(Direction::Left);
-        // this last move is not possible (blocked by a crate)
-        let result = puzzle.puzzle_move(Direction::Left);
-        println!("{}", puzzle.pretty_print());
-        assert_eq!(None, result);
-    }
-    #[ignore]
-    #[test]
-    fn undoing_pushing_a_crate() {
-        let mut puzzle = puzzle();
-        assert_eq!((13, 14), puzzle.sokoban_coords());
-        puzzle.puzzle_move(Direction::Up);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        puzzle.puzzle_move(Direction::Left);
-        let result = puzzle.puzzle_move(Direction::Left);
-        dbg!(&result);
-        assert_eq!((12, 8), puzzle.sokoban_coords());
-        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        let pushing = puzzle
-            .puzzle_move(Direction::Left)
-            .expect("pushing not a valid move");
-
-        assert_eq!((12, 7), puzzle.sokoban_coords());
-        assert_eq!(Element::Crate, puzzle.element_at((12, 6)));
-        println!("{}", puzzle.pretty_print());
-        puzzle.puzzle_undo(pushing);
-        println!("{}", puzzle.pretty_print());
-        assert_eq!((12, 8), puzzle.sokoban_coords());
-        assert_eq!(Element::Crate, puzzle.element_at((12, 7)));
-        println!("{}", puzzle.pretty_print());
+    pub fn solution() -> Vec<Direction> {
+        vec![
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Up,
+            Direction::Right,
+            Direction::Down,
+            Direction::Left,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Up,
+            Direction::Right,
+            Direction::Down,
+            Direction::Left,
+            Direction::Down,
+            Direction::Right,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Right,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Down,
+            Direction::Right,
+            Direction::Up,
+            Direction::Left,
+            Direction::Up,
+            Direction::Right,
+            Direction::Right,
+            Direction::Left,
+            Direction::Down,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Right,
+            Direction::Right,
+            Direction::Down,
+            Direction::Down,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Up,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Up,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Up,
+            Direction::Up,
+            Direction::Left,
+            Direction::Left,
+            Direction::Down,
+            Direction::Down,
+            Direction::Down,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Right,
+            Direction::Down,
+            Direction::Right,
+            Direction::Up,
+            Direction::Left,
+            Direction::Up,
+            Direction::Right,
+        ]
     }
 }

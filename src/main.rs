@@ -129,10 +129,20 @@ pub fn build_ascii_char_ui(app: &Application) {
                 }
                 gdk::Key::asterisk => {
                     {
-                    let mut game = game_rc.borrow_mut();
-                    game.restart();
+                        let mut game = game_rc.borrow_mut();
+                        game.restart();
                     }
                     drawing_area.queue_draw();
+                    glib::Propagation::Proceed
+                }
+                gdk::Key::question => {
+                    {
+                        let game = game_rc.borrow();
+                        let history = game.directions();
+                        for direction in history.iter() {
+                            println!("{:?}", direction);
+                        }
+                    }
                     glib::Propagation::Proceed
                 }
                 gdk::Key::u | gdk::Key::BackSpace => {
@@ -146,7 +156,9 @@ pub fn build_ascii_char_ui(app: &Application) {
                 gdk::Key::n | gdk::Key::Tab => {
                     {
                         let mut game = game_rc.borrow_mut();
-                        game.next_level();
+                        if game.puzzle_solved() {
+                            game.next_level();
+                        }
                     };
                     drawing_area.queue_draw();
                     glib::Propagation::Proceed
@@ -154,7 +166,9 @@ pub fn build_ascii_char_ui(app: &Application) {
                 gdk::Key::p => {
                     {
                         let mut game = game_rc.borrow_mut();
-                        game.previous_level();
+                        if game.puzzle_solved() {
+                            game.previous_level();
+                        }
                     }
                     drawing_area.queue_draw();
                     glib::Propagation::Proceed

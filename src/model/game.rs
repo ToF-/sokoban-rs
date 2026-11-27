@@ -1,10 +1,9 @@
-use crate::model::puzzle_move::reverse_move;
-use crate::model::puzzle_move::PuzzleMove;
 use crate::Direction;
 use crate::Level;
 use crate::Puzzle;
 use crate::levels_from_bytes;
-use crate::model::basic_step::Move;
+use crate::model::puzzle_move::PuzzleMove;
+use crate::model::puzzle_move::reverse_move;
 use gtk::gio;
 
 const GAME_MAX: usize = 90;
@@ -32,6 +31,19 @@ impl Game {
             puzzle,
             moves,
         }
+    }
+
+    pub fn moves(&self) -> Vec<Vec<PuzzleMove>> {
+        self.moves.clone()
+    }
+
+    pub fn directions(&self) -> Vec<Direction> {
+        let mut result = Vec::new();
+        for moves in self.moves().iter() {
+            let (coords, destination) = moves[0];
+            result.push(Direction::between(coords, destination));
+        }
+        result
     }
 
     pub fn puzzle(&self) -> Puzzle {
@@ -84,5 +96,9 @@ impl Game {
         while !self.moves.is_empty() {
             self.undo()
         }
+    }
+
+    pub fn puzzle_solved(&self) -> bool {
+        self.puzzle.is_solved()
     }
 }
