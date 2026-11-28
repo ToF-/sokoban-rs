@@ -1,8 +1,9 @@
 use crate::model::coords::Coords;
 use crate::model::coords::col;
 use crate::model::coords::row;
+use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Direction {
     Left,
     Up,
@@ -30,6 +31,29 @@ impl Direction {
             Direction::Left
         } else {
             Direction::Right
+        }
+    }
+}
+
+impl From<Direction> for char {
+    fn from(direction: Direction) -> Self {
+        match direction {
+            Direction::Left => 'L',
+            Direction::Up => 'U',
+            Direction::Right => 'R',
+            Direction::Down => 'D',
+        }
+    }
+}
+
+impl From<char> for Direction {
+    fn from(c: char) -> Self {
+        match c {
+            'L' => Direction::Left,
+            'U' => Direction::Up,
+            'R' => Direction::Right,
+            'D' => Direction::Down,
+            _ => panic!("illegal direction char"),
         }
     }
 }

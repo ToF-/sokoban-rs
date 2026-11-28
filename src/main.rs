@@ -55,7 +55,8 @@ pub fn build_ascii_char_ui(app: &Application) {
         .content_height(MAX_ROW as i32 * UNIT as i32)
         .build();
 
-    let game = Game::new();
+    let mut game = Game::new();
+    game.current_level();
     let game_rc = Rc::new(RefCell::new(game));
     let timer_on_rc = Rc::new(Cell::new(false));
 
@@ -115,7 +116,30 @@ pub fn build_ascii_char_ui(app: &Application) {
                 glib::Propagation::Stop
             } else {
                 match keyval {
+                    gdk::Key::l => {
+                        {
+                            let mut game = game_rc.borrow_mut();
+                            game.load_level();
+                        }
+                        drawing_area.queue_draw();
+                        set_auto_mode_timer(game_rc.clone(), timer_on_rc.clone(), &drawing_area);
+                        glib::Propagation::Proceed
+                    }
                     gdk::Key::q => {
+                        {
+                            let mut game = game_rc.borrow_mut();
+                            game.quit(true);
+                        }
+
+                        app.quit();
+                        glib::Propagation::Stop
+                    }
+                    gdk::Key::Q => {
+                        {
+                            let mut game = game_rc.borrow_mut();
+                            game.quit(false);
+                        }
+
                         app.quit();
                         glib::Propagation::Stop
                     }
@@ -197,9 +221,7 @@ pub fn build_ascii_char_ui(app: &Application) {
                     gdk::Key::p => {
                         {
                             let mut game = game_rc.borrow_mut();
-                            if game.puzzle_solved() {
-                                game.previous_level();
-                            }
+                            game.previous_level();
                         }
                         drawing_area.queue_draw();
                         glib::Propagation::Proceed
@@ -247,7 +269,7 @@ pub fn set_auto_mode_timer(
     drawing_area: &gtk::DrawingArea,
 ) {
     glib::timeout_add_local(
-        Duration::from_millis(50),
+        Duration::from_millis(10),
         clone!(
             #[strong]
             game_rc,

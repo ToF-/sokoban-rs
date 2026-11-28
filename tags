@@ -12,11 +12,13 @@ Direction	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^pub enum Directi
 ELEMENT_MAX	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^pub const ELEMENT_MAX: usize = 30;$/;"	c
 Element	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^pub enum Element {$/;"	g
 Error	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    type Error = ();$/;"	T
-GAME_MAX	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^const GAME_MAX: usize = 90;$/;"	c
-GAME_MAX	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^const GAME_MAX: usize = 90;$/;"	c
 Game	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^pub struct Game {$/;"	s
 Game	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^pub struct Game {$/;"	s
 Grid	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^pub struct Grid {$/;"	s
+HISTORY_FILE	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^const HISTORY_FILE: &str = "sokoban_rs.json";$/;"	c
+History	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^pub struct History {$/;"	s
+LEVEL_MAX	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^pub const LEVEL_MAX: usize = 90;$/;"	c
+LEVEL_MAX	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^const LEVEL_MAX: usize = 90;$/;"	c
 Level	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^pub struct Level {$/;"	s
 MAX_COL	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub const MAX_COL: usize = 24;$/;"	c
 MAX_COL	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^const MAX_COL: usize = 24;$/;"	c
@@ -54,11 +56,13 @@ crate_coords	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn crate_
 crate_coords	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn crate_coords(&self) -> Vec<Coords> {$/;"	f
 crate_max	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn crate_max(&self) -> usize {$/;"	f
 crates	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn crates(&self) -> HashSet<Coords> {$/;"	f
+current_level	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn current_level(&mut self) {$/;"	f
 destination	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn destination(&self, coords: Coords, direction: Direction) -> Option<Coords> {$/;"	f
 direction	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn direction(&self) -> Vec<Direction> {$/;"	f
 direction_between_coords	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    fn direction_between_coords() {$/;"	f
 directions	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    pub fn directions() -> [Direction; 4] {$/;"	f
 directions	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn directions(&self) -> Vec<Direction> {$/;"	f
+directions_for_level	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn directions_for_level(&self, level: usize) -> Vec<Direction> {$/;"	f
 element_at	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn element_at(&self, coords: Coords) -> Element {$/;"	f
 element_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn element_at(&self, coords: Coords) -> Element {$/;"	f
 elements	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn elements(&self) -> HashMap<Coords, Element> {$/;"	f
@@ -70,6 +74,8 @@ find_path	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    pub fn fin
 fixed_for_level	/Users/tof/Coding/sokoban-rs/src/tile.rs	/^pub fn fixed_for_level(level: &Level) -> gtk::Fixed {$/;"	f
 floor	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn floor(&self) -> HashSet<Coords> {$/;"	f
 follow_path	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn follow_path(&mut self, directions: &Vec<Direction>) {$/;"	f
+from	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    fn from(c: char) -> Self {$/;"	f
+from	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    fn from(direction: Direction) -> Self {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    fn from(byte: u8) -> Self {$/;"	f
 from	/Users/tof/Coding/sokoban-rs/src/model/element.rs	/^    fn from(state: Element) -> Self {$/;"	f
 from_bytes	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    pub fn from_bytes(bytes: &[u8]) -> Level {$/;"	f
@@ -85,10 +91,13 @@ initialize_from_bytes	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^    fn i
 initialize_from_level	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn initialize_from_level() {$/;"	f
 is_solved	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn is_solved(&self) -> bool {$/;"	f
 is_visible	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn is_visible(&self) -> bool {$/;"	f
+level	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn level(&self) -> usize {$/;"	f
 level_index	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn level_index(&self) -> usize {$/;"	f
 levels	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn levels(&self) -> Vec<Level> {$/;"	f
 levels_from_bytes	/Users/tof/Coding/sokoban-rs/src/model/level.rs	/^pub fn levels_from_bytes(bytes: &[u8]) -> Vec<Level> {$/;"	f
 list_of_directions	/Users/tof/Coding/sokoban-rs/src/model/direction.rs	/^    fn list_of_directions() {$/;"	f
+load	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn load() -> std::io::Result<Self> {$/;"	f
+load_level	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn load_level(&mut self) {$/;"	f
 main	/Users/tof/Coding/sokoban-rs/src/main.rs	/^fn main() -> glib::ExitCode {$/;"	f
 make_char_tile	/Users/tof/Coding/sokoban-rs/src/graphics/char_display.rs	/^pub fn make_char_tile(element: &Element) -> Pixbuf {$/;"	f
 make_move	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn make_move(&mut self, move_: Move_) {$/;"	f
@@ -104,6 +113,7 @@ move_towards	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn move_towa
 moves	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn moves(&self) -> Vec<Vec<Move_>> {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn new(width: usize, height: usize) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn new() -> Self {$/;"	f
+new	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn new() -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    pub fn new(puzzle: &Puzzle) -> Self {$/;"	f
 new	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn new(levels: &Vec<Level>, level_index: usize, level_ready_rc: Rc<Cell<bool>>) -> Self {$/;"	f
 next_level	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn next_level(&mut self) {$/;"	f
@@ -132,7 +142,9 @@ puzzle_1	/Users/tof/Coding/sokoban-rs/src/model/path_finder.rs	/^    fn puzzle_1
 puzzle_can_receive_a_letter_mark	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn puzzle_can_receive_a_letter_mark() {$/;"	f
 puzzle_is_solved_when_all_crates_are_on_goal	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    fn puzzle_is_solved_when_all_crates_are_on_goal() {$/;"	f
 puzzle_solved	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn puzzle_solved(&self) -> bool {$/;"	f
+quit	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn quit(&mut self, with_save: bool) {$/;"	f
 r	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn r#move(&mut self, fixed: &Fixed, coords: Coords) {$/;"	f
+record_level	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn record_level(&mut self, level: usize, directions: &Vec<Direction>) {$/;"	f
 remove	/Users/tof/Coding/sokoban-rs/src/sprite.rs	/^    pub fn remove(&mut self, fixed: &Fixed) {$/;"	f
 remove_mark	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn remove_mark(&mut self, letter: char) {$/;"	f
 restart	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn restart(&mut self) {$/;"	f
@@ -140,6 +152,8 @@ restart	/Users/tof/Coding/sokoban-rs/src/old_game.rs	/^    pub fn restart(&self)
 reverse_move	/Users/tof/Coding/sokoban-rs/src/model/move_.rs	/^pub fn reverse_move(puzzle_move: &Move_) -> Move_ {$/;"	f
 row	/Users/tof/Coding/sokoban-rs/src/model/coords.rs	/^pub fn row(coords: Coords) -> usize {$/;"	f
 run	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn run(&mut self, directions: &Vec<Direction>) {$/;"	f
+save	/Users/tof/Coding/sokoban-rs/src/model/history.rs	/^    pub fn save(&self) -> std::io::Result<()> {$/;"	f
+save_level	/Users/tof/Coding/sokoban-rs/src/model/game.rs	/^    pub fn save_level(&mut self) {$/;"	f
 screen	/Users/tof/Coding/sokoban-rs/src/grid.rs	/^    pub fn screen(&self) -> gtk::Fixed {$/;"	f
 set_auto_mode_timer	/Users/tof/Coding/sokoban-rs/src/main.rs	/^pub fn set_auto_mode_timer($/;"	f
 set_element_at	/Users/tof/Coding/sokoban-rs/src/model/puzzle.rs	/^    pub fn set_element_at(&mut self, coords: Coords, new_element: Element) {$/;"	f

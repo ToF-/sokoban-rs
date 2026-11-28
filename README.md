@@ -8,6 +8,7 @@ Implement a Sokoban game in rust with gtk4, one step at a time.
 - [ ] include tiles for numbers so that level number is part of the drawing
 - [ ] sounds
 - [ ] store levels done and the score (minimum moves to win)
+- [x] when the puzzle is solved for a level save moves in a history file that can be replayed
 - [x] goto to a marked floor square  (g followed by a b c d or e) if it's on the puzzle and reachable without pushing any crate
 - [x] mark the floor square (m followed by a b c d or e) where sokoban is located
 - [x] count moves 

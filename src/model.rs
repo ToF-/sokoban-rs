@@ -2,6 +2,7 @@ pub mod coords;
 pub mod direction;
 pub mod element;
 pub mod game;
+pub mod history;
 pub mod level;
 pub mod move_;
 pub mod path_finder;

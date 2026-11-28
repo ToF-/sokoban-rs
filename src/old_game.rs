@@ -36,7 +36,7 @@ pub struct Game {
     pub mark_sprites_rc: Rc<RefCell<HashMap<char, Sprite>>>,
 }
 
-const GAME_MAX: usize = 90;
+const LEVEL_MAX: usize = 90;
 
 impl Game {
     pub fn new(levels: &Vec<Level>, level_index: usize, level_ready_rc: Rc<Cell<bool>>) -> Self {
@@ -81,7 +81,7 @@ impl Game {
 
     pub fn next_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {
         let mut level_index = game.level_index() + 1;
-        if level_index == GAME_MAX {
+        if level_index == LEVEL_MAX {
             level_index = 1
         };
         level_ready_rc.set(false);
@@ -91,7 +91,7 @@ impl Game {
     pub fn previous_level(game: &Game, level_ready_rc: Rc<Cell<bool>>) -> Self {
         let mut level_index = game.level_index() - 1;
         if level_index == 0 {
-            level_index = GAME_MAX - 1
+            level_index = LEVEL_MAX - 1
         };
         level_ready_rc.set(false);
         Self::new(&game.levels(), level_index, level_ready_rc)
